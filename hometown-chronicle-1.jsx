@@ -340,7 +340,22 @@ Return: {
 [{"year":"${YEAR}","baseline":100,"withPolicy":100,"optimistic":100}, ...]
 baseline grows ~0.8%/yr, withPolicy ~2.5%/yr with some variation, optimistic ~4.5%/yr. Use plausible noise. Return only the JSON array.`),
   ]);
-
+// ✅ SAVE TO DATABASEtry {
+  await fetch("https://chroniclefuture-app.vercel.app", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      town,
+      zip,
+      state,
+      data: { weather, news, geo, blueprint, decade, projections }
+    })
+  });
+} catch (e) {
+  console.log("Save failed");
+}
   return { weather, news, geo, blueprint, decade, projections };
 }
 
