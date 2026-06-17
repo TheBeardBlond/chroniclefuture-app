@@ -1,9 +1,16 @@
 import { useState, useEffect, useRef } from "react";
+import { createClient } from "@supabase/supabase-js";
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar,
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceLine, ResponsiveContainer, Legend
 } from "recharts";
+
+// ─── SUPABASE CLIENT ──────────────────────────────────────────────────────────
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 // ─── DESIGN TOKENS — Nature journal ──────────────────────────────────────────
 const T = {
@@ -341,18 +348,26 @@ Return: {
 baseline grows ~0.8%/yr, withPolicy ~2.5%/yr with some variation, optimistic ~4.5%/yr. Use plausible noise. Return only the JSON array.`),
   ]);
 
-  // Save to database (optional - silently fails if endpoint unavailable)
+  // Save to Supabase
   try {
-    await fetch("https://chroniclefuture-app.vercel.app/api/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        town,
-        zip,
-        state,
-        data: { weather, news, geo, blueprint, decade, projections }
-      })
-    });
+    const { data, error } = await supabase
+      .from('reports')
+      .insert([
+        {
+          town,
+          zip,
+          state,
+          weather,
+          news,
+          geo,
+          blueprint,
+          decade,
+          projections,
+          created_at: new Date().toISOString()
+        }
+      ]);
+    
+    if (error) console.log("Supabase save error:", error.message);
   } catch (e) {
     console.log("Save failed:", e.message);
   }
