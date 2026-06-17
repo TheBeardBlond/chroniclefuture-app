@@ -37,13 +37,13 @@ const F_SANS    = "'Source Sans 3', 'Helvetica Neue', sans-serif";
 const F_SERIF   = "'Source Serif 4', 'Georgia', serif";
 const F_MONO    = "'JetBrains Mono', 'Courier New', monospace";
 
-// ─── DATE ─────────────────────────────────────────────────────────────────────
+// ─── DATE ────────────────────────────────────────────────────────────
 const NOW      = new Date();
 const LONGDATE = NOW.toLocaleDateString("en-US", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
 const SHORTDT  = NOW.toLocaleDateString("en-US", { day:"numeric", month:"long", year:"numeric" });
 const YEAR     = NOW.getFullYear();
 
-// ─── API ──────────────────────────────────────────────────────────────────────
+// ─── API ─────────────────────────────────────────────────────────────
 async function claudeJSON(system, user, maxTok = 1400) {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -301,7 +301,7 @@ function ChartGrowth({ data }) {
   );
 }
 
-// ─── DATA GENERATION ──────────────────────────────────────────────────────────
+// ─── DATA GENERATION ───────────────────────────────────────────────────────────
 async function generate(town, zip, state) {
   const place = `${town}, ${state} (ZIP ${zip})`;
   const J = "Return ONLY valid JSON. No markdown fences, no preamble, no trailing text.";
@@ -309,16 +309,16 @@ async function generate(town, zip, state) {
   const [weather, news, geo, blueprint, decade, projections] = await Promise.all([
 
     claudeJSON(J, `Current weather for ${place} on ${SHORTDT}.
-Return: {"temp":"72°F","feelsLike":"69°F","condition":"Partly Cloudy","humidity":"58%","wind":"NW 9 mph","uv":"Moderate","sunrise":"5:52 AM","sunset":"9:14 PM","prose":"Two precise sentences about today's atmospheric conditions in this specific region."}`),
+Return: {"temp":"72°F","feelsLike":"69°F","condition":"Partly Cloudy","humidity":"58%","wind":"NW 9 mph","uv":"Moderate","sunrise":"5:52 AM","sunset":"9:14 PM","prose":"Two precise sentences about the weather today."}`),
 
     claudeJSON(J, `Generate 3 substantive local news stories for ${place} on ${SHORTDT}. Frame analytically — causes, implications, economic context.
-Array of: {"headline":"...","section":"City|Business|Infrastructure|Environment","deck":"One sharp sentence.","analysis":"Two sentences of analytical depth — causes and implications.","urgency":"low|medium|high"}`, 1800),
+Array of: {"headline":"...","section":"City|Business|Infrastructure|Environment","deck":"One sharp sentence.","analysis":"Two sentences of analytical depth — causes and implications.","urgency":"low|medium|high"}`),
 
     claudeJSON(J, `Three active geopolitical developments that directly affect ${place}. Name specific industries, employers, or supply chains in ${town}.
-Array of: {"headline":"...","region":"...","globalSummary":"Two sentences.","localEcho":"Two sentences naming specific ${town} industries.","tension":"low|medium|high|critical","exposure":"e.g. ~14% of local manufacturing"}`, 1800),
+Array of: {"headline":"...","region":"...","globalSummary":"Two sentences.","localEcho":"Two sentences naming specific ${town} industries.","tension":"low|medium|high|critical","exposure":"e.g. ~14% of exports"}`),
 
     claudeJSON(J, `Four evidence-based development initiatives for ${place}, ${YEAR}–${YEAR+10}. Cite real policy models and financing mechanisms.
-Array of: {"title":"...","domain":"Infrastructure|Economy|Housing|Environment|Civic","cost":"$X.XM","timeline":"YYYY–YYYY","outcome":"Specific measurable result","model":"Comparable city/program","financing":"e.g. TIF district, CDBG grant","spec":"Two sentences of technical detail.","status":"proposed|funded|in-progress"}`, 2200),
+Array of: {"title":"...","domain":"Infrastructure|Economy|Housing|Environment|Civic","cost":"$X.XM","timeline":"YYYY–YYYY","outcome":"Specific measurable result","model":"Comparable city/program","financing":"funding source","spec":"One sentence detail","status":"proposed|funded|in-progress"}`),
 
     claudeJSON(J, `Rigorous 10-year economic and civic forecast for ${place} (${YEAR}–${YEAR+10}). Analytical, cite comparable towns.
 Return: {
@@ -340,26 +340,27 @@ Return: {
 [{"year":"${YEAR}","baseline":100,"withPolicy":100,"optimistic":100}, ...]
 baseline grows ~0.8%/yr, withPolicy ~2.5%/yr with some variation, optimistic ~4.5%/yr. Use plausible noise. Return only the JSON array.`),
   ]);
-// ✅ SAVE TO DATABASEtry {
-  await fetch("https://chroniclefuture-app.vercel.app", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      town,
-      zip,
-      state,
-      data: { weather, news, geo, blueprint, decade, projections }
-    })
-  });
-} catch (e) {
-  console.log("Save failed");
-}
+
+  // Save to database (optional - silently fails if endpoint unavailable)
+  try {
+    await fetch("https://chroniclefuture-app.vercel.app/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        town,
+        zip,
+        state,
+        data: { weather, news, geo, blueprint, decade, projections }
+      })
+    });
+  } catch (e) {
+    console.log("Save failed:", e.message);
+  }
+
   return { weather, news, geo, blueprint, decade, projections };
 }
 
-// ─── LANDING ──────────────────────────────────────────────────────────────────
+// ─── LANDING ───────────────────────────────────────────────────────────────────
 function Landing({ onGo, err }) {
   const [town,  setT] = useState("");
   const [zip,   setZ] = useState("");
@@ -445,9 +446,9 @@ function Landing({ onGo, err }) {
   );
 }
 
-// ─── LOADING ──────────────────────────────────────────────────────────────────
+// ─── LOADING ───────────────────────────────────────────────────────────────────
 function Loading({ town }) {
-  const steps = ["Retrieving atmospheric data…","Parsing local dispatches…","Scanning geopolitical signals…","Modelling development scenarios…","Projecting economic trajectories…","Calibrating growth curves…","Typesetting edition…"];
+  const steps = ["Retrieving atmospheric data…","Parsing local dispatches…","Scanning geopolitical signals…","Modelling development scenarios…","Projecting economic trajectories…","Calibrating forecast models…"];
   const [s, setS] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setS(p => Math.min(p + 1, steps.length - 1)), 1100);
@@ -467,7 +468,7 @@ function Loading({ town }) {
   );
 }
 
-// ─── MAIN ARTICLE ─────────────────────────────────────────────────────────────
+// ─── MAIN ARTICLE ──────────────────────────────────────────────────────────────
 function Article({ town, zip, state, ed, onBack }) {
   const W = {
     wx:   ed.weather    || {},
@@ -494,7 +495,7 @@ function Article({ town, zip, state, ed, onBack }) {
             </span>
             <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
               <span style={{ fontFamily: F_MONO, fontSize: 10, color: T.caption }}>{SHORTDT}</span>
-              <button onClick={onBack} style={{ background: "none", border: `1px solid ${T.rule}`, borderRadius: 2, padding: "3px 10px", fontFamily: F_SANS, fontSize: 10, color: T.caption, cursor: "pointer" }}>← New analysis</button>
+              <button onClick={onBack} style={{ background: "none", border: `1px solid ${T.rule}`, borderRadius: 2, padding: "3px 10px", fontFamily: F_SANS, fontSize: 10, color: T.caption, cursor: "pointer" }}>← Back</button>
             </div>
           </div>
 
@@ -586,7 +587,7 @@ function Article({ town, zip, state, ed, onBack }) {
         <div style={{ borderBottom: `1px solid ${T.rule}`, padding: "24px 0" }}>
           {/* rotated "Article" label */}
           <div style={{ display: "flex", gap: 24 }}>
-            <div style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontFamily: F_SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: T.muted, flexShrink: 0, alignSelf: "flex-start", paddingTop: 4 }}>
+            <div style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontFamily: F_SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: T.muted }}>
               Article
             </div>
             <div style={{ flex: 1 }}>
@@ -595,15 +596,15 @@ function Article({ town, zip, state, ed, onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
                 <div>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82, marginBottom: 12 }}>
-                    New business formation represents the single most important driver of net job creation in market economies.<Ref n={1} /> Firms aged less than five years generate virtually all net employment growth; incumbents, in aggregate, destroy as many jobs as they create.<Ref n={1} /> Despite this, conventional wisdom continues to associate economic development with attracting large established employers — a strategy that Haltiwanger et al. demonstrate produces inferior long-run outcomes.<Ref n={1} />
+                    New business formation represents the single most important driver of net job creation in market economies.<Ref n={1} /> Firms aged less than five years generate virtually all net employment growth in the U.S. economy.
                   </p>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82 }}>
-                    The post-pandemic surge in business applications — reaching 1.05 million new filings in 2022, a 40-year record — signals a structural reorientation of labor toward entrepreneurship.<Ref n={3} /> For municipalities like {town}, this moment presents a generational opening: declining legacy sectors have suppressed commercial rents and expanded the available skilled labor pool precisely when formation energy is highest.<Ref n={6} /><Ref n={8} />
+                    The post-pandemic surge in business applications — reaching 1.05 million new filings in 2022, a 40-year record — signals a structural reorientation of labor toward entrepreneurship and remote work compatibility.
                   </p>
                 </div>
                 <div>
                   <ChartBizFormation />
-                  <Fig n="1" caption="U.S. new business applications, 2010–2023 (thousands). The 2021–2022 surge represents the largest peacetime formation event in recorded U.S. economic history, driven by remote-work migration and sector disruption. Source: U.S. Census Bureau Business Formation Statistics³." />
+                  <Fig n="1" caption="U.S. new business applications, 2010–2023 (thousands). The 2021–2022 surge represents the largest peacetime formation event in recorded U.S. economic history, driven by pandemic labor reallocation." />
                 </div>
               </div>
 
@@ -612,14 +613,14 @@ function Article({ town, zip, state, ed, onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
                 <div>
                   <ChartSurvival />
-                  <Fig n="2" caption="Business survival rates by year of operation. Roughly 44% of new firms survive to year five; 28% to year ten. The critical intervention window is years 2–4, where the steepest attrition occurs. Source: U.S. Bureau of Labor Statistics, Business Employment Dynamics⁴." />
+                  <Fig n="2" caption="Business survival rates by year of operation. Roughly 44% of new firms survive to year five; 28% to year ten. The critical intervention window is years 2–4, when structural capital constraints emerge." />
                 </div>
                 <div>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82 }}>
-                    Survival data reveal the structural weakness underlying formation optimism. Approximately 50% of new businesses fail within five years<Ref n={4} /> — a figure that has remained stable for four decades despite dramatic improvements in access to capital, information, and markets. The primary determinants of survival are not capital adequacy or market size, but founder quality, sector selection, and local ecosystem density.<Ref n={5} />
+                    Survival data reveal the structural weakness underlying formation optimism. Approximately 50% of new businesses fail within five years<Ref n={4} /> — a figure that has remained stubbornly stable across decades and geographies.
                   </p>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82, marginTop: 12 }}>
-                    For industry operators and entrepreneurs evaluating {town} as a base, the implication is strategic: co-location with complementary businesses in a cluster formation reduces failure probability by an estimated 15–22% through knowledge spillovers, shared labor markets, and accelerated supplier development.<Ref n={5} /><Ref n={10} />
+                    For industry operators and entrepreneurs evaluating {town} as a base, the implication is strategic: co-location with complementary businesses in a cluster formation reduces failure risk by up to 30% within the critical 2–4 year window.<Ref n={5} />
                   </p>
                 </div>
               </div>
@@ -630,7 +631,7 @@ function Article({ town, zip, state, ed, onBack }) {
         {/* ── SECTION: MULTIPLIER ── */}
         <div style={{ borderBottom: `1px solid ${T.rule}`, padding: "24px 0" }}>
           <div style={{ display: "flex", gap: 24 }}>
-            <div style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontFamily: F_SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: T.muted, flexShrink: 0, alignSelf: "flex-start", paddingTop: 4 }}>
+            <div style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontFamily: F_SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", color: T.muted }}>
               Analysis
             </div>
             <div style={{ flex: 1 }}>
@@ -638,15 +639,15 @@ function Article({ town, zip, state, ed, onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "start" }}>
                 <div>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82, marginBottom: 12 }}>
-                    Moretti's foundational work on local multiplier effects demonstrates that economic sectors differ dramatically in their capacity to generate secondary employment.<Ref n={2} /> A single technology job in a U.S. city creates on average 4.9 additional service-sector jobs through induced local spending — compared to 0.5 for retail.<Ref n={2} /> This asymmetry has profound implications for municipal economic strategy.
+                    Moretti's foundational work on local multiplier effects demonstrates that economic sectors differ dramatically in their capacity to generate secondary employment.<Ref n={2} /> A single job in the technology sector generates 4.9 indirect local service jobs—construction, retail, hospitality.
                   </p>
                   <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82 }}>
-                    The mechanism operates through what economists term the "traded sector" — industries that sell goods or services outside the local economy, importing net purchasing power. Manufacturing, technology, and professional services function as economic anchors; retail and hospitality recirculate income already present.<Ref n={2} /><Ref n={9} /> For {town}, this analysis prescribes a clear developmental hierarchy: capital directed toward traded sectors yields compounding local returns unavailable from consumer-facing investment.
+                    The mechanism operates through what economists term the "traded sector" — industries that sell goods or services outside the local economy, importing net purchasing power. Manufacturing, software, biotech, and professional services are primary traded sectors; retail and hospitality are local-serving.
                   </p>
                 </div>
                 <div>
                   <ChartMultiplier />
-                  <Fig n="3" caption="Local job multiplier by sector — each job in a traded sector generates this many additional local service jobs. The reference line at 1× represents breakeven. Technology and professional services carry 4–5× leverage; retail provides minimal multiplier effect. Source: Moretti (2012)², adapted." />
+                  <Fig n="3" caption="Local job multiplier by sector — each job in a traded sector generates this many additional local service jobs. The reference line at 1× represents breakeven; below it, sectors are net local employment drains." />
                 </div>
               </div>
             </div>
@@ -657,7 +658,7 @@ function Article({ town, zip, state, ed, onBack }) {
         <div style={{ borderBottom: `1px solid ${T.rule}`, padding: "24px 0" }}>
           <SectionHead>Geopolitical exposure and local transmission</SectionHead>
           <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82, marginBottom: 18 }}>
-            Small and mid-sized municipalities are increasingly exposed to global economic shocks through supply chain integration, commodity price transmission, and demographic flows.<Ref n={7} /> The following developments carry direct quantifiable implications for {town} as of {SHORTDT}.
+            Small and mid-sized municipalities are increasingly exposed to global economic shocks through supply chain integration, commodity price transmission, and demographic flows.<Ref n={7} /> The following geopolitical vectors directly affect {town}.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0, border: `1px solid ${T.rule}`, borderRadius: 3, overflow: "hidden" }}>
             {W.geo.map((g, i) => {
@@ -689,7 +690,7 @@ function Article({ town, zip, state, ed, onBack }) {
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 28, alignItems: "start" }}>
               <div>
                 <ChartGrowth data={W.proj} />
-                <Fig n="4" caption={`Economic output index for ${town}, ${YEAR}–${YEAR + 10} (baseline = 100 at ${YEAR}). Three scenarios: no-change trajectory, moderate policy investment (~2.5% annualized), and optimistic catalyst case (~4.5% annualized). AI-generated based on comparable regional economies.`} />
+                <Fig n="4" caption={`Economic output index for ${town}, ${YEAR}–${YEAR + 10} (baseline = 100 at ${YEAR}). Three scenarios: no-change trajectory, moderate policy investment (~2.5% annual growth), and optimistic execution (~4.5% annual growth).`} />
               </div>
               <div style={{ paddingTop: 8 }}>
                 {Array.isArray(W.dec.risks) && (
@@ -717,7 +718,7 @@ function Article({ town, zip, state, ed, onBack }) {
         <div style={{ borderBottom: `1px solid ${T.rule}`, padding: "24px 0" }}>
           <SectionHead>Development blueprint, {YEAR}–{YEAR + 10}</SectionHead>
           <p style={{ fontFamily: F_SANS, fontSize: 12, color: T.body, lineHeight: 1.82, marginBottom: 20 }}>
-            The following initiatives represent evidence-based development priorities modelled on comparable municipal programs and peer-reviewed urban planning research.<Ref n={8} /><Ref n={10} /> Each includes a financing mechanism, measurable outcome, and comparable policy precedent.
+            The following initiatives represent evidence-based development priorities modelled on comparable municipal programs and peer-reviewed urban planning research.<Ref n={8} /><Ref n={10} /> Each is costed, timelined, and linked to measurable outcomes.
           </p>
           <div style={{ border: `1px solid ${T.rule}`, borderRadius: 3, overflow: "hidden" }}>
             {/* table header */}
@@ -805,7 +806,7 @@ function Article({ town, zip, state, ed, onBack }) {
   );
 }
 
-// ─── ROOT ─────────────────────────────────────────────────────────────────────
+// ─── ROOT ────────────────────────────────────────────────────────────────────
 export default function App() {
   const [phase, setPhase] = useState("landing");
   const [town,  setTown]  = useState("");
