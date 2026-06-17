@@ -14,8 +14,10 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
-    res.status(200).json(data);
+   const data = await response.json();
+const text = data.content?.[0]?.text || "No content returned";
+res.status(200).json({ text });
+
 
   } catch (error) {
     console.error(error);
