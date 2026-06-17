@@ -46,16 +46,26 @@ const YEAR     = NOW.getFullYear();
 
 // ─── API ─────────────────────────────────────────────────────────────
 async function claudeJSON(system, user, maxTok = 1400) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: maxTok,
-      system,
-      messages: [{ role: "user", content: user }],
-    }),
+  const res = await fetch("/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    messages: [
+      { role: "user", content: user }
+    ],
+    max_tokens: maxTok,
+    system
+  })
+})
+  .then(res => res.json())
+  .then(data => {
+    console.log("AI response:", data);
+    // whatever you do with the result now
+  })
+  .catch(err => {
+    console.error("Error:", err);
   });
+
   const d   = await res.json();
   const txt = (d.content || []).map(b => b.type === "text" ? b.text : "").join("").trim();
   try { return JSON.parse(txt.replace(/```json[\s\S]*?```|```/g, "").trim()); }
