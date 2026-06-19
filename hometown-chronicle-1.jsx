@@ -184,6 +184,7 @@ function HometownChronicle() {
   const [town, setTown] = useState("");
   const [zip, setZip] = useState("");
   const [state, setState] = useState("");
+  const [engine, setEngine] = useState("claude"); 
   const [result, setResult] = useState("");
   const [ok, setOk] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -192,16 +193,32 @@ function HometownChronicle() {
   const onGo = async (town, zip, state) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [
-            { role: "user", content: `Town: ${town}, ZIP: ${zip}, State: ${state}` }
-          ],
-          max_tokens: 1400
-        })
-      });
+     // Decide which backend route to call
+const endpoint =
+  engine === "claude"
+    ? "/api/generate"
+    : "/api/generate-gpt";
+
+// Call the selected AI engine
+const response = await fetch(endpoint, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    messages: [
+      {
+        role: "user",
+        content: `Town: ${town}, ZIP: ${zip}, State: ${state}`
+      }
+    ]
+  })
+});
+
+// Parse the response
+const data = await response.json();
+
+// Save the AI text into your state
+setResult(data.text);
+
 
       const data = await response.json();
       console.log("AI response:", data);
@@ -240,6 +257,17 @@ function HometownChronicle() {
         value={state}
         onChange={e => setState(e.target.value)}
       />
+<div style={{ marginTop: "12px" }}>
+  <label style={{ marginRight: "8px" }}>AI Model:</label>
+  <select
+    value={engine}
+    onChange={(e) => setEngine(e.target.value)}
+    style={{ padding: "6px", borderRadius: "6px" }}
+  >
+    <option value="claude">Claude 3 Sonnet</option>
+    <option value="gpt">ChatGPT 4o-mini</option>
+  </select>
+</div>
 
       <button
         onClick={() => onGo(town.trim(), zip.trim(), state.trim())}
