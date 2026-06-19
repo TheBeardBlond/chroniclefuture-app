@@ -1,10 +1,12 @@
 export default async function handler(req, res) {
   try {
+    // Extract the user message from the frontend payload
     const userMessage =
-      req.body.messages?.[0]?.content ||
-      req.body.prompt ||
+      req.body?.messages?.[0]?.content ||
+      req.body?.prompt ||
       "Generate civic analysis for Bay City, MI 48708";
 
+    // Call Anthropic Messages API
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -14,7 +16,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-3-sonnet-20240229",
-        max_tokens: 2024,
+        max_tokens: 2048,
         messages: [
           {
             role: "user",
@@ -26,14 +28,18 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const text =
-      data?.content?.[0]?.text ||
-      data?.content?.text ||
-      "No content returned";
+    // Anthropic ALWAYS returns: { content: [ { type: "text", text: "..." } ] }
+    const text = data?.content?.[0]?.text;
 
+    if (!text) {
+      console.error("Anthropic returned no text:", data);
+      return res.status(200).json({ text: "No content returned from Anthropic." });
+    }
+
+    // SUCCESS
     res.status(200).json({ text });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error("API /generate error:", error);
+    res.status(500).json({ text: "Server error calling Anthropic." });
   }
 }
