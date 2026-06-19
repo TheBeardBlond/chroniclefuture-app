@@ -179,6 +179,83 @@ function Ref({ n }) {
     </span>
   );
 }
+// ─── MAIN PAGE COMPONENT ─────────────────────────────────────────────
+function HometownChronicle() {
+  const [town, setTown] = useState("");
+  const [zip, setZip] = useState("");
+  const [state, setState] = useState("");
+  const [result, setResult] = useState("");
+  const [ok, setOk] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // ⭐ Your backend trigger
+  const onGo = async (town, zip, state) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [
+            { role: "user", content: `Town: ${town}, ZIP: ${zip}, State: ${state}` }
+          ],
+          max_tokens: 1400
+        })
+      });
+
+      const data = await response.json();
+      console.log("AI response:", data);
+
+      const text =
+        data.content?.map(c => c.text).join("") ||
+        "No content returned";
+
+      setResult(text);
+    } catch (err) {
+      console.error(err);
+      setResult("Generation failed — please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: 40 }}>
+      <h1>Hometown Chronicle</h1>
+
+      <input
+        placeholder="Town"
+        value={town}
+        onChange={e => setTown(e.target.value)}
+      />
+
+      <input
+        placeholder="ZIP"
+        value={zip}
+        onChange={e => setZip(e.target.value)}
+      />
+
+      <input
+        placeholder="State"
+        value={state}
+        onChange={e => setState(e.target.value)}
+      />
+
+      <button
+        onClick={() => onGo(town.trim(), zip.trim(), state.trim())}
+        disabled={!town || !zip || !state}
+      >
+        Generate analysis
+      </button>
+
+      <div style={{ marginTop: 20 }}>
+        {loading ? "Generating…" : result}
+      </div>
+    </div>
+  );
+}
+
+export default HometownChronicle;
 
 // ─── FIGURE CAPTION ───────────────────────────────────────────────────────────
 function Fig({ n, caption }) {
