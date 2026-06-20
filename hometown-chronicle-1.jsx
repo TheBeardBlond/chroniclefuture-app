@@ -45,6 +45,11 @@ async function loadBrief(briefId) {
 }
 
 function Header({ user, onWorkspace, onHome, onSignOut }) {
+  const accountName = user?.user_metadata?.username
+    || user?.user_metadata?.full_name
+    || user?.email?.split("@")[0]
+    || "Account";
+
   return (
     <header className="site-header">
       <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
@@ -52,7 +57,15 @@ function Header({ user, onWorkspace, onHome, onSignOut }) {
         <button className="nav-link" onClick={onHome}>Global feed</button>
         {user ? <button className="nav-link" onClick={onWorkspace}>My locations</button> : null}
       </nav>
-      {user ? <button className="account-button" onClick={onSignOut}>Sign out</button> : <a className="account-button" href="#access">Open your intelligence</a>}
+      {user ? (
+        <div className="account-actions">
+          <button className="account-identity" onClick={onWorkspace} title={user.email}>
+            <span className="account-dot" aria-hidden="true" />
+            <span><small>Signed in</small><strong>{accountName}</strong></span>
+          </button>
+          <button className="signout-button" onClick={onSignOut}>Sign out</button>
+        </div>
+      ) : <a className="account-button" href="#access">Open your intelligence</a>}
     </header>
   );
 }
@@ -270,6 +283,13 @@ const STYLES = `
   nav { display: flex; gap: 28px; }
   .nav-link { border: 0; background: none; color: #35414a; padding: 8px 0; font-size: 14px; }
   .account-button { justify-self: end; border: 1px solid #1a3229; border-radius: 4px; background: #173e30; color: white; padding: 10px 15px; font-size: 13px; font-weight: 700; text-decoration: none; }
+  .account-actions { justify-self: end; display: flex; align-items: center; gap: 10px; }
+  .account-identity { display: flex; align-items: center; gap: 9px; border: 0; background: transparent; color: #15221b; padding: 5px 0; text-align: left; }
+  .account-identity span:last-child { display: grid; gap: 1px; }
+  .account-identity small { color: #758078; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .account-identity strong { max-width: 150px; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+  .account-dot { width: 9px; height: 9px; border-radius: 50%; background: #20a66a; box-shadow: 0 0 0 4px rgba(32,166,106,.12); }
+  .signout-button { border: 1px solid #b9c1bb; border-radius: 4px; background: transparent; color: #344139; padding: 8px 10px; font-size: 11px; font-weight: 800; }
   .feed-hero { min-height: 610px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 68px; align-items: center; max-width: 1240px; margin: auto; padding: 70px 24px; }
   .kicker { color: #176b4d; font-size: 11px; font-weight: 900; letter-spacing: .15em; text-transform: uppercase; }
   .kicker.light { color: #9fe0c5; }
@@ -349,6 +369,8 @@ const STYLES = `
   }
   @media (max-width: 520px) {
     .account-button { padding: 9px 10px; font-size: 11px; } .brand { font-size: 12px; }
+    .account-identity small, .signout-button { display: none; }
+    .account-identity strong { max-width: 105px; font-size: 12px; }
     .feed-hero { min-height: auto; } .hero-copy h1 { font-size: 42px; }
     .lead-signal, .signal-card, .location-form, .workspace-section { padding: 22px; }
     .conversion-band h2, .access-band h2, .section-title h2 { font-size: 36px; }
