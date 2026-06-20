@@ -208,8 +208,10 @@ const response = await fetch(endpoint, {
 // Parse the response
 const data = await response.json();
 
+console.log("AI response:", data);
+
 // Save the AI text into your state
-setResult(data.text);
+setResult(data.text || "No content returned");
 
 
       const data = await response.json();
