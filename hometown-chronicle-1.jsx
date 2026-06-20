@@ -64,6 +64,9 @@ async function loadBrief(briefId) {
 
   if (briefError) throw briefError;
 
+  const [signals, signalScores, opportunities, risks, swot] = await Promise.all([
+    selectByBrief("cf_signals", briefId),
+    selectByBrief("cf_signal_scores", briefId),
   const [signals, opportunities, risks, swot] = await Promise.all([
     selectByBrief("cf_signals", briefId),
     selectByBrief("cf_opportunities", briefId),
@@ -71,6 +74,15 @@ async function loadBrief(briefId) {
     selectByBrief("cf_swots", briefId, true)
   ]);
 
+  const scoresBySignal = (signalScores || []).reduce((acc, score) => {
+    acc[score.signal_id || score.cf_signal_id] = score;
+    return acc;
+  }, {});
+
+  return {
+    ...brief,
+    persisted: {
+      signals: (signals || []).map((signal) => ({ ...signal, score_record: scoresBySignal[signal.id] })),
   return {
     ...brief,
     persisted: {
@@ -123,6 +135,7 @@ function Dashboard({ onOpenBrief }) {
   const [briefs, setBriefs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generatingId, setGeneratingId] = useState(null);
+  const [ingestingId, setIngestingId] = useState(null);
   const [message, setMessage] = useState("");
 
   const refresh = async () => {
@@ -136,6 +149,36 @@ function Dashboard({ onOpenBrief }) {
       setMessage(error.message || "Unable to load dashboard data.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  const briefsByLocation = useMemo(() => {
+    return briefs.reduce((acc, brief) => {
+      const locationId = brief.location_id || brief.cf_location_id;
+      acc[locationId] = acc[locationId] || [];
+      acc[locationId].push(brief);
+      return acc;
+    }, {});
+  }, [briefs]);
+
+  const ingest = async (locationId) => {
+    setIngestingId(locationId);
+    setMessage("");
+    try {
+      const response = await fetch("/api/ingest-signals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location_id: locationId })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Signal ingestion failed.");
+      setMessage(`Stored ${payload.saved_count || 0} source signals for this location.`);
+    } catch (error) {
+      setMessage(error.message || "Signal ingestion failed.");
+    } finally {
+      setIngestingId(null);
     }
   };
 
@@ -195,6 +238,100 @@ function Dashboard({ onOpenBrief }) {
                 <h3>{location.city}, {location.state}</h3>
                 <p className="muted">ZIP {location.zip} · {briefsByLocation[location.id]?.length || 0} historical briefs</p>
               </div>
+              <div className="actions">
+                <button className="secondary" onClick={() => ingest(location.id)} disabled={ingestingId === location.id}>
+                  {ingestingId === location.id ? "Ingesting…" : "Ingest signals"}
+                </button>
+                <button onClick={() => generate(location.id)} disabled={generatingId === location.id}>
+                  {generatingId === location.id ? "Generating…" : "Generate brief"}
+                </button>
+              </div>
+            </article>
+          ))}
+          {!locations.length && !loading && <p className="muted">No locations yet. Create the first location above.</p>}
+        </div>
+      </section>
+
+      <section className="panel">
+        <p className="eyebrow">Historical briefs</p>
+        <h2>Briefs from cf_briefs</h2>
+        <div className="brief-list">
+          {briefs.map((brief) => {
+            const payload = getBriefPayload(brief);
+            return (
+              <button className="brief-row" key={brief.id} onClick={() => onOpenBrief(brief.id)}>
+                <span>{brief.title || payload.title || "Untitled intelligence brief"}</span>
+                <small>{new Date(brief.created_at || brief.generated_at || Date.now()).toLocaleString()}</small>
+              </button>
+            );
+          })}
+          {!briefs.length && !loading && <p className="muted">Generated briefs will appear here.</p>}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+
+const STRATEGIST_PROMPTS = [
+  "What should I build?",
+  "What opportunities am I missing?",
+  "What industries are emerging?",
+  "What risks should I prepare for?",
+  "How will policy changes affect me?"
+];
+
+function DailyStrategist({ locationId }) {
+  const [sessionId, setSessionId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [draft, setDraft] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const ask = async (question) => {
+    const content = String(question || draft).trim();
+    if (!content || !locationId) return;
+
+    setMessages((current) => [...current, { role: "user", content }]);
+    setDraft("");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/strategist-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location_id: locationId, session_id: sessionId, message: content })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Daily Strategist failed.");
+      setSessionId(payload.session_id);
+      setMessages((current) => [...current, { role: "assistant", content: payload.answer }]);
+    } catch (err) {
+      setError(err.message || "Daily Strategist failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="panel strategist">
+      <p className="eyebrow">Daily Strategist</p>
+      <h2>Ask about this location</h2>
+      <p className="muted">Answers use the latest persisted Chronicle Future brief, top scored signals, opportunities, risks, and SWOT.</p>
+      <div className="prompt-list">
+        {STRATEGIST_PROMPTS.map((prompt) => <button className="secondary" key={prompt} onClick={() => ask(prompt)} disabled={loading}>{prompt}</button>)}
+      </div>
+      <div className="messages">
+        {messages.map((message, index) => <article className={`message ${message.role}`} key={`${message.role}-${index}`}><strong>{message.role}</strong><p>{message.content}</p></article>)}
+        {loading && <p className="muted">Strategist is thinking…</p>}
+      </div>
+      {error && <p className="notice">{error}</p>}
+      <form className="chat-form" onSubmit={(event) => { event.preventDefault(); ask(); }}>
+        <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask a follow-up…" />
+        <button disabled={!draft.trim() || loading || !locationId}>Ask</button>
+      </form>
+    </section>
               <button onClick={() => generate(location.id)} disabled={generatingId === location.id}>
                 {generatingId === location.id ? "Generating…" : "Generate brief"}
               </button>
@@ -260,6 +397,7 @@ function BriefPage({ briefId, onBack }) {
           return (
             <div className="panel" key={group}>
               <p className="eyebrow">{group}</p>
+              {items.map((signal) => <article className="stack-item" key={signal.id || signal.title}><h3>{signal.title}</h3><p>{signal.detail || signal.description}</p>{(signal.score_record?.score || signal.score) && <strong>Score: {signal.score_record?.score || signal.score}</strong>}</article>)}
               {items.map((signal) => <article className="stack-item" key={signal.id || signal.title}><h3>{signal.title}</h3><p>{signal.detail || signal.description}</p></article>)}
               {!items.length && <p className="muted">No {group} persisted for this brief.</p>}
             </div>
@@ -277,6 +415,17 @@ function BriefPage({ briefId, onBack }) {
           {risks.map((item) => <article className="stack-item" key={item.id || item.title}><h3>{item.title}</h3><p>{item.detail || item.description}</p><strong>{item.severity}</strong></article>)}
         </div>
       </section>
+
+      <section className="swot-grid">
+        {["strengths", "weaknesses", "opportunities", "threats"].map((key) => (
+          <div className="panel" key={key}>
+            <p className="eyebrow">{key}</p>
+            <ul>{normalizeList(swot[key]).map((item) => <li key={item}>{item}</li>)}</ul>
+          </div>
+        ))}
+      </section>
+
+      <DailyStrategist locationId={brief.location_id || brief.cf_location_id} />
 
       <section className="swot-grid">
         {["strengths", "weaknesses", "opportunities", "threats"].map((key) => (
@@ -316,6 +465,8 @@ export default function App() {
         .secondary { background: #111827; }
         .notice { color: #b42318; font-weight: 800; }
         .section-head, .location-card { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+        .location-list, .brief-list, .actions { display: grid; gap: 12px; }
+        .actions { grid-template-columns: repeat(2, max-content); }
         .location-list, .brief-list { display: grid; gap: 12px; }
         .location-card { padding: 16px 0; border-top: 1px solid #eaecf0; }
         .brief-row { width: 100%; background: #fff; color: #111827; border: 1px solid #eaecf0; border-radius: 16px; display: flex; justify-content: space-between; gap: 14px; text-align: left; }
@@ -325,6 +476,14 @@ export default function App() {
         .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
         .stack-item { border-top: 1px solid #eaecf0; padding-top: 14px; margin-top: 14px; }
         .stack-item p, li { color: #475467; line-height: 1.55; }
+        .strategist { display: grid; gap: 14px; }
+        .prompt-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .messages { display: grid; gap: 10px; }
+        .message { border: 1px solid #eaecf0; border-radius: 16px; padding: 12px 14px; background: #fff; }
+        .message.assistant { background: #f8fbff; }
+        .message p { margin: 6px 0 0; white-space: pre-wrap; color: #475467; line-height: 1.55; }
+        .chat-form { display: grid; grid-template-columns: 1fr max-content; gap: 10px; }
+        @media (max-width: 900px) { .hero, .signal-grid, .two-col, .swot-grid, .actions, .chat-form { grid-template-columns: 1fr; } .location-card, .brief-row, .section-head { display: grid; } }
         @media (max-width: 900px) { .hero, .signal-grid, .two-col, .swot-grid { grid-template-columns: 1fr; } .location-card, .brief-row, .section-head { display: grid; } }
       `}</style>
       {briefId ? <BriefPage briefId={briefId} onBack={() => setBriefId(null)} /> : <Dashboard onOpenBrief={setBriefId} />}

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { flattenSignalSet, ingestSignals } from "../src/services/signalIngestion.js";
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -37,6 +38,57 @@ async function insertFirstWorking(supabase, table, candidates) {
   throw lastError;
 }
 
+function scoreSignal(signal) {
+  const value = Number(signal.value);
+  const metric = String(signal.metric || "").toUpperCase();
+  let score = 60;
+
+  if (Number.isFinite(value)) {
+    if (metric === "UNRATE") score = value <= 4 ? 72 : value <= 6 ? 58 : 42;
+    else if (metric === "MORTGAGE30US") score = value <= 5 ? 70 : value <= 7 ? 52 : 38;
+    else if (metric === "DCOILWTICO") score = value <= 75 ? 64 : value <= 95 ? 54 : 44;
+    else if (metric === "PCOPPUSDM") score = value <= 9000 ? 62 : 50;
+    else if (metric === "median_household_income") score = value >= 85000 ? 74 : value >= 55000 ? 62 : 48;
+    else if (metric === "population") score = value >= 50000 ? 70 : value >= 15000 ? 60 : 50;
+    else if (metric === "bachelors_or_higher") score = value >= 10000 ? 72 : value >= 3000 ? 61 : 49;
+    else if (metric.startsWith("CES")) score = 63;
+  }
+
+  const impact = score >= 70 ? "high" : score >= 55 ? "medium" : "low";
+  return { ...signal, score, impact, confidence: signal.source ? "medium" : "low" };
+}
+
+function buildSourceContext(signalSet, scoredSignals) {
+  return JSON.stringify({
+    grouped_signals: signalSet,
+    scored_signals: scoredSignals.map(({ title, detail, category, source, metric, value, unit, score, impact, confidence }) => ({
+      title,
+      detail,
+      category,
+      source,
+      metric,
+      value,
+      unit,
+      score,
+      impact,
+      confidence
+    }))
+  });
+}
+
+async function generateStructuredIntelligence(location, signalSet, scoredSignals) {
+  const sourceContext = buildSourceContext(signalSet, scoredSignals);
+  const prompt = `You are Chronicle Future, a location-first decision-support analyst.
+Generate the opportunity, risk, SWOT, and brief narrative layers for ${location.city}, ${location.state} ${location.zip} using ONLY the source-backed signals below.
+Do not invent new source data. You may infer implications from the supplied signals.
+
+SOURCE SIGNALS JSON:
+${sourceContext}
+
+Return ONLY valid JSON with this exact shape:
+{
+  "title": "Brief title",
+  "summary": "Two sentence executive summary grounded in the supplied signals.",
 async function generateStructuredIntelligence(location) {
   const prompt = `You are Chronicle Future, a location-first decision-support analyst.
 Generate intelligence for ${location.city}, ${location.state} ${location.zip}.
@@ -66,6 +118,7 @@ Return ONLY valid JSON with this exact shape:
     body: JSON.stringify({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
+      max_tokens: 2200,
       max_tokens: 2600,
       response_format: { type: "json_object" }
     })
@@ -78,6 +131,12 @@ Return ONLY valid JSON with this exact shape:
 
   const parsed = extractJson(payload?.choices?.[0]?.message?.content);
   if (!parsed) throw new Error("OpenAI returned invalid intelligence JSON.");
+
+  return {
+    ...parsed,
+    signals: scoredSignals,
+    source_signal_metadata: signalSet.metadata
+  };
   return parsed;
 }
 
@@ -92,6 +151,9 @@ async function persistIntelligence(supabase, location, intelligence) {
 
   for (const signal of intelligence.signals || []) {
     const savedSignal = await insertFirstWorking(supabase, "cf_signals", [
+      { location_id: location.id, brief_id: brief.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, detail: signal.detail, metric: signal.metric, value: signal.value, unit: signal.unit, observed_at: signal.observed_at, geography: signal.geography, created_at: now },
+      { location_id: location.id, cf_brief_id: brief.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, description: signal.detail, metric: signal.metric, value: signal.value, unit: signal.unit, observed_at: signal.observed_at, geography: signal.geography, created_at: now },
+      { location_id: location.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, detail: signal.detail, created_at: now }
       { location_id: location.id, brief_id: brief.id, scope: signal.scope, category: signal.category, title: signal.title, detail: signal.detail, created_at: now },
       { location_id: location.id, cf_brief_id: brief.id, scope: signal.scope, category: signal.category, title: signal.title, description: signal.detail, created_at: now },
       { location_id: location.id, scope: signal.scope, category: signal.category, title: signal.title, detail: signal.detail, created_at: now }
@@ -145,6 +207,16 @@ export default async function handler(req, res) {
 
     if (locationError) throw locationError;
 
+    const signalSet = await ingestSignals(location);
+    const scoredSignals = flattenSignalSet(signalSet).map(scoreSignal);
+    if (!scoredSignals.length) {
+      throw new Error("No source signals were available for this location.");
+    }
+
+    const intelligence = await generateStructuredIntelligence(location, signalSet, scoredSignals);
+    const brief = await persistIntelligence(supabase, location, intelligence);
+
+    res.status(200).json({ brief_id: brief.id, signal_count: scoredSignals.length });
     const intelligence = await generateStructuredIntelligence(location);
     const brief = await persistIntelligence(supabase, location, intelligence);
 
