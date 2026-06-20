@@ -67,6 +67,8 @@ async function loadBrief(briefId) {
   const [signals, signalScores, opportunities, risks, swot] = await Promise.all([
     selectByBrief("cf_signals", briefId),
     selectByBrief("cf_signal_scores", briefId),
+  const [signals, opportunities, risks, swot] = await Promise.all([
+    selectByBrief("cf_signals", briefId),
     selectByBrief("cf_opportunities", briefId),
     selectByBrief("cf_risks", briefId),
     selectByBrief("cf_swots", briefId, true)
@@ -81,6 +83,10 @@ async function loadBrief(briefId) {
     ...brief,
     persisted: {
       signals: (signals || []).map((signal) => ({ ...signal, score_record: scoresBySignal[signal.id] })),
+  return {
+    ...brief,
+    persisted: {
+      signals: signals || [],
       opportunities: opportunities || [],
       risks: risks || [],
       swot: swot || null
@@ -175,6 +181,17 @@ function Dashboard({ onOpenBrief }) {
       setIngestingId(null);
     }
   };
+
+  useEffect(() => { refresh(); }, []);
+
+  const briefsByLocation = useMemo(() => {
+    return briefs.reduce((acc, brief) => {
+      const locationId = brief.location_id || brief.cf_location_id;
+      acc[locationId] = acc[locationId] || [];
+      acc[locationId].push(brief);
+      return acc;
+    }, {});
+  }, [briefs]);
 
   const generate = async (locationId) => {
     setGeneratingId(locationId);
@@ -315,6 +332,32 @@ function DailyStrategist({ locationId }) {
         <button disabled={!draft.trim() || loading || !locationId}>Ask</button>
       </form>
     </section>
+              <button onClick={() => generate(location.id)} disabled={generatingId === location.id}>
+                {generatingId === location.id ? "Generating…" : "Generate brief"}
+              </button>
+            </article>
+          ))}
+          {!locations.length && !loading && <p className="muted">No locations yet. Create the first location above.</p>}
+        </div>
+      </section>
+
+      <section className="panel">
+        <p className="eyebrow">Historical briefs</p>
+        <h2>Briefs from cf_briefs</h2>
+        <div className="brief-list">
+          {briefs.map((brief) => {
+            const payload = getBriefPayload(brief);
+            return (
+              <button className="brief-row" key={brief.id} onClick={() => onOpenBrief(brief.id)}>
+                <span>{brief.title || payload.title || "Untitled intelligence brief"}</span>
+                <small>{new Date(brief.created_at || brief.generated_at || Date.now()).toLocaleString()}</small>
+              </button>
+            );
+          })}
+          {!briefs.length && !loading && <p className="muted">Generated briefs will appear here.</p>}
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -355,6 +398,7 @@ function BriefPage({ briefId, onBack }) {
             <div className="panel" key={group}>
               <p className="eyebrow">{group}</p>
               {items.map((signal) => <article className="stack-item" key={signal.id || signal.title}><h3>{signal.title}</h3><p>{signal.detail || signal.description}</p>{(signal.score_record?.score || signal.score) && <strong>Score: {signal.score_record?.score || signal.score}</strong>}</article>)}
+              {items.map((signal) => <article className="stack-item" key={signal.id || signal.title}><h3>{signal.title}</h3><p>{signal.detail || signal.description}</p></article>)}
               {!items.length && <p className="muted">No {group} persisted for this brief.</p>}
             </div>
           );
@@ -382,6 +426,15 @@ function BriefPage({ briefId, onBack }) {
       </section>
 
       <DailyStrategist locationId={brief.location_id || brief.cf_location_id} />
+
+      <section className="swot-grid">
+        {["strengths", "weaknesses", "opportunities", "threats"].map((key) => (
+          <div className="panel" key={key}>
+            <p className="eyebrow">{key}</p>
+            <ul>{normalizeList(swot[key]).map((item) => <li key={item}>{item}</li>)}</ul>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }
@@ -414,6 +467,7 @@ export default function App() {
         .section-head, .location-card { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
         .location-list, .brief-list, .actions { display: grid; gap: 12px; }
         .actions { grid-template-columns: repeat(2, max-content); }
+        .location-list, .brief-list { display: grid; gap: 12px; }
         .location-card { padding: 16px 0; border-top: 1px solid #eaecf0; }
         .brief-row { width: 100%; background: #fff; color: #111827; border: 1px solid #eaecf0; border-radius: 16px; display: flex; justify-content: space-between; gap: 14px; text-align: left; }
         .masthead { padding: 34px; }
@@ -430,6 +484,7 @@ export default function App() {
         .message p { margin: 6px 0 0; white-space: pre-wrap; color: #475467; line-height: 1.55; }
         .chat-form { display: grid; grid-template-columns: 1fr max-content; gap: 10px; }
         @media (max-width: 900px) { .hero, .signal-grid, .two-col, .swot-grid, .actions, .chat-form { grid-template-columns: 1fr; } .location-card, .brief-row, .section-head { display: grid; } }
+        @media (max-width: 900px) { .hero, .signal-grid, .two-col, .swot-grid { grid-template-columns: 1fr; } .location-card, .brief-row, .section-head { display: grid; } }
       `}</style>
       {briefId ? <BriefPage briefId={briefId} onBack={() => setBriefId(null)} /> : <Dashboard onOpenBrief={setBriefId} />}
     </>

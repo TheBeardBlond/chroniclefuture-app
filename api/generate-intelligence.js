@@ -89,6 +89,21 @@ Return ONLY valid JSON with this exact shape:
 {
   "title": "Brief title",
   "summary": "Two sentence executive summary grounded in the supplied signals.",
+async function generateStructuredIntelligence(location) {
+  const prompt = `You are Chronicle Future, a location-first decision-support analyst.
+Generate intelligence for ${location.city}, ${location.state} ${location.zip}.
+Return ONLY valid JSON with this exact shape:
+{
+  "title": "Brief title",
+  "summary": "Two sentence executive summary.",
+  "signals": [
+    {"scope":"local", "category":"local signals", "title":"...", "detail":"...", "score":75, "impact":"high", "confidence":"medium"},
+    {"scope":"state", "category":"state signals", "title":"...", "detail":"...", "score":75, "impact":"medium", "confidence":"medium"},
+    {"scope":"national", "category":"national signals", "title":"...", "detail":"...", "score":75, "impact":"medium", "confidence":"medium"},
+    {"scope":"global", "category":"global signals", "title":"...", "detail":"...", "score":75, "impact":"medium", "confidence":"medium"},
+    {"scope":"technology", "category":"technology watch", "title":"...", "detail":"...", "score":75, "impact":"medium", "confidence":"medium"},
+    {"scope":"commodity", "category":"commodity watch", "title":"...", "detail":"...", "score":75, "impact":"medium", "confidence":"medium"}
+  ],
   "opportunities": [{"title":"...", "detail":"...", "score":80, "capital_required":"low|medium|high", "time_horizon":"...", "confidence":"low|medium|high"}],
   "risks": [{"title":"...", "detail":"...", "severity":"low|medium|high", "time_horizon":"...", "mitigation":"..."}],
   "swot": {"strengths":["..."], "weaknesses":["..."], "opportunities":["..."], "threats":["..."]}
@@ -104,6 +119,7 @@ Return ONLY valid JSON with this exact shape:
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: 2200,
+      max_tokens: 2600,
       response_format: { type: "json_object" }
     })
   });
@@ -121,6 +137,7 @@ Return ONLY valid JSON with this exact shape:
     signals: scoredSignals,
     source_signal_metadata: signalSet.metadata
   };
+  return parsed;
 }
 
 async function persistIntelligence(supabase, location, intelligence) {
@@ -137,6 +154,9 @@ async function persistIntelligence(supabase, location, intelligence) {
       { location_id: location.id, brief_id: brief.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, detail: signal.detail, metric: signal.metric, value: signal.value, unit: signal.unit, observed_at: signal.observed_at, geography: signal.geography, created_at: now },
       { location_id: location.id, cf_brief_id: brief.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, description: signal.detail, metric: signal.metric, value: signal.value, unit: signal.unit, observed_at: signal.observed_at, geography: signal.geography, created_at: now },
       { location_id: location.id, scope: signal.scope, category: signal.category, source: signal.source, title: signal.title, detail: signal.detail, created_at: now }
+      { location_id: location.id, brief_id: brief.id, scope: signal.scope, category: signal.category, title: signal.title, detail: signal.detail, created_at: now },
+      { location_id: location.id, cf_brief_id: brief.id, scope: signal.scope, category: signal.category, title: signal.title, description: signal.detail, created_at: now },
+      { location_id: location.id, scope: signal.scope, category: signal.category, title: signal.title, detail: signal.detail, created_at: now }
     ]);
 
     await insertFirstWorking(supabase, "cf_signal_scores", [
@@ -197,6 +217,10 @@ export default async function handler(req, res) {
     const brief = await persistIntelligence(supabase, location, intelligence);
 
     res.status(200).json({ brief_id: brief.id, signal_count: scoredSignals.length });
+    const intelligence = await generateStructuredIntelligence(location);
+    const brief = await persistIntelligence(supabase, location, intelligence);
+
+    res.status(200).json({ brief_id: brief.id });
   } catch (error) {
     console.error("generate-intelligence error:", error);
     res.status(500).json({ error: error.message || "Failed to generate intelligence" });
