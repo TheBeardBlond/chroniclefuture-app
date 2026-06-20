@@ -11,6 +11,7 @@ const PUBLIC_SIGNALS = [
 ];
 
 const SIGNAL_GROUPS = ["Local", "State", "National", "Global", "Technology", "Commodity"];
+const AUTH_REDIRECT_URL = "https://chroniclefuture-app.vercel.app";
 
 const displayDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
@@ -65,7 +66,10 @@ function AuthPanel() {
     event.preventDefault();
     setLoading(true);
     setStatus("");
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: AUTH_REDIRECT_URL, shouldCreateUser: true }
+    });
     setStatus(error ? error.message : "Check your email for your secure sign-in link.");
     setLoading(false);
   };
