@@ -19,7 +19,7 @@ export default async function handler(req, res) {
             content: userMessage
           }
         ],
-        max_tokens: 2048
+        max_tokens: req.body?.max_tokens || 2048
       })
     });
 
