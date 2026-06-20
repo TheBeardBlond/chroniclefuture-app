@@ -679,17 +679,81 @@ baseline grows ~0.8%/yr, withPolicy ~2.5%/yr with some variation, optimistic ~4.
             {/* local news */}
             <div style={{ padding: "20px 0 20px 20px" }}>
               <div style={{ fontFamily: F_SANS, fontSize: 10, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: T.muted, marginBottom: 14 }}>Local dispatches</div>
-              {W.news.map((s, i) => {
-                const acc = { City: T.blue, Business: T.orange, Infrastructure: T.blue, Environment: T.green }[s.section] || T.blue;
-                return (
-                  <div key={i} style={{ borderTop: i > 0 ? `1px solid ${T.ruleLight}` : "none", paddingTop: i > 0 ? 14 : 0, marginTop: i > 0 ? 14 : 0 }}>
-                    <div style={{ fontFamily: F_SANS, fontSize: 9, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: acc, marginBottom: 5 }}>{s.section}</div>
-                    <div style={{ fontFamily: F_SERIF, fontSize: 15, color: T.ink, lineHeight: 1.3, marginBottom: 5 }}>{s.headline}</div>
-                    <div style={{ fontFamily: F_SANS, fontSize: 11.5, color: T.secondary, lineHeight: 1.6, marginBottom: 5 }}>{s.deck}</div>
-                    <div style={{ fontFamily: F_SANS, fontSize: 11, color: T.caption, lineHeight: 1.7 }}>{s.analysis}</div>
-                  </div>
-                );
-              })}
+             {Array.isArray(W.news) ? (
+  W.news.map((s, i) => {
+    const acc =
+      {
+        City: T.blue,
+        Business: T.orange,
+        Infrastructure: T.blue,
+        Environment: T.green
+      }[s.section] || T.blue;
+
+    return (
+      <div
+        key={i}
+        style={{
+          borderTop: i > 0 ? `1px solid ${T.ruleLight}` : "none",
+          paddingTop: i > 0 ? 14 : 0,
+          marginTop: i > 0 ? 14 : 0
+        }}
+      >
+        <div
+          style={{
+            fontFamily: F_SANS,
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: acc,
+            marginBottom: 5
+          }}
+        >
+          {s.section}
+        </div>
+
+        <div
+          style={{
+            fontFamily: F_SERIF,
+            fontSize: 15,
+            color: T.ink,
+            lineHeight: 1.3,
+            marginBottom: 5
+          }}
+        >
+          {s.headline}
+        </div>
+
+        <div
+          style={{
+            fontFamily: F_SANS,
+            fontSize: 11.5,
+            color: T.secondary,
+            lineHeight: 1.6,
+            marginBottom: 5
+          }}
+        >
+          {s.deck}
+        </div>
+
+        <div
+          style={{
+            fontFamily: F_SANS,
+            fontSize: 11,
+            color: T.caption,
+            lineHeight: 1.7
+          }}
+        >
+          {s.analysis}
+        </div>
+      </div>
+    );
+  })
+) : (
+  <div style={{ padding: 20 }}>
+    No news data returned.
+  </div>
+)}
             </div>
           </div>
 
