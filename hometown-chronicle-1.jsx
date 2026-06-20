@@ -11,6 +11,14 @@ const PUBLIC_SIGNALS = [
 ];
 
 const SIGNAL_GROUPS = ["Local", "State", "National", "Global", "Technology", "Commodity"];
+const BRIEF_FIELDS = {
+  Local: "local_signals",
+  State: "state_signals",
+  National: "national_signals",
+  Global: "global_signals",
+  Technology: "technology_watch",
+  Commodity: "commodity_watch"
+};
 const AUTH_REDIRECT_URL = "https://chroniclefuture-app.vercel.app";
 
 const displayDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -35,13 +43,33 @@ async function createLocation(form, userId) {
 async function loadBrief(briefId) {
   const { data: brief, error } = await supabase.from("cf_briefs").select("*").eq("id", briefId).single();
   if (error) throw error;
-  const [signals, opportunities, risks, swots] = await Promise.all([
-    supabase.from("cf_signals").select("*").eq("location_id", brief.location_id),
-    supabase.from("cf_opportunities").select("*").eq("location_id", brief.location_id),
-    supabase.from("cf_risks").select("*").eq("location_id", brief.location_id),
-    supabase.from("cf_swots").select("*").eq("location_id", brief.location_id).order("created_at", { ascending: false }).limit(1)
+  const [signals, scores, opportunities, risks, swots] = await Promise.all([
+    supabase.from("cf_signals").select("*").eq("brief_id", briefId),
+    supabase.from("cf_signal_scores").select("*").eq("brief_id", briefId),
+    supabase.from("cf_opportunities").select("*").eq("brief_id", briefId),
+    supabase.from("cf_risks").select("*").eq("brief_id", briefId),
+    supabase.from("cf_swots").select("*").eq("brief_id", briefId).limit(1)
   ]);
-  return { ...brief, signals: signals.data || [], opportunities: opportunities.data || [], risks: risks.data || [], swot: swots.data?.[0] || {} };
+  const requestError = [signals, scores, opportunities, risks, swots].find((result) => result.error)?.error;
+  if (requestError) throw requestError;
+  const scoresBySignal = (scores.data || []).reduce((map, item) => ({ ...map, [item.signal_id]: item }), {});
+  return {
+    ...brief,
+    signals: (signals.data || []).map((item) => ({ ...item, score: scoresBySignal[item.id] })),
+    opportunities: opportunities.data || [],
+    risks: risks.data || [],
+    swot: swots.data?.[0] || {}
+  };
+}
+
+async function authorizedFetch(url, options = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new Error("Your session has expired. Sign in again.");
+  return fetch(url, {
+    ...options,
+    headers: { ...options.headers, Authorization: `Bearer ${token}` }
+  });
 }
 
 function Header({ user, onWorkspace, onHome, onSignOut }) {
@@ -201,7 +229,7 @@ function Dashboard({ user, onOpenBrief }) {
   const run = async (type, locationId) => {
     setBusy(`${type}:${locationId}`); setMessage("");
     try {
-      const response = await fetch(type === "ingest" ? "/api/ingest-signals" : "/api/generate-intelligence", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ location_id: locationId }) });
+      const response = await authorizedFetch(type === "ingest" ? "/api/ingest-signals" : "/api/generate-intelligence", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ location_id: locationId }) });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Request failed.");
       setMessage(type === "ingest" ? `Stored ${payload.saved_count || 0} new signals.` : "Your intelligence brief is ready.");
@@ -219,7 +247,7 @@ function Dashboard({ user, onOpenBrief }) {
           {!locations.length && !loading ? <div className="empty-state"><h3>No locations yet</h3><p>Add the first place you want Chronicle Future to monitor.</p></div> : null}
         </div>
       </section>
-      {briefs.length ? <section className="workspace-section"><p className="kicker">Archive</p><h2>Recent briefs</h2><div className="brief-list">{briefs.map((brief) => <button key={brief.id} onClick={() => onOpenBrief(brief.id)}><span>{brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief"}</span><small>{displayDate(brief.created_at)}</small></button>)}</div></section> : null}
+      {briefs.length ? <section className="workspace-section"><p className="kicker">Archive</p><h2>Recent briefs</h2><div className="brief-list">{briefs.map((brief) => <button key={brief.id} onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>)}</div></section> : null}
     </main>
   );
 }
@@ -231,9 +259,9 @@ function BriefPage({ briefId, onBack }) {
   if (error) return <main className="workspace"><button className="text-button" onClick={onBack}>Back to locations</button><p className="error">{error}</p></main>;
   if (!brief) return <main className="workspace"><p>Loading intelligence...</p></main>;
   return (
-    <main className="workspace brief-page"><button className="text-button" onClick={onBack}>Back to locations</button><section className="brief-masthead"><p className="kicker">Weekly intelligence brief</p><h1>{displayDate(brief.week_of || brief.created_at)}</h1><p>{brief.decade_outlook || "A structured view of the signals shaping this location."}</p></section>
-      <section className="brief-grid">{SIGNAL_GROUPS.map((group) => { const field = `${group.toLowerCase()}_signals`; const matching = brief.signals.filter((signal) => (signal.signal_type || "").toLowerCase().includes(group.toLowerCase())); return <article key={group}><p className="kicker">{group}</p>{brief[field] ? <p>{brief[field]}</p> : matching.map((signal) => <div className="brief-item" key={signal.id}><h3>{signal.title}</h3><p>{signal.summary}</p></div>)}</article>; })}</section>
-      <section className="two-column"><article><p className="kicker">Opportunities</p>{brief.opportunities.map((item) => <div className="brief-item" key={item.id}><h3>{item.title}</h3><p>{item.description}</p></div>)}</article><article><p className="kicker">Risks</p>{brief.risks.map((item) => <div className="brief-item" key={item.id}><h3>{item.title}</h3><p>{item.description}</p></div>)}</article></section>
+    <main className="workspace brief-page"><button className="text-button" onClick={onBack}>Back to locations</button><section className="brief-masthead"><p className="kicker">Weekly intelligence brief · {displayDate(brief.week_of || brief.created_at)}</p><h1>{brief.title || "Location intelligence"}</h1><p>{brief.summary || brief.decade_outlook || "A structured view of the signals shaping this location."}</p>{brief.decade_outlook ? <div className="outlook"><strong>Decade outlook</strong><p>{brief.decade_outlook}</p></div> : null}</section>
+      <section className="brief-grid">{SIGNAL_GROUPS.map((group) => { const field = BRIEF_FIELDS[group]; const matching = brief.signals.filter((signal) => (signal.signal_type || "").toLowerCase() === group.toLowerCase()); return <article key={group}><p className="kicker">{group}</p>{matching.length ? matching.map((signal) => <div className="brief-item" key={signal.id}><h3>{signal.title}</h3><p>{signal.summary}</p>{signal.score ? <small>Impact {signal.score.impact_score} · Confidence {signal.score.confidence_score} · Urgency {signal.score.urgency_score}</small> : null}</div>) : <p className="brief-copy">{brief[field] || "No signal persisted for this scope."}</p>}</article>; })}</section>
+      <section className="two-column"><article><p className="kicker">Opportunities</p>{brief.opportunities.map((item) => <div className="brief-item" key={item.id}><h3>{item.title}</h3><p>{item.description}</p><small>Score {item.opportunity_score} · Confidence {item.confidence_level} · {item.capital_requirement} capital · {item.time_horizon}</small></div>)}</article><article><p className="kicker">Risks</p>{brief.risks.map((item) => <div className="brief-item" key={item.id}><h3>{item.title}</h3><p>{item.description}</p><small>Risk {item.risk_score} · {item.severity} severity · {item.time_horizon}</small>{item.mitigation ? <p><strong>Mitigation:</strong> {item.mitigation}</p> : null}</div>)}</article></section>
       <section className="swot-grid">{["strengths", "weaknesses", "opportunities", "threats"].map((key) => <article key={key}><p className="kicker">{key}</p><ul>{(Array.isArray(brief.swot[key]) ? brief.swot[key] : []).map((item) => <li key={item}>{item}</li>)}</ul></article>)}</section>
     </main>
   );
@@ -355,6 +383,11 @@ const STYLES = `
   .brief-item { border-top: 1px solid #d7dcd7; padding-top: 16px; margin-top: 16px; }
   .brief-item h3 { font-size: 22px; }
   .brief-item p, .brief-grid p, .two-column p, .swot-grid li { color: #59655e; line-height: 1.55; }
+  .brief-item small { color: #176b4d; font-size: 11px; font-weight: 800; text-transform: capitalize; }
+  .brief-copy { white-space: pre-wrap; }
+  .outlook { max-width: 780px; border-top: 1px solid #c8cec8; margin-top: 28px; padding-top: 20px; }
+  .outlook > strong { color: #176b4d; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .outlook p { margin: 8px 0 0; }
   .two-column { display: grid; grid-template-columns: 1fr 1fr; }
   .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 900px) {
