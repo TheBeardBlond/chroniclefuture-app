@@ -228,8 +228,21 @@ export default function App() {
   const [view, setView] = useState("public");
   const [briefId, setBriefId] = useState(null);
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => { setUser(data.session?.user || null); setAuthReady(true); });
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => { setUser(session?.user || null); setAuthReady(true); });
+    supabase.auth.getSession().then(({ data }) => {
+      const sessionUser = data.session?.user || null;
+      setUser(sessionUser);
+      if (sessionUser) setView("workspace");
+      setAuthReady(true);
+    });
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      const sessionUser = session?.user || null;
+      setUser(sessionUser);
+      if (sessionUser && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        setView("workspace");
+        setBriefId(null);
+      }
+      setAuthReady(true);
+    });
     return () => data.subscription.unsubscribe();
   }, []);
   const home = () => { setView("public"); setBriefId(null); window.scrollTo(0, 0); };
