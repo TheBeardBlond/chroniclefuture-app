@@ -64,12 +64,13 @@ async function loadBrief(briefId) {
 
   if (briefError) throw briefError;
 
-  const [signals, opportunities, risks, swot] = await Promise.all([
-    selectByBrief("cf_signals", briefId),
-    selectByBrief("cf_opportunities", briefId),
-    selectByBrief("cf_risks", briefId),
-    selectByBrief("cf_swots", briefId, true)
-  ]);
+  const [signals, signalScores, opportunities, risks, swot] = await Promise.all([
+  selectByBrief("cf_signals", briefId),
+  selectByBrief("cf_signal_scores", briefId),
+  selectByBrief("cf_opportunities", briefId),
+  selectByBrief("cf_risks", briefId),
+  selectByBrief("cf_swots", briefId, true)
+]);
 
   return {
     ...brief,
