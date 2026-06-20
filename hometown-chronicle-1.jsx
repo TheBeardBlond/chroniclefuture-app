@@ -213,15 +213,6 @@ console.log("AI response:", data);
 // Save the AI text into your state
 setResult(data.text || "No content returned");
 
-
-      const data = await response.json();
-      console.log("AI response:", data);
-
-      const text =
-        data.content?.map(c => c.text).join("") ||
-        "No content returned";
-
-      setResult(text);
     } catch (err) {
       console.error(err);
       setResult("Generation failed — please try again.");
