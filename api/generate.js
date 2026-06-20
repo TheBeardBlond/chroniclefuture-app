@@ -27,8 +27,10 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-console.log("ANTHROPIC RAW RESPONSE:", JSON.stringify(data, null, 2));
-
+    console.log(
+  "ANTHROPIC RAW RESPONSE:",
+  JSON.stringify(data, null, 2)
+);
     // Anthropic ALWAYS returns: { content: [ { type: "text", text: "..." } ] }
     const text = data?.content?.[0]?.text;
 

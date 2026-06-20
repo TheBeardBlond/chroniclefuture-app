@@ -56,21 +56,13 @@ async function claudeJSON(system, user, maxTok = 1400) {
     max_tokens: maxTok,
     system
   })
-})
-  .then(res => res.json())
-  .then(data => {
-    console.log("AI response:", data);
-    // whatever you do with the result now
-  })
-  .catch(err => {
-    console.error("Error:", err);
-  });
+});
 
-  const d   = await res.json();
-  const txt = (d.content || []).map(b => b.type === "text" ? b.text : "").join("").trim();
-  try { return JSON.parse(txt.replace(/```json[\s\S]*?```|```/g, "").trim()); }
-  catch { return txt; }
-}
+const d = await res.json();
+
+console.log("AI response:", d);
+
+return d;
 
 // ─── INTERSECTION HOOK ────────────────────────────────────────────────────────
 function useInView(ref, threshold = 0.15) {
