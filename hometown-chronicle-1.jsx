@@ -102,16 +102,28 @@ function AuthPanel() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (!cooldown) return undefined;
+    const timer = window.setInterval(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown > 0]);
 
   const submit = async (event) => {
     event.preventDefault();
+    if (cooldown) return;
     setLoading(true);
     setStatus("");
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: AUTH_REDIRECT_URL, shouldCreateUser: true }
     });
-    setStatus(error ? error.message : "Check your email for your secure sign-in link.");
+    if (error) setStatus(error.message);
+    else {
+      setCooldown(60);
+      setStatus("Secure link sent. Open the newest email once; older links expire automatically.");
+    }
     setLoading(false);
   };
 
@@ -125,7 +137,7 @@ function AuthPanel() {
         <label htmlFor="email">Work email</label>
         <div className="input-row">
           <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" required />
-          <button disabled={loading}>{loading ? "Sending..." : "Continue"}</button>
+          <button disabled={loading || cooldown > 0}>{loading ? "Sending..." : cooldown ? `Resend in ${cooldown}s` : "Continue"}</button>
         </div>
         <p>{status || "Sign in to unlock location briefs, SWOT, opportunities, risks, and forecasts."}</p>
       </form>
