@@ -268,7 +268,7 @@ async function claudeJSON(system, user, maxTok = 1400) {
     );
   }
 
-  export default HometownChronicle;
+ 
 
   // ─── FIGURE CAPTION ───────────────────────────────────────────────────────────
   function Fig({ n, caption }) {
