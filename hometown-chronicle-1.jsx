@@ -24,15 +24,17 @@ const AUTH_REDIRECT_URL = "https://chroniclefuture-app.vercel.app";
 const displayDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
 async function loadDashboardData(userId) {
-  const [{ data: locations, error: locationError }, { data: briefs, error: briefError }, { data: entitlement, error: entitlementError }] = await Promise.all([
+  const [{ data: locations, error: locationError }, { data: briefs, error: briefError }, { data: issues, error: issueError }, { data: entitlement, error: entitlementError }] = await Promise.all([
     supabase.from("cf_locations").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("cf_briefs").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("cf_magazine_issues").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("cf_entitlements").select("*").eq("user_id", userId).maybeSingle()
   ]);
   if (locationError) throw locationError;
   if (briefError) throw briefError;
+  if (issueError) throw issueError;
   if (entitlementError) throw entitlementError;
-  return { locations: locations || [], briefs: briefs || [], entitlement };
+  return { locations: locations || [], briefs: briefs || [], issues: issues || [], entitlement };
 }
 
 async function createLocation(form, userId) {
@@ -62,6 +64,41 @@ async function loadBrief(briefId) {
     risks: risks.data || [],
     swot: swots.data?.[0] || {}
   };
+}
+
+async function loadMagazine(issueId) {
+  const [issueResult, articleResult] = await Promise.all([
+    supabase.from("cf_magazine_issues").select("*").eq("id", issueId).single(),
+    supabase.from("cf_magazine_articles").select("*").eq("issue_id", issueId).order("sort_order")
+  ]);
+  if (issueResult.error) throw issueResult.error;
+  if (articleResult.error) throw articleResult.error;
+  return { issue: issueResult.data, articles: articleResult.data || [] };
+}
+
+async function saveMagazine(issue, articles) {
+  const updatedAt = new Date().toISOString();
+  const issueResult = await supabase.from("cf_magazine_issues").update({
+    title: issue.title,
+    subtitle: issue.subtitle,
+    dek: issue.dek,
+    editor_note: issue.editor_note,
+    status: issue.status,
+    updated_at: updatedAt
+  }).eq("id", issue.id).select("id").single();
+  if (issueResult.error) throw issueResult.error;
+  const articleResults = await Promise.all(articles.map((article) => supabase.from("cf_magazine_articles").update({
+    section: article.section,
+    headline: article.headline,
+    subheadline: article.subheadline,
+    body: article.body,
+    pull_quote: article.pull_quote,
+    source_note: article.source_note,
+    status: article.status,
+    updated_at: updatedAt
+  }).eq("id", article.id).select("id").single()));
+  const articleError = articleResults.find((result) => result.error)?.error;
+  if (articleError) throw articleError;
 }
 
 async function authorizedFetch(url, options = {}) {
@@ -278,16 +315,17 @@ function LocationForm({ userId, onCreated }) {
   );
 }
 
-function Dashboard({ user, onOpenBrief }) {
+function Dashboard({ user, onOpenBrief, onOpenIssue }) {
   const [locations, setLocations] = useState([]);
   const [briefs, setBriefs] = useState([]);
+  const [issues, setIssues] = useState([]);
   const [entitlement, setEntitlement] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const refresh = async () => {
     setLoading(true);
-    try { const data = await loadDashboardData(user.id); setLocations(data.locations); setBriefs(data.briefs); setEntitlement(data.entitlement); }
+    try { const data = await loadDashboardData(user.id); setLocations(data.locations); setBriefs(data.briefs); setIssues(data.issues); setEntitlement(data.entitlement); }
     catch (error) { setMessage(error.message || "Unable to load your workspace."); }
     finally { setLoading(false); }
   };
@@ -310,6 +348,22 @@ function Dashboard({ user, onOpenBrief }) {
     } catch (error) { setMessage(error.message || "Request failed."); }
     finally { setBusy(""); }
   };
+  const createMagazine = async (briefId) => {
+    setBusy(`magazine:${briefId}`);
+    setMessage("");
+    try {
+      const response = await authorizedFetch("/api/generate-magazine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brief_id: briefId })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Magazine generation failed.");
+      await refresh();
+      if (payload.issue_id) onOpenIssue(payload.issue_id);
+    } catch (error) { setMessage(error.message || "Magazine generation failed."); }
+    finally { setBusy(""); }
+  };
   const openBillingPortal = async () => {
     try {
       const response = await authorizedFetch("/api/create-portal-session", { method: "POST" });
@@ -323,6 +377,7 @@ function Dashboard({ user, onOpenBrief }) {
     : entitlement?.plan === "monthly" && entitlement?.status === "active"
       ? `${Math.max(0, entitlement.monthly_brief_limit - entitlement.monthly_briefs_used)} of ${entitlement.monthly_brief_limit} monthly briefs remaining`
       : `${entitlement?.one_time_credits || 0} one-time brief credits`;
+  const magazineAccess = entitlement?.plan === "owner" || (entitlement?.plan === "monthly" && entitlement?.status === "active");
   return (
     <main className="workspace">
       <section className="workspace-head"><div><p className="kicker">Private intelligence workspace</p><h1>Your locations</h1><p>Turn global change into local risks, opportunities, SWOT, and forward scenarios.</p></div><LocationForm userId={user.id} onCreated={refresh} /></section>
@@ -334,7 +389,8 @@ function Dashboard({ user, onOpenBrief }) {
           {!locations.length && !loading ? <div className="empty-state"><h3>No locations yet</h3><p>Add the first place you want Chronicle Future to monitor.</p></div> : null}
         </div>
       </section>
-      {briefs.length ? <section className="workspace-section"><p className="kicker">Archive</p><h2>Recent briefs</h2><div className="brief-list">{briefs.map((brief) => <button key={brief.id} onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>)}</div></section> : null}
+      {briefs.length ? <section className="workspace-section"><div className="section-title"><div><p className="kicker">Archive</p><h2>Recent briefs</h2></div><p>Open the analysis or turn it into an editable four-article publication.</p></div><div className="brief-list">{briefs.map((brief) => <article className="brief-row" key={brief.id}><button className="brief-open" onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>{magazineAccess ? <button className="magazine-button" onClick={() => createMagazine(brief.id)} disabled={!!busy}>{busy === `magazine:${brief.id}` ? "Writing issue..." : "Produce magazine"}</button> : null}</article>)}</div></section> : null}
+      <section className="workspace-section magazine-library"><div className="section-title"><div><p className="kicker">Claude production desk</p><h2>Magazine studio</h2></div><p>Evidence-led editions created from your saved intelligence, ready for review and print.</p></div>{issues.length ? <div className="issue-list">{issues.map((issue) => <button key={issue.id} onClick={() => onOpenIssue(issue.id)}><span><small>{issue.status}</small><strong>{issue.title}</strong><em>{issue.subtitle}</em></span><time>{displayDate(issue.edition_date)}</time></button>)}</div> : <div className="empty-state"><h3>No magazine issues yet</h3><p>{magazineAccess ? "Choose Produce magazine beside any intelligence brief." : "Magazine production is available with monthly access."}</p></div>}</section>
       {entitlement?.plan !== "owner" ? <div id="workspace-pricing"><PricingSection user={user} /></div> : null}
     </main>
   );
@@ -355,11 +411,62 @@ function BriefPage({ briefId, onBack }) {
   );
 }
 
+const articleParagraphs = (body) => String(body || "").split(/\n\s*\n/).filter(Boolean);
+
+function MagazinePage({ issueId, onBack }) {
+  const [issue, setIssue] = useState(null);
+  const [articles, setArticles] = useState([]);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    let active = true;
+    loadMagazine(issueId).then((data) => {
+      if (!active) return;
+      setIssue(data.issue);
+      setArticles(data.articles);
+    }).catch((error) => active && setMessage(error.message));
+    return () => { active = false; };
+  }, [issueId]);
+  const updateIssue = (field) => (event) => setIssue((current) => ({ ...current, [field]: event.target.value }));
+  const updateArticle = (index, field) => (event) => setArticles((current) => current.map((article, articleIndex) => articleIndex === index ? { ...article, [field]: event.target.value } : article));
+  const save = async () => {
+    setSaving(true);
+    setMessage("");
+    try { await saveMagazine(issue, articles); setMessage("Draft saved."); setEditing(false); }
+    catch (error) { setMessage(error.message || "Unable to save the draft."); }
+    finally { setSaving(false); }
+  };
+  if (!issue) return <main className="workspace"><button className="text-button" onClick={onBack}>Back to workspace</button><p>{message || "Loading magazine studio..."}</p></main>;
+  return (
+    <main className="magazine-page">
+      <div className="studio-toolbar"><button className="text-button" onClick={onBack}>Back to workspace</button><div><span>{message}</span><button className="outline" onClick={() => setEditing((value) => !value)}>{editing ? "Preview" : "Edit issue"}</button>{editing ? <button onClick={save} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button> : <button onClick={() => window.print()}>Print / Save PDF</button>}</div></div>
+      {editing ? (
+        <section className="magazine-editor">
+          <div className="editor-heading"><p className="kicker">Issue settings</p><h1>Edit publication</h1><label>Status<select value={issue.status} onChange={updateIssue("status")}><option value="draft">Draft</option><option value="review">In review</option><option value="published">Published</option></select></label></div>
+          <label>Title<input value={issue.title} onChange={updateIssue("title")} /></label>
+          <label>Subtitle<input value={issue.subtitle} onChange={updateIssue("subtitle")} /></label>
+          <label>Cover deck<textarea value={issue.dek} onChange={updateIssue("dek")} rows={3} /></label>
+          <label>Editor's note<textarea value={issue.editor_note} onChange={updateIssue("editor_note")} rows={5} /></label>
+          {articles.map((article, index) => <article className="article-editor" key={article.id}><div><p className="kicker">Article {index + 1}</p><h2>{article.headline || "Untitled article"}</h2></div><label>Section<input value={article.section} onChange={updateArticle(index, "section")} /></label><label>Headline<input value={article.headline} onChange={updateArticle(index, "headline")} /></label><label>Subheadline<textarea value={article.subheadline} onChange={updateArticle(index, "subheadline")} rows={2} /></label><label>Article body<textarea value={article.body} onChange={updateArticle(index, "body")} rows={18} /></label><label>Pull quote<textarea value={article.pull_quote} onChange={updateArticle(index, "pull_quote")} rows={3} /></label><label>Source note<input value={article.source_note} onChange={updateArticle(index, "source_note")} /></label></article>)}
+        </section>
+      ) : (
+        <article className="magazine-edition">
+          <section className="magazine-cover"><div className="magazine-brand">CHRONICLE <span>FUTURE</span></div><p className="magazine-date">Intelligence edition · {displayDate(issue.edition_date)}</p><div><p className="kicker">{issue.status}</p><h1>{issue.title}</h1><h2>{issue.subtitle}</h2><p>{issue.dek}</p></div><footer>Location intelligence · Strategy · Opportunity</footer></section>
+          <section className="editor-note"><p className="kicker">From the editor</p><h2>Why this issue matters</h2>{articleParagraphs(issue.editor_note).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</section>
+          {articles.map((article, index) => <section className="magazine-article" key={article.id}><header><p className="kicker">{article.section}</p><span>0{index + 1}</span><h2>{article.headline}</h2><h3>{article.subheadline}</h3><p className="byline">By {article.byline}</p></header>{articleParagraphs(article.body).map((paragraph, paragraphIndex) => paragraphIndex === 1 && article.pull_quote ? <div key={`${paragraph}-quote`}><blockquote>{article.pull_quote}</blockquote><p>{paragraph}</p></div> : <p key={paragraph}>{paragraph}</p>)}<footer>Sources: {article.source_note || "Chronicle Future synthesis"}</footer></section>)}
+        </article>
+      )}
+    </main>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [view, setView] = useState("public");
   const [briefId, setBriefId] = useState(null);
+  const [issueId, setIssueId] = useState(null);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const sessionUser = data.session?.user || null;
@@ -373,22 +480,25 @@ export default function App() {
       if (sessionUser && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         setView("workspace");
         setBriefId(null);
+        setIssueId(null);
       }
       setAuthReady(true);
     });
     return () => data.subscription.unsubscribe();
   }, []);
-  const home = () => { setView("public"); setBriefId(null); window.scrollTo(0, 0); };
-  const workspace = () => { if (user) { setView("workspace"); setBriefId(null); window.scrollTo(0, 0); } };
+  const home = () => { setView("public"); setBriefId(null); setIssueId(null); window.scrollTo(0, 0); };
+  const workspace = () => { if (user) { setView("workspace"); setBriefId(null); setIssueId(null); window.scrollTo(0, 0); } };
   const signOut = async () => { await supabase.auth.signOut(); home(); };
-  return <><style>{STYLES}</style><Header user={user} onHome={home} onWorkspace={workspace} onSignOut={signOut} />{!authReady ? <main className="loading-screen">Loading Chronicle Future...</main> : briefId ? <BriefPage briefId={briefId} onBack={workspace} /> : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={setBriefId} /> : <PublicLanding user={user} onWorkspace={workspace} />}</>;
+  const openBrief = (id) => { setIssueId(null); setBriefId(id); window.scrollTo(0, 0); };
+  const openIssue = (id) => { setBriefId(null); setIssueId(id); window.scrollTo(0, 0); };
+  return <><style>{STYLES}</style><Header user={user} onHome={home} onWorkspace={workspace} onSignOut={signOut} />{!authReady ? <main className="loading-screen">Loading Chronicle Future...</main> : issueId ? <MagazinePage issueId={issueId} onBack={workspace} /> : briefId ? <BriefPage briefId={briefId} onBack={workspace} /> : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} /> : <PublicLanding user={user} onWorkspace={workspace} />}</>;
 }
 
 const STYLES = `
   :root { color: #121a21; background: #f3f4f1; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis: none; }
   * { box-sizing: border-box; }
   body { margin: 0; background: #f3f4f1; }
-  button, input { font: inherit; }
+  button, input, textarea, select { font: inherit; }
   button, a { -webkit-tap-highlight-color: transparent; }
   button { cursor: pointer; }
   h1, h2, h3, p { margin-top: 0; }
@@ -482,7 +592,16 @@ const STYLES = `
   .location-actions button:disabled { opacity: .55; cursor: wait; }
   .empty-state { padding: 45px 0 20px; color: #677169; }
   .brief-list { display: grid; gap: 8px; margin-top: 28px; }
-  .brief-list button { display: flex; justify-content: space-between; gap: 20px; border: 0; border-top: 1px solid #d7dcd7; background: transparent; color: #17231d; padding: 18px 0; text-align: left; }
+  .brief-row { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; border-top: 1px solid #d7dcd7; }
+  .brief-open { display: flex; justify-content: space-between; gap: 20px; border: 0; background: transparent; color: #17231d; padding: 18px 0; text-align: left; }
+  .magazine-button { border: 1px solid #176b4d; border-radius: 3px; background: transparent; color: #176b4d; padding: 10px 14px; font-size: 12px; font-weight: 900; }
+  .magazine-button:disabled { opacity: .55; cursor: wait; }
+  .issue-list { display: grid; }
+  .issue-list > button { display: flex; justify-content: space-between; gap: 24px; align-items: center; border: 0; border-top: 1px solid #d7dcd7; background: transparent; color: #17231d; padding: 20px 0; text-align: left; }
+  .issue-list > button > span { display: grid; gap: 4px; }
+  .issue-list small { color: #176b4d; font-size: 9px; font-style: normal; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+  .issue-list strong { font-family: Georgia, serif; font-size: 24px; font-weight: 500; }
+  .issue-list em, .issue-list time { color: #6c766f; font-size: 12px; font-style: normal; }
   .brief-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
   .brief-grid > article, .two-column > article, .swot-grid > article { margin: -1px 0 0 -1px; min-height: 240px; }
   .brief-item { border-top: 1px solid #d7dcd7; padding-top: 16px; margin-top: 16px; }
@@ -495,6 +614,44 @@ const STYLES = `
   .outlook p { margin: 8px 0 0; }
   .two-column { display: grid; grid-template-columns: 1fr 1fr; }
   .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .magazine-page { min-height: 100vh; padding: 32px 24px 90px; }
+  .studio-toolbar { position: sticky; top: 66px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 20px; max-width: 1160px; margin: 0 auto 24px; border: 1px solid #c8cec8; background: rgba(243,244,241,.97); padding: 14px 18px; }
+  .studio-toolbar > div { display: flex; align-items: center; gap: 10px; }
+  .studio-toolbar span { color: #176b4d; font-size: 12px; font-weight: 800; }
+  .studio-toolbar > div button { border: 0; border-radius: 3px; background: #176b4d; color: #fff; padding: 10px 14px; font-weight: 800; }
+  .studio-toolbar > div .outline { border: 1px solid #176b4d; background: transparent; color: #176b4d; }
+  .magazine-editor { display: grid; gap: 18px; max-width: 980px; margin: auto; }
+  .magazine-editor > label, .article-editor { border: 1px solid #c8cec8; background: #fff; padding: 22px; }
+  .magazine-editor label { display: grid; gap: 8px; }
+  .magazine-editor input, .magazine-editor textarea, .magazine-editor select { width: 100%; border: 1px solid #b8c0ba; border-radius: 3px; background: #fbfcfa; padding: 11px; color: #17231d; line-height: 1.55; }
+  .editor-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding: 22px 0; }
+  .editor-heading h1 { margin-bottom: 0; font-size: 52px; }
+  .editor-heading label { min-width: 170px; }
+  .article-editor { display: grid; gap: 16px; margin-top: 18px; }
+  .article-editor h2 { margin-bottom: 0; font-size: 34px; }
+  .magazine-edition { max-width: 980px; margin: auto; background: #fff; box-shadow: 0 24px 70px rgba(19,32,25,.12); }
+  .magazine-cover { min-height: 1080px; display: grid; grid-template-rows: auto auto 1fr auto; background: #132b22; color: #fff; padding: 54px; }
+  .magazine-brand { font-weight: 900; letter-spacing: .08em; }
+  .magazine-brand span { color: #c8f05a; }
+  .magazine-date { margin-top: 20px; color: #b9c9c1; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .magazine-cover > div:nth-of-type(2) { align-self: end; max-width: 780px; padding-bottom: 70px; }
+  .magazine-cover h1 { margin-bottom: 22px; font-size: 86px; line-height: .92; }
+  .magazine-cover h2 { color: #c8f05a; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 22px; font-weight: 700; }
+  .magazine-cover > div:nth-of-type(2) > p:last-child { max-width: 660px; color: #d1ddd7; font-size: 19px; line-height: 1.55; }
+  .magazine-cover footer { border-top: 1px solid #486158; padding-top: 18px; color: #aebfb7; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .editor-note, .magazine-article { padding: 70px 72px; }
+  .editor-note { background: #eaf0eb; }
+  .editor-note h2 { font-size: 48px; }
+  .editor-note > p:not(.kicker), .magazine-article > p, .magazine-article > div > p { color: #35453d; font-family: Georgia, serif; font-size: 18px; line-height: 1.75; }
+  .magazine-article { border-top: 1px solid #c8cec8; }
+  .magazine-article header { display: grid; grid-template-columns: 1fr auto; margin-bottom: 38px; }
+  .magazine-article header > span { grid-column: 2; grid-row: 1 / 5; color: #d7ddd8; font-family: Georgia, serif; font-size: 76px; }
+  .magazine-article h2, .magazine-article h3, .magazine-article .byline { grid-column: 1; }
+  .magazine-article h2 { max-width: 720px; margin-bottom: 18px; font-size: 58px; line-height: 1; }
+  .magazine-article h3 { max-width: 680px; color: #5c6861; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 18px; line-height: 1.5; }
+  .magazine-article .byline { color: #176b4d; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+  .magazine-article blockquote { float: right; width: 42%; margin: 8px 0 24px 38px; border-top: 4px solid #176b4d; border-bottom: 1px solid #9aa79f; padding: 20px 0; color: #176b4d; font-family: Georgia, serif; font-size: 29px; line-height: 1.2; }
+  .magazine-article footer { clear: both; border-top: 1px solid #d5dad6; margin-top: 42px; padding-top: 14px; color: #778179; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
   @media (max-width: 900px) {
     .site-header { grid-template-columns: 1fr auto; padding: 0 16px; } nav { display: none; }
     .feed-hero, .workspace-head, .access-band, .pricing-grid { grid-template-columns: 1fr; gap: 34px; }
@@ -504,6 +661,14 @@ const STYLES = `
     .signal-number { margin-bottom: 34px; } .section-title, .location-row { display: grid; }
     .location-form { grid-template-columns: 1fr; } .location-form > * { grid-column: 1 !important; }
     .brief-grid, .two-column, .swot-grid { grid-template-columns: 1fr; }
+    .brief-row { grid-template-columns: 1fr; gap: 0; padding-bottom: 16px; }
+    .studio-toolbar { position: static; align-items: start; }
+    .studio-toolbar, .studio-toolbar > div { flex-wrap: wrap; }
+    .magazine-cover { min-height: 820px; padding: 34px; }
+    .magazine-cover h1 { font-size: 58px; }
+    .editor-note, .magazine-article { padding: 44px 34px; }
+    .magazine-article h2 { font-size: 42px; }
+    .magazine-article blockquote { float: none; width: auto; margin: 28px 0; }
   }
   @media (max-width: 520px) {
     .account-button { padding: 9px 10px; font-size: 11px; } .brand { font-size: 12px; }
@@ -513,5 +678,18 @@ const STYLES = `
     .lead-signal, .signal-card, .location-form, .workspace-section { padding: 22px; }
     .conversion-band h2, .access-band h2, .section-title h2 { font-size: 36px; }
     .input-row, .location-actions { grid-template-columns: 1fr; display: grid; }
+  }
+  @media print {
+    @page { size: letter; margin: .55in; }
+    body { background: #fff; }
+    .site-header, .studio-toolbar { display: none !important; }
+    .magazine-page { padding: 0; }
+    .magazine-edition { max-width: none; box-shadow: none; }
+    .magazine-cover { min-height: 9.9in; break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .editor-note { break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .magazine-article { break-before: page; padding: 0; border: 0; }
+    .magazine-article h2 { font-size: 44px; }
+    .magazine-article > p, .magazine-article > div > p { font-size: 13px; line-height: 1.55; }
+    .magazine-article blockquote { font-size: 22px; }
   }
 `;
