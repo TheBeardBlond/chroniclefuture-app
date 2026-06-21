@@ -197,41 +197,53 @@ function MarketTicker() {
     };
   }, []);
 
-  const items = [
-    ...feed.market.map((item) => ({ ...item, kind: "market", key: item.symbol })),
-    ...feed.news.map((item, index) => ({ ...item, kind: "news", key: `news-${index}` }))
-  ];
-  const fallback = status === "loading" ? "Loading delayed market data" : "Market feed temporarily unavailable";
-
-  const renderSet = (copy, hidden = false) => (
+  const renderMarketSet = (copy, hidden = false) => (
     <div className="market-tape-set" aria-hidden={hidden || undefined}>
-      {items.length ? items.map((item) => item.kind === "market" ? (
-        <span className="market-quote" key={`${copy}-${item.key}`}>
+      {feed.market.length ? feed.market.map((item) => (
+        <span className="market-quote" key={`${copy}-${item.symbol}`}>
           <strong>{item.label}</strong>
           <span>{formatMarketPrice(item.price)}</span>
           <em className={item.change_percent > 0 ? "up" : item.change_percent < 0 ? "down" : "flat"}>
             {Number.isFinite(item.change_percent) ? `${item.change_percent >= 0 ? "+" : ""}${item.change_percent.toFixed(2)}%` : "--"}
           </em>
         </span>
-      ) : (
-        <a className="market-headline" href={item.url} target="_blank" rel="noreferrer" tabIndex={hidden ? -1 : undefined} key={`${copy}-${item.key}`}>
+      )) : <span className="market-fallback">{status === "loading" ? "Loading delayed prices" : "Market prices temporarily unavailable"}</span>}
+    </div>
+  );
+
+  const renderNewsSet = (copy, hidden = false) => (
+    <div className="market-tape-set" aria-hidden={hidden || undefined}>
+      {feed.news.length ? feed.news.map((item, index) => (
+        <a className="market-headline" href={item.url} target="_blank" rel="noreferrer" tabIndex={hidden ? -1 : undefined} key={`${copy}-${index}`}>
           <small>{item.source}</small>{item.title}
         </a>
-      )) : <span className="market-fallback">{fallback}</span>}
+      )) : <span className="market-fallback">{status === "loading" ? "Loading global headlines" : "News feed temporarily unavailable"}</span>}
     </div>
   );
 
   return (
-    <section className="market-tape" aria-label="Delayed market prices and business news">
-      <div className="market-tape-label"><strong>MARKET WATCH</strong><span>Delayed</span></div>
-      <div className={`market-tape-window ${items.length ? "is-moving" : ""}`}>
-        <div className="market-tape-track">
-          {renderSet("primary")}
-          {items.length ? renderSet("copy", true) : null}
+    <>
+      <section className="market-tape market-tape-prices" aria-label="Delayed stock index and commodity prices">
+        <div className="market-tape-label"><strong>MARKETS</strong><span>Delayed</span></div>
+        <div className={`market-tape-window ${feed.market.length ? "is-moving" : ""}`}>
+          <div className="market-tape-track">
+            {renderMarketSet("market-primary")}
+            {feed.market.length ? renderMarketSet("market-copy", true) : null}
+          </div>
         </div>
-      </div>
-      <time>{feed.as_of ? new Date(feed.as_of).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "--"}</time>
-    </section>
+        <time>{feed.as_of ? new Date(feed.as_of).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "--"}</time>
+      </section>
+      <section className="market-tape market-tape-news" aria-label="Global business and economic headlines">
+        <div className="market-tape-label"><strong>NEWS WIRE</strong><span>Global</span></div>
+        <div className={`market-tape-window ${feed.news.length ? "is-moving" : ""}`}>
+          <div className="market-tape-track">
+            {renderNewsSet("news-primary")}
+            {feed.news.length ? renderNewsSet("news-copy", true) : null}
+          </div>
+        </div>
+        <time>{feed.news.length ? `${feed.news.length} stories` : "--"}</time>
+      </section>
+    </>
   );
 }
 
@@ -589,6 +601,12 @@ const STYLES = `
   .market-tape-window { min-width: 0; overflow: hidden; }
   .market-tape-track { width: max-content; display: flex; }
   .market-tape-window.is-moving .market-tape-track { animation: market-scroll 58s linear infinite; }
+  .market-tape-prices .market-tape-track { animation-duration: 44s; }
+  .market-tape-news { background: #16231d; }
+  .market-tape-news .market-tape-label { background: #214c3a; }
+  .market-tape-news .market-tape-label strong { color: #9fe0c5; }
+  .market-tape-news .market-tape-track { animation-duration: 78s; }
+  .market-tape-news > time { background: #16231d; }
   .market-tape-window.is-moving:hover .market-tape-track, .market-tape-window.is-moving:focus-within .market-tape-track { animation-play-state: paused; }
   .market-tape-set { display: flex; align-items: center; gap: 28px; padding: 0 14px; white-space: nowrap; }
   .market-quote { display: flex; align-items: baseline; gap: 7px; }
@@ -716,7 +734,7 @@ const STYLES = `
   .two-column { display: grid; grid-template-columns: 1fr 1fr; }
   .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
   .magazine-page { min-height: 100vh; padding: 32px 24px 90px; }
-  .studio-toolbar { position: sticky; top: 100px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 20px; max-width: 1160px; margin: 0 auto 24px; border: 1px solid #c8cec8; background: rgba(243,244,241,.97); padding: 14px 18px; }
+  .studio-toolbar { position: sticky; top: 134px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 20px; max-width: 1160px; margin: 0 auto 24px; border: 1px solid #c8cec8; background: rgba(243,244,241,.97); padding: 14px 18px; }
   .studio-toolbar > div { display: flex; align-items: center; gap: 10px; }
   .studio-toolbar span { color: #176b4d; font-size: 12px; font-weight: 800; }
   .studio-toolbar > div button { border: 0; border-radius: 3px; background: #176b4d; color: #fff; padding: 10px 14px; font-weight: 800; }
@@ -775,7 +793,8 @@ const STYLES = `
     .market-tape { grid-template-columns: auto minmax(0, 1fr); }
     .market-tape-label { padding: 0 10px; }
     .market-tape-label span, .market-tape > time { display: none; }
-    .market-tape-window.is-moving .market-tape-track { animation-duration: 48s; }
+    .market-tape-prices .market-tape-track { animation-duration: 42s; }
+    .market-tape-news .market-tape-track { animation-duration: 68s; }
     .account-button { padding: 9px 10px; font-size: 11px; } .brand { font-size: 12px; }
     .account-identity small, .signout-button { display: none; }
     .account-identity strong { max-width: 105px; font-size: 12px; }
