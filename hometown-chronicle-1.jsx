@@ -27,7 +27,7 @@ async function loadDashboardData(userId) {
   const [{ data: locations, error: locationError }, { data: briefs, error: briefError }, { data: issues, error: issueError }, { data: entitlement, error: entitlementError }] = await Promise.all([
     supabase.from("cf_locations").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
     supabase.from("cf_briefs").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("cf_magazine_issues").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("cf_magazine_issues").select("*").order("created_at", { ascending: false }),
     supabase.from("cf_entitlements").select("*").eq("user_id", userId).maybeSingle()
   ]);
   if (locationError) throw locationError;
@@ -153,7 +153,7 @@ function PricingSection({ user }) {
         <article className="price-card featured">
           <p className="kicker light">Monthly intelligence</p>
           <h3><span>$39</span> per month</h3>
-          <p>Four briefs every billing period, weekly monitoring, saved history, and continuing access to your location workspace.</p>
+          <p>Four briefs every billing period, saved history, and access to Chronicle Future's publisher-produced magazine editions.</p>
           <button onClick={() => checkout("monthly")} disabled={!!loading}>{loading === "monthly" ? "Opening checkout..." : user ? "Start monthly access" : "Sign in to subscribe"}</button>
         </article>
       </div>
@@ -377,7 +377,8 @@ function Dashboard({ user, onOpenBrief, onOpenIssue }) {
     : entitlement?.plan === "monthly" && entitlement?.status === "active"
       ? `${Math.max(0, entitlement.monthly_brief_limit - entitlement.monthly_briefs_used)} of ${entitlement.monthly_brief_limit} monthly briefs remaining`
       : `${entitlement?.one_time_credits || 0} one-time brief credits`;
-  const magazineAccess = entitlement?.plan === "owner" || (entitlement?.plan === "monthly" && entitlement?.status === "active");
+  const isPublisher = entitlement?.plan === "owner" && entitlement?.status === "active";
+  const magazineAccess = isPublisher || (entitlement?.plan === "monthly" && entitlement?.status === "active");
   return (
     <main className="workspace">
       <section className="workspace-head"><div><p className="kicker">Private intelligence workspace</p><h1>Your locations</h1><p>Turn global change into local risks, opportunities, SWOT, and forward scenarios.</p></div><LocationForm userId={user.id} onCreated={refresh} /></section>
@@ -389,8 +390,8 @@ function Dashboard({ user, onOpenBrief, onOpenIssue }) {
           {!locations.length && !loading ? <div className="empty-state"><h3>No locations yet</h3><p>Add the first place you want Chronicle Future to monitor.</p></div> : null}
         </div>
       </section>
-      {briefs.length ? <section className="workspace-section"><div className="section-title"><div><p className="kicker">Archive</p><h2>Recent briefs</h2></div><p>Open the analysis or turn it into an editable four-article publication.</p></div><div className="brief-list">{briefs.map((brief) => <article className="brief-row" key={brief.id}><button className="brief-open" onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>{magazineAccess ? <button className="magazine-button" onClick={() => createMagazine(brief.id)} disabled={!!busy}>{busy === `magazine:${brief.id}` ? "Writing issue..." : "Produce magazine"}</button> : null}</article>)}</div></section> : null}
-      <section className="workspace-section magazine-library"><div className="section-title"><div><p className="kicker">Claude production desk</p><h2>Magazine studio</h2></div><p>Evidence-led editions created from your saved intelligence, ready for review and print.</p></div>{issues.length ? <div className="issue-list">{issues.map((issue) => <button key={issue.id} onClick={() => onOpenIssue(issue.id)}><span><small>{issue.status}</small><strong>{issue.title}</strong><em>{issue.subtitle}</em></span><time>{displayDate(issue.edition_date)}</time></button>)}</div> : <div className="empty-state"><h3>No magazine issues yet</h3><p>{magazineAccess ? "Choose Produce magazine beside any intelligence brief." : "Magazine production is available with monthly access."}</p></div>}</section>
+      {briefs.length ? <section className="workspace-section"><div className="section-title"><div><p className="kicker">Archive</p><h2>Recent briefs</h2></div><p>{isPublisher ? "Open the analysis or use it as the source for the next Chronicle Future edition." : "Your private archive of location intelligence."}</p></div><div className="brief-list">{briefs.map((brief) => <article className="brief-row" key={brief.id}><button className="brief-open" onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>{isPublisher ? <button className="magazine-button" onClick={() => createMagazine(brief.id)} disabled={!!busy}>{busy === `magazine:${brief.id}` ? "Writing issue..." : "Produce magazine"}</button> : null}</article>)}</div></section> : null}
+      <section className="workspace-section magazine-library"><div className="section-title"><div><p className="kicker">Chronicle Future editions</p><h2>{isPublisher ? "Publisher studio" : "Magazine library"}</h2></div><p>{isPublisher ? "Produce, review, and publish evidence-led editions for Chronicle Future subscribers." : "Read the weekly and monthly editions produced by the Chronicle Future intelligence desk."}</p></div>{issues.length ? <div className="issue-list">{issues.map((issue) => <button key={issue.id} onClick={() => onOpenIssue(issue.id)}><span><small>{issue.status}</small><strong>{issue.title}</strong><em>{issue.subtitle}</em></span><time>{displayDate(issue.edition_date)}</time></button>)}</div> : <div className="empty-state"><h3>No editions available yet</h3><p>{isPublisher ? "Produce the first edition from a saved intelligence brief." : magazineAccess ? "The next Chronicle Future edition will appear here when it is published." : "Magazine access is included with the monthly subscription."}</p></div>}</section>
       {entitlement?.plan !== "owner" ? <div id="workspace-pricing"><PricingSection user={user} /></div> : null}
     </main>
   );
@@ -413,7 +414,7 @@ function BriefPage({ briefId, onBack }) {
 
 const articleParagraphs = (body) => String(body || "").split(/\n\s*\n/).filter(Boolean);
 
-function MagazinePage({ issueId, onBack }) {
+function MagazinePage({ issueId, user, onBack }) {
   const [issue, setIssue] = useState(null);
   const [articles, setArticles] = useState([]);
   const [editing, setEditing] = useState(false);
@@ -438,9 +439,10 @@ function MagazinePage({ issueId, onBack }) {
     finally { setSaving(false); }
   };
   if (!issue) return <main className="workspace"><button className="text-button" onClick={onBack}>Back to workspace</button><p>{message || "Loading magazine studio..."}</p></main>;
+  const canEdit = issue.user_id === user.id;
   return (
     <main className="magazine-page">
-      <div className="studio-toolbar"><button className="text-button" onClick={onBack}>Back to workspace</button><div><span>{message}</span><button className="outline" onClick={() => setEditing((value) => !value)}>{editing ? "Preview" : "Edit issue"}</button>{editing ? <button onClick={save} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button> : <button onClick={() => window.print()}>Print / Save PDF</button>}</div></div>
+      <div className="studio-toolbar"><button className="text-button" onClick={onBack}>Back to workspace</button><div><span>{message}</span>{canEdit ? <button className="outline" onClick={() => setEditing((value) => !value)}>{editing ? "Preview" : "Edit issue"}</button> : null}{editing && canEdit ? <button onClick={save} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button> : <button onClick={() => window.print()}>Print / Save PDF</button>}</div></div>
       {editing ? (
         <section className="magazine-editor">
           <div className="editor-heading"><p className="kicker">Issue settings</p><h1>Edit publication</h1><label>Status<select value={issue.status} onChange={updateIssue("status")}><option value="draft">Draft</option><option value="review">In review</option><option value="published">Published</option></select></label></div>
@@ -491,7 +493,7 @@ export default function App() {
   const signOut = async () => { await supabase.auth.signOut(); home(); };
   const openBrief = (id) => { setIssueId(null); setBriefId(id); window.scrollTo(0, 0); };
   const openIssue = (id) => { setBriefId(null); setIssueId(id); window.scrollTo(0, 0); };
-  return <><style>{STYLES}</style><Header user={user} onHome={home} onWorkspace={workspace} onSignOut={signOut} />{!authReady ? <main className="loading-screen">Loading Chronicle Future...</main> : issueId ? <MagazinePage issueId={issueId} onBack={workspace} /> : briefId ? <BriefPage briefId={briefId} onBack={workspace} /> : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} /> : <PublicLanding user={user} onWorkspace={workspace} />}</>;
+  return <><style>{STYLES}</style><Header user={user} onHome={home} onWorkspace={workspace} onSignOut={signOut} />{!authReady ? <main className="loading-screen">Loading Chronicle Future...</main> : issueId ? <MagazinePage issueId={issueId} user={user} onBack={workspace} /> : briefId ? <BriefPage briefId={briefId} onBack={workspace} /> : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} /> : <PublicLanding user={user} onWorkspace={workspace} />}</>;
 }
 
 const STYLES = `
