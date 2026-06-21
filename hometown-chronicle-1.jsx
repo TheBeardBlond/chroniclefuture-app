@@ -162,6 +162,79 @@ function PricingSection({ user }) {
   );
 }
 
+function formatMarketPrice(value) {
+  if (!Number.isFinite(value)) return "--";
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: value >= 1000 ? 0 : 2,
+    minimumFractionDigits: value < 10 ? 2 : 0
+  }).format(value);
+}
+
+function MarketTicker() {
+  const [feed, setFeed] = useState({ market: [], news: [], as_of: null });
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch("/api/market-feed");
+        if (!response.ok) throw new Error("Market feed unavailable.");
+        const payload = await response.json();
+        if (!active) return;
+        setFeed({ market: payload.market || [], news: payload.news || [], as_of: payload.as_of || null });
+        setStatus(payload.market?.length || payload.news?.length ? "ready" : "empty");
+      } catch (error) {
+        if (active) setStatus("error");
+      }
+    };
+
+    load();
+    const timer = window.setInterval(load, 300000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const items = [
+    ...feed.market.map((item) => ({ ...item, kind: "market", key: item.symbol })),
+    ...feed.news.map((item, index) => ({ ...item, kind: "news", key: `news-${index}` }))
+  ];
+  const fallback = status === "loading" ? "Loading delayed market data" : "Market feed temporarily unavailable";
+
+  const renderSet = (copy, hidden = false) => (
+    <div className="market-tape-set" aria-hidden={hidden || undefined}>
+      {items.length ? items.map((item) => item.kind === "market" ? (
+        <span className="market-quote" key={`${copy}-${item.key}`}>
+          <strong>{item.label}</strong>
+          <span>{formatMarketPrice(item.price)}</span>
+          <em className={item.change_percent > 0 ? "up" : item.change_percent < 0 ? "down" : "flat"}>
+            {Number.isFinite(item.change_percent) ? `${item.change_percent >= 0 ? "+" : ""}${item.change_percent.toFixed(2)}%` : "--"}
+          </em>
+        </span>
+      ) : (
+        <a className="market-headline" href={item.url} target="_blank" rel="noreferrer" tabIndex={hidden ? -1 : undefined} key={`${copy}-${item.key}`}>
+          <small>{item.source}</small>{item.title}
+        </a>
+      )) : <span className="market-fallback">{fallback}</span>}
+    </div>
+  );
+
+  return (
+    <section className="market-tape" aria-label="Delayed market prices and business news">
+      <div className="market-tape-label"><strong>MARKET WATCH</strong><span>Delayed</span></div>
+      <div className={`market-tape-window ${items.length ? "is-moving" : ""}`}>
+        <div className="market-tape-track">
+          {renderSet("primary")}
+          {items.length ? renderSet("copy", true) : null}
+        </div>
+      </div>
+      <time>{feed.as_of ? new Date(feed.as_of).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "--"}</time>
+    </section>
+  );
+}
+
 function Header({ user, onWorkspace, onHome, onSignOut }) {
   const accountName = user?.user_metadata?.username
     || user?.user_metadata?.full_name
@@ -169,22 +242,25 @@ function Header({ user, onWorkspace, onHome, onSignOut }) {
     || "Account";
 
   return (
-    <header className="site-header">
-      <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
-      <nav aria-label="Primary navigation">
-        <button className="nav-link" onClick={onHome}>Global feed</button>
-        {user ? <button className="nav-link" onClick={onWorkspace}>My locations</button> : null}
-      </nav>
-      {user ? (
-        <div className="account-actions">
-          <button className="account-identity" onClick={onWorkspace} title={user.email}>
-            <span className="account-dot" aria-hidden="true" />
-            <span><small>Signed in</small><strong>{accountName}</strong></span>
-          </button>
-          <button className="signout-button" onClick={onSignOut}>Sign out</button>
-        </div>
-      ) : <a className="account-button" href="#access">Open your intelligence</a>}
-    </header>
+    <div className="header-stack">
+      <MarketTicker />
+      <header className="site-header">
+        <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
+        <nav aria-label="Primary navigation">
+          <button className="nav-link" onClick={onHome}>Global feed</button>
+          {user ? <button className="nav-link" onClick={onWorkspace}>My locations</button> : null}
+        </nav>
+        {user ? (
+          <div className="account-actions">
+            <button className="account-identity" onClick={onWorkspace} title={user.email}>
+              <span className="account-dot" aria-hidden="true" />
+              <span><small>Signed in</small><strong>{accountName}</strong></span>
+            </button>
+            <button className="signout-button" onClick={onSignOut}>Sign out</button>
+          </div>
+        ) : <a className="account-button" href="#access">Open your intelligence</a>}
+      </header>
+    </div>
   );
 }
 
@@ -505,7 +581,30 @@ const STYLES = `
   button { cursor: pointer; }
   h1, h2, h3, p { margin-top: 0; }
   h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
-  .site-header { position: sticky; top: 0; z-index: 20; height: 66px; padding: 0 max(24px, calc((100vw - 1240px) / 2)); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid #c8cec8; background: rgba(243,244,241,.96); }
+  .header-stack { position: sticky; top: 0; z-index: 20; }
+  .market-tape { height: 34px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; overflow: hidden; background: #101914; color: #dbe7e0; border-bottom: 1px solid #2d4137; font-size: 11px; }
+  .market-tape-label { align-self: stretch; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 0 16px; padding-left: max(16px, env(safe-area-inset-left)); background: #173e30; white-space: nowrap; }
+  .market-tape-label strong { color: #c8f05a; font-size: 10px; letter-spacing: .1em; }
+  .market-tape-label span { color: #9cb0a6; font-size: 9px; text-transform: uppercase; }
+  .market-tape-window { min-width: 0; overflow: hidden; }
+  .market-tape-track { width: max-content; display: flex; }
+  .market-tape-window.is-moving .market-tape-track { animation: market-scroll 58s linear infinite; }
+  .market-tape-window.is-moving:hover .market-tape-track, .market-tape-window.is-moving:focus-within .market-tape-track { animation-play-state: paused; }
+  .market-tape-set { display: flex; align-items: center; gap: 28px; padding: 0 14px; white-space: nowrap; }
+  .market-quote { display: flex; align-items: baseline; gap: 7px; }
+  .market-quote strong { color: #f4f7f5; font-size: 10px; letter-spacing: .04em; }
+  .market-quote span { color: #c5d1cb; font-variant-numeric: tabular-nums; }
+  .market-quote em { font-size: 10px; font-style: normal; font-variant-numeric: tabular-nums; }
+  .market-quote .up { color: #8fe0b8; }
+  .market-quote .down { color: #ff9e92; }
+  .market-quote .flat { color: #a9b8b0; }
+  .market-headline { max-width: 520px; overflow: hidden; color: #e6ece8; text-decoration: none; text-overflow: ellipsis; }
+  .market-headline small { margin-right: 8px; color: #8fe0b8; font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+  .market-headline:hover { color: #c8f05a; }
+  .market-fallback { color: #a9b8b0; }
+  .market-tape > time { z-index: 2; padding: 0 14px; background: #101914; color: #819188; font-size: 9px; font-variant-numeric: tabular-nums; }
+  @keyframes market-scroll { to { transform: translateX(-50%); } }
+  .site-header { height: 66px; padding: 0 max(24px, calc((100vw - 1240px) / 2)); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid #c8cec8; background: rgba(243,244,241,.97); }
   .brand { border: 0; background: none; padding: 0; justify-self: start; color: #111920; font-weight: 900; letter-spacing: .04em; }
   .brand span { color: #176b4d; }
   nav { display: flex; gap: 28px; }
@@ -617,7 +716,7 @@ const STYLES = `
   .two-column { display: grid; grid-template-columns: 1fr 1fr; }
   .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
   .magazine-page { min-height: 100vh; padding: 32px 24px 90px; }
-  .studio-toolbar { position: sticky; top: 66px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 20px; max-width: 1160px; margin: 0 auto 24px; border: 1px solid #c8cec8; background: rgba(243,244,241,.97); padding: 14px 18px; }
+  .studio-toolbar { position: sticky; top: 100px; z-index: 15; display: flex; justify-content: space-between; align-items: center; gap: 20px; max-width: 1160px; margin: 0 auto 24px; border: 1px solid #c8cec8; background: rgba(243,244,241,.97); padding: 14px 18px; }
   .studio-toolbar > div { display: flex; align-items: center; gap: 10px; }
   .studio-toolbar span { color: #176b4d; font-size: 12px; font-weight: 800; }
   .studio-toolbar > div button { border: 0; border-radius: 3px; background: #176b4d; color: #fff; padding: 10px 14px; font-weight: 800; }
@@ -673,6 +772,10 @@ const STYLES = `
     .magazine-article blockquote { float: none; width: auto; margin: 28px 0; }
   }
   @media (max-width: 520px) {
+    .market-tape { grid-template-columns: auto minmax(0, 1fr); }
+    .market-tape-label { padding: 0 10px; }
+    .market-tape-label span, .market-tape > time { display: none; }
+    .market-tape-window.is-moving .market-tape-track { animation-duration: 48s; }
     .account-button { padding: 9px 10px; font-size: 11px; } .brand { font-size: 12px; }
     .account-identity small, .signout-button { display: none; }
     .account-identity strong { max-width: 105px; font-size: 12px; }
@@ -684,7 +787,7 @@ const STYLES = `
   @media print {
     @page { size: letter; margin: .55in; }
     body { background: #fff; }
-    .site-header, .studio-toolbar { display: none !important; }
+    .header-stack, .studio-toolbar { display: none !important; }
     .magazine-page { padding: 0; }
     .magazine-edition { max-width: none; box-shadow: none; }
     .magazine-cover { min-height: 9.9in; break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
@@ -693,5 +796,9 @@ const STYLES = `
     .magazine-article h2 { font-size: 44px; }
     .magazine-article > p, .magazine-article > div > p { font-size: 13px; line-height: 1.55; }
     .magazine-article blockquote { font-size: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .market-tape-window.is-moving .market-tape-track { animation: none; }
+    .market-tape-window { overflow-x: auto; }
   }
 `;
