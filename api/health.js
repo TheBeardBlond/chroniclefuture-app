@@ -5,7 +5,9 @@ export default async function handler(request, response) {
 
   const checks = {
     supabase: false,
-    openai: Boolean(process.env.OPENAI_API_KEY)
+    openai: Boolean(process.env.OPENAI_API_KEY),
+    stripe: Boolean(process.env.STRIPE_SECRET_KEY),
+    stripeWebhook: Boolean(process.env.STRIPE_WEBHOOK_SECRET)
   };
 
   try {
@@ -16,7 +18,7 @@ export default async function handler(request, response) {
     console.error("health check:", error);
   }
 
-  const healthy = checks.supabase && checks.openai;
+  const healthy = Object.values(checks).every(Boolean);
   return response.status(healthy ? 200 : 503).json({
     status: healthy ? "healthy" : "degraded",
     checks
