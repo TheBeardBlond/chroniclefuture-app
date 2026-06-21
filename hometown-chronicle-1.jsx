@@ -19,7 +19,7 @@ const BRIEF_FIELDS = {
   Technology: "technology_watch",
   Commodity: "commodity_watch"
 };
-const AUTH_REDIRECT_URL = "https://chroniclefuture.com";
+const AUTH_REDIRECT_URL = window.location.origin;
 
 const displayDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 const longDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
