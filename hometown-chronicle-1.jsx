@@ -24,13 +24,15 @@ const AUTH_REDIRECT_URL = "https://chroniclefuture-app.vercel.app";
 const displayDate = (value) => new Date(value || Date.now()).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
 async function loadDashboardData(userId) {
-  const [{ data: locations, error: locationError }, { data: briefs, error: briefError }] = await Promise.all([
+  const [{ data: locations, error: locationError }, { data: briefs, error: briefError }, { data: entitlement, error: entitlementError }] = await Promise.all([
     supabase.from("cf_locations").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
-    supabase.from("cf_briefs").select("*").eq("user_id", userId).order("created_at", { ascending: false })
+    supabase.from("cf_briefs").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+    supabase.from("cf_entitlements").select("*").eq("user_id", userId).maybeSingle()
   ]);
   if (locationError) throw locationError;
   if (briefError) throw briefError;
-  return { locations: locations || [], briefs: briefs || [] };
+  if (entitlementError) throw entitlementError;
+  return { locations: locations || [], briefs: briefs || [], entitlement };
 }
 
 async function createLocation(form, userId) {
@@ -70,6 +72,57 @@ async function authorizedFetch(url, options = {}) {
     ...options,
     headers: { ...options.headers, Authorization: `Bearer ${token}` }
   });
+}
+
+function PricingSection({ user }) {
+  const [loading, setLoading] = useState("");
+  const [error, setError] = useState("");
+
+  const checkout = async (offer) => {
+    if (!user) {
+      document.getElementById("access")?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    setLoading(offer);
+    setError("");
+    try {
+      const response = await authorizedFetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ offer })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Unable to open checkout.");
+      window.location.assign(payload.url);
+    } catch (checkoutError) {
+      setError(checkoutError.message || "Unable to open checkout.");
+      setLoading("");
+    }
+  };
+
+  return (
+    <section className="pricing-section" id="pricing">
+      <div className="section-title">
+        <div><p className="kicker">Private intelligence</p><h2>Choose how you use Chronicle Future</h2></div>
+        <p>Start with one decision-ready brief or maintain a weekly view of the forces shaping your location.</p>
+      </div>
+      <div className="pricing-grid">
+        <article className="price-card">
+          <p className="kicker">One-time</p>
+          <h3><span>$19</span> per brief</h3>
+          <p>One complete location intelligence brief with signals, opportunity scoring, risks, SWOT, and decade outlook.</p>
+          <button className="outline" onClick={() => checkout("one_time")} disabled={!!loading}>{loading === "one_time" ? "Opening checkout..." : user ? "Buy one brief" : "Sign in to purchase"}</button>
+        </article>
+        <article className="price-card featured">
+          <p className="kicker light">Monthly intelligence</p>
+          <h3><span>$39</span> per month</h3>
+          <p>Four briefs every billing period, weekly monitoring, saved history, and continuing access to your location workspace.</p>
+          <button onClick={() => checkout("monthly")} disabled={!!loading}>{loading === "monthly" ? "Opening checkout..." : user ? "Start monthly access" : "Sign in to subscribe"}</button>
+        </article>
+      </div>
+      {error ? <p className="pricing-error">{error}</p> : null}
+    </section>
+  );
 }
 
 function Header({ user, onWorkspace, onHome, onSignOut }) {
@@ -191,6 +244,7 @@ function PublicLanding({ user, onWorkspace }) {
         <p>Chronicle Future connects world-scale change to a specific city, workforce, industry mix, infrastructure base, and business environment.</p>
         {user ? <button onClick={onWorkspace}>Open my location intelligence</button> : <a href="#access">Analyze your location</a>}
       </section>
+      <PricingSection user={user} />
       {!user ? <AuthPanel /> : null}
     </main>
   );
@@ -227,16 +281,23 @@ function LocationForm({ userId, onCreated }) {
 function Dashboard({ user, onOpenBrief }) {
   const [locations, setLocations] = useState([]);
   const [briefs, setBriefs] = useState([]);
+  const [entitlement, setEntitlement] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const refresh = async () => {
     setLoading(true);
-    try { const data = await loadDashboardData(user.id); setLocations(data.locations); setBriefs(data.briefs); }
+    try { const data = await loadDashboardData(user.id); setLocations(data.locations); setBriefs(data.briefs); setEntitlement(data.entitlement); }
     catch (error) { setMessage(error.message || "Unable to load your workspace."); }
     finally { setLoading(false); }
   };
   useEffect(() => { refresh(); }, [user.id]);
+  useEffect(() => {
+    const checkoutStatus = new URLSearchParams(window.location.search).get("checkout");
+    if (checkoutStatus === "success") setMessage("Payment received. Your access will update in a moment.");
+    if (checkoutStatus === "cancelled") setMessage("Checkout was cancelled. No charge was made.");
+    if (checkoutStatus) window.history.replaceState({}, "", window.location.pathname);
+  }, []);
   const briefsByLocation = useMemo(() => briefs.reduce((map, brief) => ({ ...map, [brief.location_id]: [...(map[brief.location_id] || []), brief] }), {}), [briefs]);
   const run = async (type, locationId) => {
     setBusy(`${type}:${locationId}`); setMessage("");
@@ -249,9 +310,23 @@ function Dashboard({ user, onOpenBrief }) {
     } catch (error) { setMessage(error.message || "Request failed."); }
     finally { setBusy(""); }
   };
+  const openBillingPortal = async () => {
+    try {
+      const response = await authorizedFetch("/api/create-portal-session", { method: "POST" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Unable to open billing.");
+      window.location.assign(payload.url);
+    } catch (error) { setMessage(error.message || "Unable to open billing."); }
+  };
+  const allowance = entitlement?.plan === "owner"
+    ? "Owner access"
+    : entitlement?.plan === "monthly" && entitlement?.status === "active"
+      ? `${Math.max(0, entitlement.monthly_brief_limit - entitlement.monthly_briefs_used)} of ${entitlement.monthly_brief_limit} monthly briefs remaining`
+      : `${entitlement?.one_time_credits || 0} one-time brief credits`;
   return (
     <main className="workspace">
       <section className="workspace-head"><div><p className="kicker">Private intelligence workspace</p><h1>Your locations</h1><p>Turn global change into local risks, opportunities, SWOT, and forward scenarios.</p></div><LocationForm userId={user.id} onCreated={refresh} /></section>
+      <section className="plan-bar"><div><span className="account-dot" /><div><small>Current access</small><strong>{allowance}</strong></div></div>{entitlement?.stripe_customer_id ? <button className="text-button" onClick={openBillingPortal}>Manage billing</button> : entitlement?.plan !== "owner" ? <a href="#workspace-pricing">View pricing</a> : null}</section>
       {message ? <p className="workspace-notice">{message}</p> : null}
       <section className="workspace-section"><div className="section-title"><div><p className="kicker">Coverage</p><h2>Location portfolio</h2></div><button className="text-button" onClick={refresh}>{loading ? "Refreshing..." : "Refresh"}</button></div>
         <div className="location-list">
@@ -260,6 +335,7 @@ function Dashboard({ user, onOpenBrief }) {
         </div>
       </section>
       {briefs.length ? <section className="workspace-section"><p className="kicker">Archive</p><h2>Recent briefs</h2><div className="brief-list">{briefs.map((brief) => <button key={brief.id} onClick={() => onOpenBrief(brief.id)}><span>{brief.title || (brief.week_of ? `Weekly intelligence: ${displayDate(brief.week_of)}` : "Intelligence brief")}</span><small>{displayDate(brief.created_at)}</small></button>)}</div></section> : null}
+      {entitlement?.plan !== "owner" ? <div id="workspace-pricing"><PricingSection user={user} /></div> : null}
     </main>
   );
 }
@@ -356,6 +432,18 @@ const STYLES = `
   .signal-number { margin-bottom: 56px; color: #a5aea7; font-family: Georgia, serif; font-size: 30px; }
   .signal-card h3 { margin-bottom: 16px; font-size: 28px; line-height: 1.15; }
   .signal-card > p:not(.region) { color: #59655e; line-height: 1.6; }
+  .pricing-section { max-width: 1040px; margin: 0 auto; padding: 82px 24px; }
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .price-card { display: grid; align-content: start; border: 1px solid #bfc7c0; border-radius: 6px; background: #fff; padding: 32px; }
+  .price-card.featured { border-color: #173e30; background: #173e30; color: #fff; }
+  .price-card h3 { margin-bottom: 18px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 17px; font-weight: 700; }
+  .price-card h3 span { display: block; margin-bottom: 4px; font-family: Georgia, serif; font-size: 46px; font-weight: 500; }
+  .price-card > p:not(.kicker) { min-height: 78px; color: #5f6b63; line-height: 1.55; }
+  .price-card.featured > p:not(.kicker) { color: #c5d5cd; }
+  .price-card button { border: 0; border-radius: 4px; background: #c8f05a; color: #142019; padding: 13px 17px; font-weight: 900; }
+  .price-card .outline { border: 1px solid #176b4d; background: transparent; color: #176b4d; }
+  .price-card button:disabled { opacity: .55; cursor: wait; }
+  .pricing-error { margin: 18px 0 0; color: #9f2f25; font-weight: 800; text-align: center; }
   .conversion-band { padding: 88px max(24px, calc((100vw - 1000px) / 2)); text-align: center; background: #111d18; color: white; }
   .conversion-band h2 { margin: 0 auto 22px; max-width: 760px; font-size: 52px; }
   .conversion-band > p:not(.kicker) { max-width: 700px; margin: 0 auto 30px; color: #b9c9c1; font-size: 18px; line-height: 1.6; }
@@ -372,6 +460,11 @@ const STYLES = `
   .workspace-head { display: grid; grid-template-columns: 1fr 460px; gap: 70px; align-items: center; }
   .workspace-head h1, .brief-masthead h1 { margin-bottom: 22px; font-size: 68px; line-height: 1; }
   .workspace-head > div > p:last-child, .brief-masthead > p:last-child { max-width: 610px; color: #58645d; font-size: 18px; line-height: 1.6; }
+  .plan-bar { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 1px solid #c8cec8; border-bottom: 1px solid #c8cec8; padding: 15px 0; }
+  .plan-bar > div { display: flex; align-items: center; gap: 12px; }
+  .plan-bar > div > div { display: grid; gap: 2px; }
+  .plan-bar small { color: #758078; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .plan-bar a { color: #176b4d; font-size: 13px; font-weight: 800; }
   .location-form, .workspace-section, .brief-grid > article, .two-column > article, .swot-grid > article { border: 1px solid #c8cec8; background: #fff; padding: 28px; }
   .location-form { display: grid; grid-template-columns: 1fr 80px 120px; gap: 14px; }
   .location-form > div, .location-form > button, .location-form .error { grid-column: 1 / -1; }
@@ -404,7 +497,7 @@ const STYLES = `
   .swot-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
   @media (max-width: 900px) {
     .site-header { grid-template-columns: 1fr auto; padding: 0 16px; } nav { display: none; }
-    .feed-hero, .workspace-head, .access-band { grid-template-columns: 1fr; gap: 34px; }
+    .feed-hero, .workspace-head, .access-band, .pricing-grid { grid-template-columns: 1fr; gap: 34px; }
     .feed-hero { padding-top: 46px; } .hero-copy h1, .workspace-head h1, .brief-masthead h1 { font-size: 48px; }
     .ticker { justify-content: flex-start; overflow-x: auto; }
     .feed-grid { grid-template-columns: 1fr; } .signal-card, .signal-card:nth-child(4), .signal-card:nth-child(5) { grid-column: auto; min-height: 0; }
