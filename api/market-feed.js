@@ -46,10 +46,11 @@ async function fetchQuote(instrument) {
 
 function buildNewsUrl() {
   const url = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
-  url.searchParams.set("query", "(global economy OR financial markets OR commodities) sourcelang:english");
+  url.searchParams.set("query", "\"global economy\" OR \"financial markets\" OR commodities");
   url.searchParams.set("mode", "ArtList");
   url.searchParams.set("maxrecords", "8");
   url.searchParams.set("sort", "HybridRel");
+  url.searchParams.set("timespan", "3d");
   url.searchParams.set("format", "json");
   return url;
 }
