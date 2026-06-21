@@ -443,54 +443,133 @@ function AuthPanel() {
 
 function PublicLanding({ user, onWorkspace }) {
   const lead = PUBLIC_SIGNALS[0];
-  const indexItems = [...PUBLIC_SIGNALS].sort((a, b) => b.impact - a.impact).map((signal) => ({ label: signal.scope, value: signal.impact }));
+  const ranked = [...PUBLIC_SIGNALS]
+    .sort((a, b) => b.impact - a.impact)
+    .map((signal) => ({ label: signal.scope, value: signal.impact }));
+  const latest = PUBLIC_SIGNALS.slice(1, 5);
+  const research = PUBLIC_SIGNALS.slice(2);
   return (
-    <main className="page">
-      <section className="feed-hero">
-        <div className="hero-copy">
-          <p className="kicker">Global intelligence feed</p>
-          <h1>See the forces shaping what comes next.</h1>
-          <p className="hero-deck">A public briefing on economic, technological, resource, and geopolitical signals with consequences for places, industries, and operators.</p>
-          <div className="feed-meta"><span className="live-dot" aria-hidden="true" /> Intelligence watchlist <span className="feed-meta-date">{longDate()}</span></div>
+    <main className="editorial-home">
+      <section className="editorial-lead-band">
+        <div className="editorial-lead-copy">
+          <p className="publication-line">Global intelligence briefing · {longDate()}</p>
+          <p className="kicker light">Lead assessment</p>
+          <h1>{lead.title}</h1>
+          <p>{lead.summary}</p>
+          <div className="editorial-lead-meta">
+            <span>{lead.scope}</span><span>{lead.region}</span><span>{lead.horizon}</span>
+          </div>
         </div>
-        <article className="lead-signal" aria-label="Lead signal">
-          <div className="signal-topline"><span>{lead.scope}</span><strong>Impact {lead.impact}</strong></div>
-          <p className="region">{lead.region}</p>
-          <h2>{lead.title}</h2>
-          <p className="lead-body">{lead.summary}</p>
-          <Meter label="Structural impact" value={lead.impact} />
-          <div className="horizon-row"><span>Time horizon</span><strong>{lead.horizon}</strong></div>
-        </article>
+        <div className="editorial-lead-visual" aria-label="Structural impact ranking">
+          <div className="visual-heading"><span>Structural impact index</span><strong>{lead.impact}</strong></div>
+          <RankedBars items={ranked.slice(0, 5)} />
+          <p>Relative impact across Chronicle Future's active global watchlist.</p>
+        </div>
       </section>
 
-      <section className="watchlist" aria-label="Areas under watch">
-        <span className="watchlist-label">Under watch</span>
-        <span>AI infrastructure</span><span>Energy capacity</span><span>Trade corridors</span><span>Critical minerals</span><span>Demographics</span>
+      <section className="briefing-ribbon" aria-label="Chronicle Future briefing">
+        <div><strong>Chronicle briefing</strong><span>Signals selected for consequence, not headline volume.</span></div>
+        <a href="#latest-signals">Explore today’s intelligence</a>
       </section>
 
-      <section className="feed-section">
-        <div className="section-head">
-          <div><p className="kicker">Major signals</p><h2>What the world is telling us</h2></div>
-          <p>Ranked by likely structural impact, not by the volume of headlines.</p>
-        </div>
-        <div className="feed-layout">
-          <aside className="impact-index" aria-label="Structural impact index">
-            <p className="panel-eyebrow">Impact index</p>
-            <RankedBars items={indexItems} />
-            <p className="panel-foot">Relative structural weight, 0–100.</p>
-          </aside>
-          <div className="feed-grid">
-            {PUBLIC_SIGNALS.slice(1).map((signal, index) => (
-              <article className="signal-card" key={signal.title}>
-                <div className="signal-number">{String(index + 2).padStart(2, "0")}</div>
-                <div className="signal-topline"><span>{signal.scope}</span><strong>{signal.impact}</strong></div>
-                <p className="region">{signal.region}</p>
+      <section className="editorial-section" id="latest-signals">
+        <header className="editorial-section-head">
+          <h2>News &amp; Signals</h2>
+          <span>Global developments with local consequences</span>
+        </header>
+        <div className="editorial-news-grid">
+          <article className="editorial-feature">
+            <div className="feature-visual">
+              <div className="feature-index"><span>Impact</span><strong>{lead.impact}</strong></div>
+              <div className="feature-bars" aria-hidden="true">
+                {[78, 94, 64, 86, 72, 90, 58, 82].map((value, index) => <i key={index} style={{ height: value + "%" }} />)}
+              </div>
+            </div>
+            <p className="story-label">{lead.scope} · {lead.region}</p>
+            <h3>{lead.title}</h3>
+            <p>{lead.summary}</p>
+            <footer><span>Lead intelligence</span><time>{lead.horizon}</time></footer>
+          </article>
+          <div className="editorial-story-grid">
+            {latest.map((signal, index) => (
+              <article className="editorial-story" key={signal.title}>
+                <div className={"story-marker marker-" + (index + 1)} aria-hidden="true"><span>{signal.impact}</span></div>
+                <p className="story-label">{signal.scope}</p>
                 <h3>{signal.title}</h3>
-                <p className="signal-body">{signal.summary}</p>
-                <div className="horizon-row"><span>Horizon</span><strong>{signal.horizon}</strong></div>
+                <p>{signal.summary}</p>
+                <footer><span>{signal.region}</span><time>{signal.horizon}</time></footer>
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="editorial-section analysis-desk">
+        <header className="editorial-section-head">
+          <h2>Latest Analysis</h2>
+          <span>Evidence, trajectory, and strategic consequence</span>
+        </header>
+        <div className="analysis-desk-grid">
+          <article className="analysis-main">
+            <p className="story-label">Technology &amp; infrastructure</p>
+            <h3>{PUBLIC_SIGNALS[1].title}</h3>
+            <p>{PUBLIC_SIGNALS[1].summary}</p>
+            <HorizonMap lanes={[
+              { label: "Near term", tone: "up", items: PUBLIC_SIGNALS.slice(0, 3).map((item) => ({ title: item.title, horizon: item.horizon })) },
+              { label: "Long term", tone: "down", items: PUBLIC_SIGNALS.slice(3).map((item) => ({ title: item.title, horizon: item.horizon })) }
+            ]} />
+          </article>
+          <aside className="analysis-index">
+            <p className="panel-eyebrow">Impact index</p>
+            <RankedBars items={ranked} />
+            <p className="panel-foot">Updated from the current public watchlist.</p>
+          </aside>
+          <aside className="analysis-rail">
+            {PUBLIC_SIGNALS.slice(4).map((signal) => (
+              <article key={signal.title}>
+                <p className="story-label">{signal.scope}</p>
+                <h3>{signal.title}</h3>
+                <span>{signal.horizon}</span>
+              </article>
+            ))}
+          </aside>
+        </div>
+
+        <div className="research-grid">
+          {research.map((signal, index) => (
+            <article key={signal.title}>
+              <span className="research-number">{String(index + 1).padStart(2, "0")}</span>
+              <p className="story-label">{signal.scope} research</p>
+              <h3>{signal.title}</h3>
+              <p>{signal.summary}</p>
+              <footer>{signal.region} · {signal.horizon}</footer>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="editorial-section research-list-section">
+        <header className="editorial-section-head">
+          <h2>Research &amp; Outlook</h2>
+          <span>Chronicle Future intelligence desk</span>
+        </header>
+        <div className="research-list">
+          {PUBLIC_SIGNALS.map((signal, index) => (
+            <article key={signal.title}>
+              <span><small>Analysis</small>{String(index + 1).padStart(2, "0")}</span>
+              <div><h3>{signal.title}</h3><p>{signal.summary}</p></div>
+              <strong>{signal.impact}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="editorial-section collections-section">
+        <header className="editorial-section-head"><h2>Collections</h2><span>Persistent themes under active watch</span></header>
+        <div className="collection-grid">
+          {["AI & compute", "Energy systems", "Trade & industry", "Resources", "Demographics"].map((item, index) => (
+            <article key={item}><span>{String(index + 1).padStart(2, "0")}</span><h3>{item}</h3><p>Signals, analysis, and location implications.</p></article>
+          ))}
         </div>
       </section>
 
@@ -502,6 +581,14 @@ function PublicLanding({ user, onWorkspace }) {
       </section>
       <PricingSection user={user} />
       {!user ? <AuthPanel /> : null}
+
+      <footer className="editorial-footer">
+        <div className="footer-brand"><strong>CHRONICLE <span>FUTURE</span></strong><p>Intelligence for decisions that cannot wait for certainty.</p></div>
+        <div><h3>Intelligence</h3><span>Global signals</span><span>Location briefs</span><span>Opportunity radar</span></div>
+        <div><h3>Publication</h3><span>Magazine editions</span><span>Research &amp; outlook</span><span>Collections</span></div>
+        <div><h3>Company</h3><span>About Chronicle Future</span><span>Methodology</span><span>Contact</span></div>
+        <small>© {new Date().getFullYear()} Chronicle Future. Decision intelligence for operators and forward thinkers.</small>
+      </footer>
     </main>
   );
 }
@@ -1432,6 +1519,122 @@ const STYLES = `
   .article-editor { display: grid; gap: 14px; }
   .article-editor-head h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); }
   .editor-grid { display: grid; grid-template-columns: 1fr 200px; gap: 14px; }
+
+
+  /* Editorial homepage */
+  .editorial-home { background: var(--paper); }
+  .editorial-lead-band { max-width: var(--maxw); display: grid; grid-template-columns: 1.08fr .92fr; min-height: 430px; margin: 0 auto; padding: 28px var(--gutter) 34px; }
+  .editorial-lead-copy { display: flex; flex-direction: column; justify-content: flex-end; background: var(--green-deep); color: #fff; padding: clamp(28px, 5vw, 54px); }
+  .publication-line { position: absolute; align-self: flex-start; margin: 0; transform: translateY(calc(-1 * clamp(300px, 28vw, 345px))); color: #b9d2dd; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .editorial-lead-copy h1 { max-width: 790px; margin: 4px 0 18px; font-size: clamp(38px, 6vw, 68px); line-height: .98; }
+  .editorial-lead-copy > p:not(.kicker):not(.publication-line) { max-width: 64ch; margin-bottom: 24px; color: #d7eaf2; font-size: 17px; line-height: 1.55; }
+  .editorial-lead-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; border-top: 1px solid #54798b; padding-top: 16px; color: #b9d2dd; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .editorial-lead-visual { display: flex; flex-direction: column; justify-content: center; border: 1px solid var(--line-strong); border-left: 0; background: var(--paper-2); padding: clamp(28px, 5vw, 48px); }
+  .visual-heading { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid var(--ink); margin-bottom: 24px; padding-bottom: 12px; }
+  .visual-heading span { max-width: 150px; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+  .visual-heading strong { color: var(--green); font-family: var(--serif); font-size: 72px; line-height: .78; }
+  .editorial-lead-visual > p { border-top: 1px solid var(--line); margin: 24px 0 0; padding-top: 12px; color: var(--ink-4); font-size: 10px; }
+
+  .briefing-ribbon { max-width: var(--maxw); display: flex; justify-content: space-between; align-items: center; gap: 28px; margin: 0 auto; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 15px var(--gutter); background: var(--paper-2); }
+  .briefing-ribbon div { display: flex; align-items: baseline; gap: 18px; }
+  .briefing-ribbon strong { font-family: var(--serif); font-size: 20px; }
+  .briefing-ribbon span { color: var(--ink-3); font-size: 12px; }
+  .briefing-ribbon a { font-size: 11px; font-weight: 900; text-transform: uppercase; }
+
+  .editorial-section { max-width: var(--maxw); margin: 0 auto; padding: 52px var(--gutter); }
+  .editorial-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); margin-bottom: 22px; padding: 9px 0 8px; }
+  .editorial-section-head h2 { margin: 0; font-size: 22px; }
+  .editorial-section-head span { color: var(--ink-3); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .story-label { margin: 0 0 8px; color: var(--green); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+
+  .editorial-news-grid { display: grid; grid-template-columns: 1.05fr 1.45fr; gap: 18px; }
+  .editorial-feature { display: flex; flex-direction: column; background: var(--green-800); color: #fff; }
+  .editorial-feature > p, .editorial-feature > h3, .editorial-feature > footer { margin-left: 24px; margin-right: 24px; }
+  .editorial-feature h3 { margin-top: 0; margin-bottom: 12px; font-size: clamp(28px, 4vw, 42px); line-height: 1.02; }
+  .editorial-feature > p:not(.story-label) { color: #d7eaf2; line-height: 1.55; }
+  .editorial-feature .story-label { margin-top: 20px; color: var(--lime-soft); }
+  .editorial-feature footer, .editorial-story footer { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid rgba(255,255,255,.22); margin-top: auto; padding: 15px 0 20px; color: #b9d2dd; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+  .feature-visual { height: 230px; display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 28px; background: var(--green-deep); padding: 26px; }
+  .feature-index { display: grid; }
+  .feature-index span { color: var(--lime-soft); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+  .feature-index strong { color: var(--lime); font-family: var(--serif); font-size: 82px; line-height: .9; }
+  .feature-bars { height: 150px; display: flex; align-items: end; gap: 8px; }
+  .feature-bars i { flex: 1; min-width: 5px; background: var(--lime); opacity: .28; }
+  .feature-bars i:nth-child(2n) { opacity: .72; }
+  .editorial-story-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); }
+  .editorial-story { min-height: 320px; display: flex; flex-direction: column; border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); background: var(--paper-2); padding: 18px; }
+  .editorial-story h3 { margin: 0 0 10px; font-size: 22px; line-height: 1.08; }
+  .editorial-story > p:not(.story-label) { color: var(--ink-3); font-size: 12px; line-height: 1.5; }
+  .editorial-story footer { border-color: var(--line); color: var(--ink-4); padding-bottom: 0; }
+  .story-marker { height: 92px; display: grid; place-items: end start; margin: -18px -18px 16px; background: var(--paper-3); padding: 14px 18px; }
+  .story-marker span { color: var(--green); font-family: var(--serif); font-size: 44px; }
+  .marker-2, .marker-4 { background: var(--lime-soft); }
+  .marker-2 span, .marker-4 span { color: var(--green-800); }
+
+  .analysis-desk { padding-top: 28px; }
+  .analysis-desk-grid { display: grid; grid-template-columns: 1.2fr .72fr .58fr; gap: 22px; }
+  .analysis-main { border-right: 1px solid var(--line); padding-right: 24px; }
+  .analysis-main h3 { max-width: 18ch; margin: 0 0 12px; font-size: clamp(28px, 4vw, 42px); line-height: 1.04; }
+  .analysis-main > p:not(.story-label) { max-width: 64ch; color: var(--ink-3); line-height: 1.6; }
+  .analysis-index { border-right: 1px solid var(--line); padding-right: 22px; }
+  .analysis-index .panel-eyebrow { margin-top: 0; }
+  .analysis-index .panel-foot { color: var(--ink-4); font-size: 10px; }
+  .analysis-rail { display: grid; align-content: start; }
+  .analysis-rail article { border-bottom: 1px solid var(--line); padding: 0 0 20px; margin-bottom: 20px; }
+  .analysis-rail h3 { margin: 0 0 12px; font-size: 18px; line-height: 1.12; }
+  .analysis-rail span { color: var(--ink-4); font-size: 10px; }
+
+  .research-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 38px; border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); }
+  .research-grid article { min-height: 290px; border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); background: var(--paper-2); padding: 18px; }
+  .research-number { color: var(--ink-4); font-family: var(--serif); font-size: 26px; }
+  .research-grid h3 { margin: 34px 0 10px; font-size: 19px; line-height: 1.12; }
+  .research-grid article > p:not(.story-label) { color: var(--ink-3); font-size: 12px; line-height: 1.5; }
+  .research-grid footer { margin-top: 18px; color: var(--ink-4); font-size: 9px; }
+
+  .research-list { border-top: 1px solid var(--line); }
+  .research-list article { display: grid; grid-template-columns: 80px 1fr 52px; gap: 20px; align-items: start; border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .research-list article > span { display: grid; color: var(--ink-4); font-family: var(--serif); font-size: 22px; }
+  .research-list article small { font-family: var(--sans); font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+  .research-list h3 { margin: 0 0 6px; font-size: 19px; }
+  .research-list p { max-width: 78ch; margin: 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; }
+  .research-list article > strong { color: var(--green); font-family: var(--serif); font-size: 28px; text-align: right; }
+
+  .collection-grid { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid var(--line-strong); }
+  .collection-grid article { min-height: 150px; border-right: 1px solid var(--line-strong); padding: 18px; background: var(--paper-2); }
+  .collection-grid article:last-child { border-right: 0; }
+  .collection-grid span { color: var(--green); font-family: var(--serif); font-size: 26px; }
+  .collection-grid h3 { margin: 28px 0 6px; font-size: 18px; }
+  .collection-grid p { color: var(--ink-4); font-size: 10px; line-height: 1.4; }
+
+  .editorial-footer { display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 34px; background: var(--green-900); color: #fff; padding: 48px max(var(--gutter), calc((100vw - var(--maxw)) / 2)); }
+  .footer-brand strong { font-size: 20px; letter-spacing: .06em; }
+  .footer-brand strong span { color: var(--lime); }
+  .footer-brand p { max-width: 300px; margin-top: 14px; color: #b9d2dd; font-size: 12px; line-height: 1.5; }
+  .editorial-footer h3 { margin: 0 0 15px; color: var(--lime-soft); font-family: var(--sans); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+  .editorial-footer > div:not(.footer-brand) { display: grid; align-content: start; gap: 8px; }
+  .editorial-footer > div:not(.footer-brand) span { color: #d7eaf2; font-size: 11px; }
+  .editorial-footer > small { grid-column: 1 / -1; border-top: 1px solid #54798b; padding-top: 18px; color: #89a8b7; font-size: 9px; }
+
+  @media (max-width: 900px) {
+    .editorial-lead-band, .editorial-news-grid, .analysis-desk-grid { grid-template-columns: 1fr; }
+    .editorial-lead-visual { border-left: 1px solid var(--line-strong); }
+    .publication-line { position: static; transform: none; margin-bottom: 28px; }
+    .analysis-main, .analysis-index { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 24px; }
+    .research-grid { grid-template-columns: 1fr 1fr; }
+    .collection-grid { grid-template-columns: 1fr 1fr; }
+    .collection-grid article { border-bottom: 1px solid var(--line-strong); }
+    .editorial-footer { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .editorial-lead-band { padding: 16px var(--gutter) 24px; }
+    .briefing-ribbon, .briefing-ribbon div, .editorial-section-head { align-items: flex-start; flex-direction: column; }
+    .editorial-story-grid, .research-grid, .collection-grid { grid-template-columns: 1fr; }
+    .editorial-story { min-height: auto; }
+    .research-list article { grid-template-columns: 48px 1fr; }
+    .research-list article > strong { display: none; }
+    .editorial-footer { grid-template-columns: 1fr; }
+    .editorial-footer > small { grid-column: auto; }
+  }
 
   /* Responsive */
   @media (max-width: 1080px) {
