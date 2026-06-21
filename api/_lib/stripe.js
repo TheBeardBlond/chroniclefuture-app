@@ -1,5 +1,5 @@
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-export const APP_URL = process.env.APP_URL || "https://chroniclefuture-app.vercel.app";
+export const APP_URL = process.env.APP_URL || "https://chroniclefuture.com";
 
 export const OFFERS = {
   monthly: { mode: "subscription", amount: 3900, name: "Chronicle Future Monthly", briefs: 4 },
