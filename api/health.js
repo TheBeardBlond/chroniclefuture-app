@@ -6,6 +6,7 @@ export default async function handler(request, response) {
   const checks = {
     supabase: false,
     openai: Boolean(process.env.OPENAI_API_KEY),
+    anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
     stripe: Boolean(process.env.STRIPE_SECRET_KEY),
     stripeWebhook: Boolean(process.env.STRIPE_WEBHOOK_SECRET)
   };
