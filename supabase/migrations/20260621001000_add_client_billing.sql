@@ -49,10 +49,11 @@ insert into public.cf_entitlements (
   user_id, plan, status, monthly_brief_limit, monthly_briefs_used,
   usage_period_start, current_period_end
 )
-values (
-  '62a65da2-32cf-43c5-86f3-11d0f0b7cb5a'::uuid,
-  'owner', 'active', 1000, 0, date_trunc('month', now()), now() + interval '10 years'
-)
+select
+  id, 'owner', 'active', 1000, 0,
+  date_trunc('month', now()), now() + interval '10 years'
+from auth.users
+where id = '62a65da2-32cf-43c5-86f3-11d0f0b7cb5a'::uuid
 on conflict (user_id) do update set
   plan = excluded.plan,
   status = excluded.status,
