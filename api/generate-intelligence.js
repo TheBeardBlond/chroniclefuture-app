@@ -1,4 +1,5 @@
 import { requireOwnedLocation, sendApiError } from "./_lib/auth.js";
+import { assertBriefAccess, consumeBriefAccess } from "./_lib/entitlements.js";
 
 function extractJson(text) {
   const cleaned = String(text || "").replace(/^```(?:json)?/i, "").replace(/```$/i, "").trim();
@@ -154,6 +155,7 @@ export default async function handler(request, response) {
     const locationId = request.body?.location_id;
     if (!locationId) return response.status(400).json({ error: "location_id is required." });
     const { user, location, admin } = await requireOwnedLocation(request, locationId);
+    const entitlement = await assertBriefAccess(admin, user.id);
     const { data: sourceSignals, error } = await admin
       .from("cf_signals")
       .select("title,summary,source,signal_date")
@@ -164,6 +166,12 @@ export default async function handler(request, response) {
     if (error) throw error;
     const intelligence = await generateIntelligence(location, sourceSignals || []);
     const brief = await persistIntelligence(admin, user, location, intelligence);
+    try {
+      await consumeBriefAccess(admin, entitlement);
+    } catch (entitlementError) {
+      await admin.from("cf_briefs").delete().eq("id", brief.id);
+      throw entitlementError;
+    }
     return response.status(200).json({ success: true, brief_id: brief.id });
   } catch (error) {
     return sendApiError(response, error, "generate-intelligence");
