@@ -116,11 +116,10 @@ export default async function handler(request, response) {
       .eq("user_id", user.id)
       .maybeSingle();
     if (entitlementError) throw entitlementError;
-    const magazineAccess = entitlement?.plan === "owner"
-      || (entitlement?.plan === "monthly" && entitlement?.status === "active" && (!entitlement.current_period_end || new Date(entitlement.current_period_end) > new Date()));
-    if (!magazineAccess) {
-      const error = new Error("Magazine production requires active monthly access.");
-      error.httpStatus = 402;
+    const publisherAccess = entitlement?.plan === "owner" && entitlement?.status === "active";
+    if (!publisherAccess) {
+      const error = new Error("Magazine production is restricted to the Chronicle Future publisher account.");
+      error.httpStatus = 403;
       throw error;
     }
 
