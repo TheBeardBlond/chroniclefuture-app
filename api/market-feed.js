@@ -1,3 +1,5 @@
+import { XMLParser } from "fast-xml-parser";
+
 const INSTRUMENTS = [
   { symbol: "^GSPC", label: "S&P 500", type: "index" },
   { symbol: "^DJI", label: "Dow", type: "index" },
@@ -45,13 +47,11 @@ async function fetchQuote(instrument) {
 }
 
 function buildNewsUrl() {
-  const url = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
-  url.searchParams.set("query", "\"global economy\" OR \"financial markets\" OR commodities");
-  url.searchParams.set("mode", "ArtList");
-  url.searchParams.set("maxrecords", "8");
-  url.searchParams.set("sort", "HybridRel");
-  url.searchParams.set("timespan", "3d");
-  url.searchParams.set("format", "json");
+  const url = new URL("https://news.google.com/rss/search");
+  url.searchParams.set("q", "global economy OR financial markets OR commodities");
+  url.searchParams.set("hl", "en-US");
+  url.searchParams.set("gl", "US");
+  url.searchParams.set("ceid", "US:en");
   return url;
 }
 
@@ -62,19 +62,22 @@ async function fetchHeadlines() {
   });
   if (!response.ok) throw new Error(`News source returned ${response.status}.`);
 
-  const payload = await response.json();
+  const xml = await response.text();
+  const payload = new XMLParser({ ignoreAttributes: false, trimValues: true }).parse(xml);
+  const items = payload?.rss?.channel?.item;
+  const articles = Array.isArray(items) ? items : items ? [items] : [];
   const seen = new Set();
-  return (Array.isArray(payload.articles) ? payload.articles : [])
+  return articles
     .filter((article) => {
-      if (!article?.title || !/^https?:\/\//.test(article?.url || "") || seen.has(article.url)) return false;
-      seen.add(article.url);
+      if (!article?.title || !/^https?:\/\//.test(article?.link || "") || seen.has(article.link)) return false;
+      seen.add(article.link);
       return true;
     })
     .slice(0, 5)
     .map((article) => ({
       title: String(article.title).slice(0, 180),
-      url: article.url,
-      source: article.domain || "News source"
+      url: article.link,
+      source: typeof article.source === "string" ? article.source : article.source?.["#text"] || "News source"
     }));
 }
 
