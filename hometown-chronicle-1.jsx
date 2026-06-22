@@ -183,14 +183,463 @@ const FEATURE_ARTICLE = {
   sourceNote: `Chronicle Future Magazine is an independent publication. The views expressed in this exposé represent an analysis of publicly available economic, financial, and geopolitical evidence. This article draws on reporting from Fortune, the Centre for Economic Policy Research, Cambridge's International Organization journal, Deutsche Bank research, IMF COFER data, Green Central Banking, and multiple institutional analyses published between 2025 and 2026.`
 };
 
-const UPCOMING_ARTICLES = [
-  { slug: "grid-cant-keep-up", status: "upcoming", category: "Energy", title: "The Grid Can't Keep Up", cardDek: "Why power capacity — not chips — is becoming the real constraint on the AI build-out.", dateLabel: "Forthcoming" },
-  { slug: "mineral-nationalism", status: "upcoming", category: "Resources", title: "Mineral Nationalism", cardDek: "Permitting, processing, and the quiet race to control the inputs of the next economy.", dateLabel: "Forthcoming" },
-  { slug: "aging-balance-sheet", status: "upcoming", category: "Demographics", title: "The Aging Balance Sheet", cardDek: "How shifting demographics will reprice labor, housing, and the essential services that hold a region together.", dateLabel: "Forthcoming" },
-  { slug: "resilience-premium", status: "upcoming", category: "Trade", title: "The Resilience Premium", cardDek: "Supply chains are still choosing reliability over pure efficiency. The question is who pays for it.", dateLabel: "Forthcoming" }
-];
+const METAL_ARTICLE = {
+  slug: "metal-that-thinks",
+  status: "published",
+  category: "Markets",
+  kicker: "Original investigation",
+  title: "The Metal That Thinks",
+  dek: "Gold and silver have been running for years. The AI boom explains part of the story. The AI bust could explain the rest.",
+  cardDek: "Why the AI build-out is creating structural, physical demand for silver — and what a bust would do to precious metals.",
+  standfirst: "An original investigation for Chronicle Future Magazine · June 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 2026",
+  readingTime: "11 min read",
+  epigraph: {
+    quote: "After three major resource bull cycles in my thirty-year career, I've seen the same pattern repeat: when speculative themes fade — whether the internet in the early 2000s or today's AI boom — investors retreat to hard assets.",
+    source: "Jeff Phillips, Strategic Investor, New Orleans Investment Conference, 2025"
+  },
+  lead: "Gold is trading above $4,000 an ounce. Silver crossed $94 earlier this year — levels not seen in decades. And the reason is stranger, and more structural, than the headlines suggest.",
+  sections: [
+    {
+      id: "intro",
+      figures: ["metal-stats"],
+      paragraphs: [
+        `Gold is trading above $4,000 an ounce. Silver crossed $94 earlier this year — levels not seen in decades. Platinum is up 87% in 2025 alone. Palladium up 68%. The silver ETF tracking the metal's spot price via JPMorgan Chase vaults rose 118% in 2025. If you had asked most financial advisors four years ago where precious metals would be in mid-2026, they would have given you numbers that sound conservative by comparison to the reality sitting in today's market data.`,
+        `The standard explanation attributes this to the usual suspects: geopolitical anxiety, the dollar's decline, central bank gold-buying, inflation fears, and the general nervousness of a world that has lived through a global pandemic, multiple shooting wars, and the most unstable geopolitical environment since the Cold War. All of these are true. None of them is the full story.`,
+        `The full story has two parts that are in deep tension with each other. The first part is that the AI boom is creating genuine, structural, physical demand for precious metals — silver in particular — at a scale that the market is only beginning to price in. The second part is that the AI boom may also be the most overvalued speculative bubble since the dot-com era, and if it bursts, the consequences for precious metals are complicated, non-obvious, and potentially enormous — in both directions.`,
+        `Understanding both parts matters if you are trying to understand where gold and silver go from here. And increasingly, it matters if you are trying to understand what kind of economy your retirement savings will be living in.`
+      ]
+    },
+    {
+      id: "part-one",
+      figures: ["metal-2025"],
+      eyebrow: "Part One",
+      heading: "Why AI Actually Needs Your Silver",
+      pullQuote: "Silver has become an industrial metal with some monetary properties.",
+      paragraphs: [
+        `There is a question that almost never gets asked in coverage of the artificial intelligence revolution: what is this thing physically made of?`,
+        `The answer, in significant part, is silver.`,
+        `Silver has the highest electrical conductivity of any known material — 63.01 million siemens per metre — and the highest thermal conductivity of any metal at 429 W/m·K. These are not abstract laboratory properties. They are the reason silver ends up inside the GPU chips that run AI models, in the connectors and switchgear that distribute power through hyperscale data centres, in the circuit boards of the servers stacked floor to ceiling in facilities that consume as much electricity as small cities, and in the high-performance packaging that keeps AI chips from destroying themselves with their own heat.`,
+        `A single high-end GPU designed for AI inference — the kind Nvidia produces and that every major technology company is buying as fast as Nvidia can make them — contains silver in its bonding wire, its packaging substrate, its circuit board connectors, and its thermal interface components. When Microsoft, Google, Amazon, and Meta collectively commit over $200 billion to data centre infrastructure in a single year, they are not just ordering concrete and cooling fans. They are ordering silver. A lot of it.`,
+        `The International Energy Agency projects that global electricity demand from data centres, AI workloads, and related infrastructure will double by 2030. That doubling requires not just more power generation but more power distribution infrastructure — and the connectors, busbars, switchgear, and relay systems that distribute power at the high voltages data centres operate at are silver-plated. The IEA is, in effect, projecting that silver demand from this single category of application will grow dramatically over the next four years.`,
+        `Oxford Economics, in a December 2025 report, concluded that AI-driven industrial demand for silver would grow significantly over the next five years — a forecast so out of step with the traditional precious metals investment narrative that it took some time for markets to fully price in. Industrial demand now accounts for approximately 59% of total silver usage, compared to much lower fractions in previous decades. Silver has transformed from a monetary metal with some industrial applications into an industrial metal with some monetary properties.`
+      ]
+    },
+    {
+      id: "part-two",
+      eyebrow: "Part Two",
+      heading: "The Supply Problem Nobody Is Talking About",
+      pullQuote: "The global silver market has been in structural supply deficit for five consecutive years.",
+      paragraphs: [
+        `The demand story would be interesting but manageable if silver supply were elastic. It is not — and this is perhaps the most underreported aspect of the entire precious metals market.`,
+        `Silver is not primarily mined for silver. The majority of global silver production comes as a byproduct of zinc, lead, and copper mining. When those primary metals face reduced demand or mining constraints, silver production falls regardless of how high the silver price goes. You cannot simply open more silver mines in response to a price signal, because most of what you're building is a zinc mine that happens to produce silver as a secondary output.`,
+        `The global silver market has now been in structural supply deficit for five consecutive years. The 2025 World Silver Survey projected a shortfall of 117 million troy ounces for that year alone. Tech companies and their suppliers are competing with solar panel manufacturers, electric vehicle battery makers, semiconductor fabs, and central banks all trying to acquire silver simultaneously. The deficit does not resolve quickly. Mine supply is physically constrained by geology, permitting timelines, and the economics of base metal mining.`,
+        `When Bank of America set a 12-month price target of $65 per ounce for silver, and more bullish analysts at Citi projected $100 per ounce by 2026, they were pricing in a market where demand from multiple structural growth sectors — AI, green energy, EVs — was colliding with flat supply against a backdrop of investment demand driven by geopolitical anxiety. Silver crossed $94 earlier this year, briefly touching those formerly audacious targets.`
+      ]
+    },
+    {
+      id: "part-three",
+      eyebrow: "Part Three",
+      heading: "Gold's Different Story — And Why It's Running Too",
+      paragraphs: [
+        `Gold's role in AI infrastructure is real but secondary to silver's. Gold bonding wire appears in high-end chip packaging. Gold plating appears on printed circuit boards where corrosion resistance and reliability are paramount. The World Gold Council's data showed double-digit forecast growth in electronics demand for gold due to AI hardware and high-performance computing systems.`,
+        `But gold's primary movement over the past two years has been driven by something other than AI hardware demand. It has been driven by the systematic, deliberate, and historically unprecedented accumulation of physical gold by the world's central banks.`,
+        `As documented in our petrodollar exposé, central banks purchased over 1,000 tonnes of gold in each of the three most recent years — more than double the annual average of the preceding decade. Russia, China, Poland, Turkey, India, and Brazil have all been aggressive buyers. This is not a passive investment decision. It is a geopolitical statement: these countries are building reserves in an asset that no other government can freeze, seize, or sanction.`,
+        `The weaponisation of the dollar — the use of exclusion from the dollar financial system as a geopolitical weapon, most dramatically demonstrated in the freezing of Russian assets after the Ukraine invasion — changed the calculus for every central bank in the world. If your dollar-denominated reserves can be neutralised by a decision in Washington, the asset you want is one that Washington cannot touch. That asset is gold.`,
+        `The gold price, above $4,000 and climbing, is therefore telling two stories simultaneously: an AI-hardware industrial demand story that is relatively new, and a de-dollarisation safe-haven story that is much larger and more structural.`
+      ]
+    },
+    {
+      id: "part-four",
+      eyebrow: "Part Four",
+      heading: "The Bubble Next Door — And What a Burst Would Mean",
+      pullQuote: "Tech investment hit 4.4% of US GDP in 2025 — nearly matching the peak of the year-2000 bubble.",
+      paragraphs: [
+        `Here is where the precious metals story becomes genuinely difficult to navigate — and where the tension between the AI boom as demand driver and the AI boom as bubble risk needs to be confronted directly.`,
+        `The AI investment frenzy of 2024 and 2025 has structural similarities to the dot-com bubble of the late 1990s that should concern anyone paying attention. BCA Research calculated that tech investment hit 4.4% of US GDP in 2025 — nearly matching the peak of the year 2000 bubble. The Shiller price-to-earnings ratio for the S&P 500, which had been at its historical danger level of 44.19 just before the dot-com bust, was sitting between 39 and 40 in late 2025. Hyperscaler debt — the debt taken on by Microsoft, Amazon, Google, Meta, and their peers to fund data centre construction — was growing at a pace that macro analysts were explicitly comparing to the telecoms infrastructure binge of 2001 and 2002 that preceded the crash.`,
+        `Tech firms had issued over $428 billion in debt to fund AI expansion by December 2025, according to Dealogic. Credit default swap spreads for major hyperscalers — essentially the market's assessment of their default risk — nearly doubled by early 2026. Goldman Sachs CEO David Solomon predicted a potential 10-20% pullback in equity markets. Bank of America's chief investment strategist Michael Hartnett told clients that AI growth had driven top tech stocks to sky-high valuations, and explicitly identified gold as among the best hedges for a potential AI bubble burst.`,
+        `A Yale Insights analysis published in October 2025 made a comparison that deserves wider attention: the AI infrastructure buildout resembles the overbuilding of fibre-optic cable in the 1990s. Bethany McLean, one of the journalists who broke the Enron story, had pointed out that a breakthrough in semiconductor efficiency or quantum computing could render much of the $200 billion-plus being spent on current-generation data centres obsolete almost overnight — exactly as a breakthrough in cable technology rendered most of the 1990s fibre buildout unnecessary for years.`,
+        `If the AI bubble bursts — whether through a technology discontinuity, a collapse in AI stock valuations, a credit crunch among overextended hyperscalers, or simply the inevitable collision between AI's promised productivity miracle and the messier, slower reality of enterprise deployment — what happens to precious metals?`,
+        `The answer is both complicated and historically instructive.`
+      ]
+    },
+    {
+      id: "part-five",
+      eyebrow: "Part Five",
+      heading: "The Crash Playbook — What History Tells Us",
+      pullQuote: "Gold gained more than 620% between 1999 and 2011 — from under $300 to $1,825.",
+      paragraphs: [
+        `When the dot-com bubble burst between 2000 and 2002, the immediate effect on precious metals was not obvious to investors living through it. Initially, the market crash caused some liquidation pressure on gold as investors needed cash to cover losses elsewhere. But within months, the pattern that has repeated across every major financial crisis of the modern era asserted itself: investors fleeing equities moved into hard assets, the Federal Reserve cut interest rates aggressively (making non-yielding gold relatively more attractive), and gold began one of the most sustained bull runs in its history.`,
+        `The gold price gained more than 620% between 1999 and 2011 — from under $300 per ounce to $1,825 — as investors who had been burned by the technology sector's collapse poured money into an asset that had no counterparty risk, no earnings to miss, and no CEO who could be arrested. Silver followed, with characteristic volatility — bigger drawdowns during the crash itself, then bigger gains during the recovery.`,
+        `Investment strategists at the New Orleans Investment Conference in late 2025 were explicit about this parallel. Roy-Byrne, a precious metals market analyst, argued that the current setup resembles the mid-1970s more than 2008 — a period when equity markets slumped but precious metals soared. Jeff Phillips noted that resource bull markets are frequently sparked by broader financial corrections, because investors retreat to hard assets when liquidity dries up and speculative themes collapse.`,
+        `But there is a critical nuance that distinguishes the AI bust scenario from the dot-com bust scenario for silver specifically: silver is simultaneously a monetary safe-haven metal and an industrial metal. In the dot-com crash, industrial demand was largely unaffected by the tech collapse. In an AI crash, industrial demand for silver could be directly impacted — data centre construction would slow, semiconductor orders would fall, the buildout of AI infrastructure would pause. Some of the structural demand tailwind that is driving silver prices today would reverse.`,
+        `Gold, which has minimal industrial exposure relative to its total demand, would be far more insulated from this effect. Its role as a safe-haven and reserve asset would likely be the dominant driver in a crisis — as it was after 2000, and as it was after 2008. Silver would offer both more upside in a prolonged safe-haven rally and more downside risk in the immediate aftermath of a tech crash.`
+      ]
+    },
+    {
+      id: "part-six",
+      eyebrow: "Part Six",
+      heading: "The Deeper Bet — What the Metal Is Saying About the World",
+      pullQuote: "Gold above $4,000 is not a speculative bubble. It is a clear-eyed statement about paper.",
+      paragraphs: [
+        `Strip away the technology-specific analysis, and what gold and silver are ultimately pricing is a worldview about institutional trust.`,
+        `When central banks buy gold at record pace, they are saying they do not fully trust the dollar system. When retail investors in the United States and Europe pour into silver ETFs at 118% annual returns, they are expressing anxiety about inflation, debt, and the stability of financial institutions. When the BRICS Unit — the new gold-backed digital settlement instrument launched in pilot form in late 2025 — reserves 40% of its backing in physical gold, it is signalling that the post-war dollar-based financial architecture is in transition and that gold is the consensus anchor of whatever comes next.`,
+        `The AI boom is one thread in a much larger story. The Iran war, the petrodollar's erosion, the fracturing of the Western alliance, the $39 trillion national debt, the Federal Reserve's compromised independence — all of these are also threads. And they all run toward the same conclusion: we are in a period of deep institutional uncertainty, and in such periods, the assets that hold their value are the ones that have been holding it for five thousand years.`,
+        `Gold above $4,000 is not a speculative bubble. It is a very clear-eyed statement, made by the largest and most sophisticated investors in the world, about the degree to which they no longer trust paper.`,
+        `Whether the AI boom continues or collapses, that statement is unlikely to be retracted.`
+      ]
+    },
+    {
+      id: "numbers-to-watch",
+      eyebrow: "Field guide",
+      heading: "The Numbers to Watch",
+      paragraphs: [
+        `For readers thinking about what comes next, the indicators that matter most are:`
+      ],
+      points: [
+        { lead: "Silver's industrial vs monetary split.", text: `If AI infrastructure spending continues to grow, industrial demand supports higher silver prices regardless of the investment thesis. If a tech correction hits data centre construction, watch for silver to lag gold's safe-haven move in the immediate aftermath before recovering.` },
+        { lead: "Central bank gold purchasing.", text: `The pace of sovereign gold accumulation is the single most important long-term indicator for the gold price. If China, Russia, and the BRICS bloc continue buying physical gold at current rates, the structural demand floor rises regardless of short-term market volatility.` },
+        { lead: "The gold-silver ratio.", text: `Historically, silver underperforms gold in early stages of a crisis (when liquidity needs drive selling of the cheaper metal) and outperforms in the recovery phase. A ratio above 80 has historically been a signal of silver undervaluation relative to gold — and an opportunity that has rewarded patient investors across multiple historical cycles.` },
+        { lead: "Hyperscaler debt and credit spreads.", text: `Watch the CDS spreads on Microsoft, Amazon, Google, and Meta. When institutional investors begin pricing in real default risk among the companies most exposed to the AI infrastructure buildout, the tech correction has become systemic. At that point, the dot-com playbook for precious metals becomes the relevant reference frame.` }
+      ]
+    },
+    {
+      id: "metal-coda",
+      paragraphs: [
+        `The metal that was mined by ancient civilisations, used as currency for millennia, and hoarded by kings and central banks alike is now inside your smartphone, inside the AI chips that are automating your profession, and inside the geopolitical calculations of every major power on Earth.`,
+        `It has always known something that paper doesn't. In a world this uncertain, that knowledge is worth more than it has been in a generation.`
+      ]
+    }
+  ]
+};
 
-const NEWS_ARTICLES = { [FEATURE_ARTICLE.slug]: FEATURE_ARTICLE };
+const WAR_ARTICLE = {
+  slug: "the-750-war",
+  status: "published",
+  category: "Economy",
+  kicker: "Original investigation",
+  title: "The $750 War",
+  dek: "Operation Epic Fury was sold as a blow for world peace. The bill is being sent to your kitchen table.",
+  cardDek: "The Iran war's real cost isn't in the Pentagon's ledger — it's in fuel, food, and freight, landing on American households.",
+  standfirst: "An original investigation for Chronicle Future Magazine · June 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 2026",
+  readingTime: "11 min read",
+  epigraph: {
+    quote: "I think the damage has already been done, in part because there's no going back on oil prices, at least not any time in the near future.",
+    source: "Mark Zandi, Chief Economist, Moody's Analytics, April 2026"
+  },
+  lead: "On the morning of February 28, 2026, the United States and Israel launched joint airstrikes on Iran. Within 48 hours, oil had spiked from $75 to over $130 a barrel.",
+  sections: [
+    {
+      id: "intro",
+      figures: ["war-stats"],
+      paragraphs: [
+        `On the morning of February 28, 2026, the United States and Israel launched joint airstrikes on Iranian military infrastructure, killing Supreme Leader Ali Khamenei and triggering the largest Iranian missile barrage in the Islamic Republic's history. Within 48 hours, oil prices had spiked from $75 to over $130 a barrel. By the end of that first week, the Pentagon had spent $11.3 billion — roughly $1.88 billion a day, or $21,800 every second. Gas prices in the United States rose nearly 35 cents in a single week.`,
+        `The White House called it a temporary disruption. The president, asked about rising fuel prices at a press conference in early March, shrugged and said it was "a very small price to pay for US and world safety and peace."`,
+        `Moody's Analytics disagrees. So does Goldman Sachs. So does the Institute on Taxation and Economic Policy, which has been running a live tracker since the first bombs fell, updating the war's cost to American households week by week. As of June 15, 2026 — 107 days into the conflict — the average additional cost borne by an American household from higher fuel prices alone stood at $397.45. If prices hold where they are today, that number reaches $712 by end of summer. By year's end, it approaches $1,400.`,
+        `That is not the cost of the war. That is merely the fuel bill.`
+      ]
+    },
+    {
+      id: "visible-cost",
+      figures: ["war-prices"],
+      heading: "The Visible Cost: What You Feel at the Pump",
+      pullQuote: "What happens in the Gulf of Oman is felt at the gas station in Bay City, Michigan within days.",
+      paragraphs: [
+        `The mechanism is blunt and fast. The Strait of Hormuz — the narrow waterway between Iran and the Arabian Peninsula — is the funnel through which roughly one-fifth of the world's oil supply normally flows. When Iran closed that funnel, either through direct naval action, mining operations, or the credible threat of both, global oil markets repriced within hours. Oil is a single globally traded commodity. What happens in the Gulf of Oman is felt at the gas station in Bay City, Michigan within days.`,
+        `By April 2026, Brent crude was trading at $105 a barrel, up 44% from the pre-war level of around $73. Regular unleaded gasoline reached a national average of $4.06 per gallon — the highest since late 2023. On-highway diesel, which is not primarily a consumer fuel but is the lifeblood of the entire US freight and logistics system, rose from $3.77 per gallon on February 27 to $5.45 by April 1, a 45% increase that GasBuddy's senior analyst warned could approach $6. In some West Coast markets, regular gas crossed $6.50.`,
+        `The diesel number matters most to people who don't drive trucks. Every product that arrives at a store — every bag of groceries, every package, every piece of furniture, every pallet of construction materials — was moved by a diesel-powered vehicle at some point in its journey. When diesel goes up 45%, the cost of transporting everything goes up. That cost does not disappear. It moves forward through the supply chain until it arrives, invisibly, in the price of whatever you're buying at the checkout.`,
+        `Goldman Sachs calculated that higher gasoline prices alone represented a $140 billion annualised headwind to US household income as of mid-April. Morgan Stanley put an even sharper point on it: a sustained 15% rise in gas prices is sufficient to fully cancel out the average household's benefit from the tax refunds generated by the One Big Beautiful Bill Act — which Trump had billed as "the largest tax refund season in US history." Gas prices, by April, had risen 40%.`
+      ]
+    },
+    {
+      id: "hidden-cost",
+      heading: "The Hidden Cost: Food, Fertiliser, and the Forgotten Supply Chain",
+      pullQuote: "One-third of global fertiliser supplies transit the Strait of Hormuz.",
+      paragraphs: [
+        `The gas station is just the beginning. The more insidious and slower-moving damage is arriving through food prices — and it originates in a supply chain disruption that most Americans are entirely unaware of.`,
+        `Iran, Qatar, and Kuwait together produce and export roughly 45% of the world's traded sulfur. Sulfur is not something most people think about. But sulfuric acid, which is derived from sulfur, is a foundational input in the production of fertilisers and pesticides. Since the war began, sulfuric acid prices rose 30% in the first six weeks of conflict. Fertiliser costs, which already account for between 40% and 50% of all variable costs in US crop production, spiked in tandem.`,
+        `That price increase does not arrive in grocery stores immediately. It filters through slowly: farmers plant with expensive inputs, harvest, and the higher costs appear in food prices months later. Economists who have been tracking the pattern warn that the full food inflation impact of the war's supply disruption will not be visible in US supermarkets until late summer and autumn of 2026. By the time American families feel it, the connection to the February airstrikes will be invisible, and the political debate will have moved on.`,
+        `One-third of global fertiliser supplies transit the Strait of Hormuz. So does a significant portion of the liquefied natural gas that powers industrial processes across Europe and Asia. When those supply chains constrict, the pressure propagates outward in ways that eventually touch everything that requires energy to produce, process, or move — which is to say, everything.`
+      ]
+    },
+    {
+      id: "military-bill",
+      heading: "The Military Bill: Who Pays, and What It Buys",
+      paragraphs: [
+        `Beyond the household energy burden sits the direct military expenditure — the munitions, the carrier strike groups, the stealth aircraft, the Tomahawk cruise missiles at $2 million each, the SM-3 interceptors at $36 million apiece.`,
+        `The Pentagon's comptroller told the Senate Armed Services Committee in May that direct operational costs through Day 75 stood at $29 billion — $4 billion higher than the administration's figure from a month earlier, revised upward to account for equipment repair and replacement. That figure did not include the cost of repairing damage to US bases in Kuwait and Bahrain, both of which were struck by Iranian drones and ballistic missiles, damaging aircraft, radar systems, and infrastructure. It did not include the long-term cost of veteran care for the 13 US service members killed in the conflict and the larger number wounded. It did not include the value of equipment lost at sea or destroyed in Iranian counter-strikes.`,
+        `Congress was presented with a $200 billion supplemental spending request to cover projected war costs. The national debt crossed $39 trillion in March 2026, weeks into the conflict. Interest payments on that debt were already the fastest-growing line item in the federal budget before the war began.`,
+        `The AEI calculated that, combining fuel costs, fertiliser costs, military expenditures, and equity market losses, the total economic cost to the United States was running at approximately $1.4 billion per day as of early April. For the average American household, that translated to roughly $410 per month — a figure that lands differently depending on where you sit in the income distribution.`
+      ]
+    },
+    {
+      id: "k-shaped",
+      heading: "The K-Shaped War: Who Is Actually Paying",
+      pullQuote: "The fuel burden is regressive. This is not a political characterisation — it is an arithmetic one.",
+      paragraphs: [
+        `The fuel burden is regressive. This is not a political characterisation — it is an arithmetic one. Lower-income households spend a larger fraction of their income on gasoline than higher-income households do, because they drive older, less fuel-efficient vehicles, live further from work, and have fewer alternatives. When gas goes up $1.10 per gallon, the impact on a household spending 8% of its income on fuel is categorically different from the impact on one spending 2%.`,
+        `Bank of America's consumer data through April 2026 showed the divergence in sharp relief. Spending among higher-income households on big-ticket discretionary items — travel, restaurants, leisure — remained largely stable. Among lower-income households, there was a measurable pullback in vacation spending, entertainment, and anything requiring air travel. The K-shaped economy that defined the post-pandemic recovery was sharpening again under the pressure of war-driven inflation.`,
+        `Airlines, meanwhile, were responding to jet fuel prices up more than $2 per gallon by hiking ticket prices, introducing new bag fees, and reducing unprofitable routes. Summer travel for 2026 was already measuring as significantly more expensive than 2025 in every major booking data source, with the least price-sensitive travellers barely noticing and the most price-sensitive cancelling or not booking at all.`,
+        `The Federal Reserve, facing renewed inflationary pressure from the war at the same time as it was trying to calibrate rates for a slowing economy, found itself in exactly the bind it had been trying to avoid. Consumer price inflation, which had cooled to 2.4% in January, spiked to 3.3% by March — its highest level since May 2024. Scott Lincicome of the Cato Institute projected that the Personal Consumption Expenditures index — the Fed's preferred inflation gauge — could reach 4% by year's end, double the Fed's 2% target. The new Fed chair, Kevin Warsh, inherited this mess without having had a hand in creating it.`
+      ]
+    },
+    {
+      id: "said-vs-measured",
+      heading: "What the White House Said Versus What Economists Measured",
+      paragraphs: [
+        `There is a pattern in how Washington has discussed the war's economic consequences that is worth examining directly.`,
+        `When Trump dismissed concerns about gas prices in early March, the framing was that this was a temporary dislocation in service of a larger strategic objective — securing the Strait of Hormuz, degrading Iran's military capability, and ultimately producing a more stable Middle East that would be better for American interests, including energy interests, in the long run. White House spokesperson Kush Desai insisted through April that the American economy remained "on a solid trajectory," pointing to March job numbers and some cooling in core inflation.`,
+        `What the data showed simultaneously was that the "bigger tax refunds" the administration was counting as an economic achievement had, by May 16, ceased to cover the increased fuel costs the war had imposed on American households. Moody's chief economist Mark Zandi, whose firm calculated the total household energy burden at $100 billion and climbing, noted that with savings rates already near historic lows, consumers facing sustained high energy costs would have little choice but to pull back on spending — creating a direct drag on GDP, roughly 70% of which is driven by consumer expenditure.`,
+        `The World Bank, in its revised 2026 forecast, cut global growth to 2.5% — the lowest since the pandemic — in large part due to war-related disruption. The IMF noted acute pressure on Gulf state economies, projecting regional GDP growth of just 1.3%, down from 4.5% in 2025. Economies in Asia and Africa dependent on Gulf energy imports faced fuel rationing and panic buying. India experienced gold price spikes and energy market turbulence. Vietnam saw panic buying at petrol stations.`,
+        `The war's costs were global. But only American taxpayers were paying for both the bombs and the fuel.`
+      ]
+    },
+    {
+      id: "peace-deal",
+      heading: "The Peace Deal and What It Doesn't Resolve",
+      paragraphs: [
+        `On June 14, 2026 — Day 106 of the conflict — a 14-point memorandum of understanding was announced between the US and Iran, mediated through Pakistani and Qatari intermediaries. The Strait of Hormuz blockade was formally lifted. Oil fell to $83 a barrel. Sixty days of nuclear talks were scheduled to begin.`,
+        `It sounded like relief. In some respects it was. But the economic damage was not undone by the signing. EY-Parthenon's senior economist Lydia Boussour, speaking to CBS News the week of the announcement, noted that "full normalisation will still take time, especially when it comes to supply chains, when it comes to energy capacity." Economists across the spectrum forecast that oil prices would remain above pre-war levels for the remainder of 2026, even with the Strait reopened. The fertiliser price spikes were working their way through the food production cycle. Disruptions to semiconductor supply chains — tungsten prices had tripled by March as China restricted exports of a metal critical to chip manufacturing, military hardware, and aerospace — were not resolved by a ceasefire.`,
+        `The MOU also included a plan for $300 billion toward Iran's reconstruction and development. American taxpayers, who had already paid for the bombs, would be invited to consider whether they would also pay for the rebuilding.`
+      ]
+    },
+    {
+      id: "arithmetic",
+      heading: "The Arithmetic of “Small Price”",
+      pullQuote: "Small prices look smaller from the Oval Office than they do from the kitchen table.",
+      paragraphs: [
+        `The president called it a small price. The numbers suggest otherwise.`,
+        `Moody's put the total household burden at $100 billion and climbing. The AEI calculated $1.4 billion per day in combined economic cost. Goldman Sachs counted $140 billion in annualised income headwinds from fuel prices alone. The Pentagon acknowledged $29 billion in direct military costs, with the meter still running. Fertiliser prices up 30%. Diesel up 45%. The national debt crossed $39 trillion. The Federal Reserve's inflation target blown past on a trajectory heading for 4%.`,
+        `The Strategic Petroleum Reserve, which exists precisely to buffer American consumers against oil supply shocks, had not been refilled after being drawn down in previous years. The administration had been warned this left the country exposed. It proceeded anyway.`,
+        `For the 120 million car-owning American households filling up their tanks, booking their summer trips, paying their utility bills, and doing their grocery shopping in the summer of 2026, the reckoning is not abstract. It is a line item. It is the extra $50 at the pump this month, the $30 on the grocery bill that wasn't there last year, the airline ticket that now costs $180 more than it did in January.`,
+        `Small prices, as it turns out, are relative. They look smaller from the Oval Office than they do from the kitchen table.`
+      ]
+    }
+  ]
+};
+
+const NATO_ARTICLE = {
+  slug: "nato-without-america",
+  status: "published",
+  category: "Geopolitics",
+  kicker: "Original investigation",
+  title: "NATO Without America",
+  dek: "Europe is building its own army. American workers, taxpayers, and soldiers should be paying very close attention.",
+  cardDek: "A quiet line in the new National Defense Strategy ended 77 years of automatic American primacy in Europe. The bill comes home.",
+  standfirst: "An original investigation for Chronicle Future Magazine · June 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 2026",
+  readingTime: "10 min read",
+  epigraph: {
+    quote: "Europe's push to reduce its reliance on the US is likely to be permanent. US policymakers should wake up to this new reality.",
+    source: "Chatham House, February 2026"
+  },
+  lead: "In January 2026, the Pentagon published its new National Defense Strategy. Most Americans didn't read it. Most of the world did.",
+  sections: [
+    {
+      id: "intro",
+      paragraphs: [
+        `In January 2026, the Pentagon published its new National Defense Strategy. Most Americans didn't read it. Most of the world did.`,
+        `Buried in the document's strategic language — beneath the familiar rhetoric about strength and deterrence — was a quiet revolution in American foreign policy. The NDS ranked America's military priorities in an order that had never before been stated so plainly: defend the homeland first, deter China second. Everything else — including the defence of Europe against Russia, the security guarantee that has underpinned the entire post-war international order for 77 years — was explicitly secondary.`,
+        `In Brussels, in Paris, in Warsaw and Berlin and Stockholm, defence officials didn't need a think-tank to interpret the implications. The era of automatic American primacy in Europe was over. The US would remain in NATO, retain its nuclear role, and provide high-end enablers. But it would no longer, as the strategy stated, "underwrite Europe's conventional defence by default."`,
+        `Europe was on its own. And unlike the last time an American president raised this possibility, this time they believed it.`
+      ]
+    },
+    {
+      id: "part-one",
+      figures: ["nato-stats", "nato-spending"],
+      eyebrow: "Part One",
+      heading: "The Numbers That Changed Everything",
+      pullQuote: "European defence spending hit $864 billion in 2025 — a 14% increase in a single year.",
+      paragraphs: [
+        `The story of NATO's fracture is told first in two sets of numbers, moving in opposite directions.`,
+        `US military expenditure fell 7.5% in 2025 — the largest annual reduction in recent memory — largely because no new financial assistance for Ukraine was approved during that year. The superpower that had anchored Western security for eight decades was, for the first time in living memory, pulling back its defence spending while its adversaries were ramping up.`,
+        `Across the Atlantic, the response was immediate and dramatic. European defence spending hit $864 billion in 2025 — a 14% increase in a single year. Germany's military budget jumped 24%, exceeding NATO's 2% GDP benchmark for the first time since 1990. Spain's defence spending surged 50%, taking it above 2% of GDP for the first time since the alliance's spending targets were agreed in 1994. Poland, facing the most acute Russian threat, was racing toward the 5% of GDP commitment that most NATO members had theoretically endorsed.`,
+        `Global military spending hit a record $2.9 trillion in 2025. The US remains the world's largest military spender in absolute terms at $954 billion. But the relative position is shifting. And the direction of that shift — who European nations are now buying from, who they are trusting to build their security infrastructure — has consequences for American industry, American influence, and American workers that are only beginning to be understood.`
+      ]
+    },
+    {
+      id: "part-two",
+      eyebrow: "Part Two",
+      heading: "The Weapons Europe Is No Longer Buying From America",
+      pullQuote: "The air policing of the continent is shifting from American to European hardware.",
+      paragraphs: [
+        `Here is where the domestic impact of a geopolitical story becomes concrete.`,
+        `For the entirety of the post-war era, US-made weapons platforms were effectively the default standard for NATO members. European nations bought F-16s and F-35s, Boeing tankers, American-made radar systems, American-standard ammunition. This was never only about military capability. It was about interoperability, standardisation, and the subtle power of dependency: nations that rely on US weapons systems also rely on US spare parts, US software updates, and ultimately US permission to use those systems in certain ways.`,
+        `That dependency is now being systematically dismantled.`,
+        `Italy, which would previously have been considered a reliable market for American aerospace products, adopted the Airbus A330 MRTT refuelling aircraft over Boeing's KC-46. The Airbus aircraft carries 15-16% more fuel than its American competitor, holds 50% more cargo, and can transport more than twice as many troops. Seventeen countries have now ordered 85 of the aircraft. France's own defence industry has been aggressively marketing its Rafale fighter jet to European neighbours with a pitch that a few years ago would have seemed unthinkable: unlike the F-35, it gives buyers full operational independence — you do not need Washington's approval to integrate weapons or modify mission software. Emmanuel Macron has been explicit about the reasoning: Europe should buy European.`,
+        `Perhaps most symbolically, NATO's own procurement agency — which had been pursuing Boeing's E-7 Wedgetail surveillance aircraft as a replacement for the ageing E-3 Sentry — suspended that programme after the US Air Force raised concerns about costs, delays, and survivability. Sweden's Saab quickly moved into the vacuum, and its GlobalEye platform is now the leading candidate being considered by France and Germany for the next generation of European airborne surveillance. The air policing of the continent is shifting from American to European hardware.`,
+        `The International Institute for Strategic Studies estimated in March 2025 that directly replacing key parts of the US military contribution to European defence — if Washington were to disengage — would cost Europe approximately $1 trillion. Europe has begun spending it.`
+      ]
+    },
+    {
+      id: "part-three",
+      eyebrow: "Part Three",
+      heading: "The American Jobs Nobody Is Talking About",
+      pullQuote: "America First is accelerating the very Buy European movement costing American defence workers their export markets.",
+      paragraphs: [
+        `The domestic US consequences of this shift are almost entirely absent from the political conversation, which remains focused on whether America should be "paying for Europe's defence" — a framing that obscures the economic reality.`,
+        `The US defence industry is among the largest manufacturing employers in the country. Lockheed Martin, Boeing's defence division, Raytheon (now RTX), General Dynamics, and Northrop Grumman collectively employ hundreds of thousands of Americans in states from Connecticut to Texas to California. These companies are not only defence contractors — they are anchor employers in their communities, supporting thousands of supplier businesses that feed into the production of aircraft, missiles, radar systems, and the full spectrum of military hardware.`,
+        `When Italy buys an Airbus tanker instead of a Boeing KC-46, those are jobs in the US aerospace supply chain that did not materialise. When Germany builds its own armoured vehicle instead of buying an American-designed platform, those are contracts that went to Rheinmetall and not to General Dynamics. When Sweden's Saab wins a surveillance aircraft contract that would previously have been Boeing's, the reverberation is felt not in Stockholm but in Wichita and St Louis.`,
+        `The irony is almost too neat: Trump's "America First" foreign policy, by convincing European allies that they can no longer rely on American commitments, is accelerating the very "Buy European" movement in defence procurement that is costing American defence workers their export markets.`,
+        `Defence stocks in South Korea, Turkey, Japan, Australia, and Europe are surging. Hanwha Aerospace in Seoul gained 193% in 2025. Companies like Rheinmetall in Germany and Saab in Sweden are reporting order books that would have seemed impossible three years ago. The beneficiaries of European rearmament are, increasingly, everyone except American companies.`
+      ]
+    },
+    {
+      id: "part-four",
+      eyebrow: "Part Four",
+      heading: "What the New Strategy Costs the American Soldier",
+      paragraphs: [
+        `Beyond the industrial question sits a more fundamental one: if Europe is no longer counting on the United States for its conventional defence, what does that mean for the Americans who are still stationed there — and for those who might be sent if a crisis erupts?`,
+        `The 2026 NDS explicitly identifies the Indo-Pacific as the primary theatre and China as the primary strategic challenge. US military planners are under pressure to shift resources, forces, and forward-deployment posture toward Asia. The logic is clear: a military that tries to simultaneously deter Russia in Europe and China in the Pacific will struggle to do either convincingly.`,
+        `The consequence is that American troops in Europe are caught in a peculiar limbo. There are still roughly 80,000 US military personnel stationed across the continent. The NDS says Europe is no longer the priority. But no responsible commander is going to pretend that a Russian incursion into the Baltic states could be contained without American involvement. Article 5 — the collective defence commitment at NATO's core — remains nominally in force even as its credibility is being openly questioned by the nation that wrote it.`,
+        `The IISS assessed in 2025 that Russia could, by 2027, reconstitute its ground forces to near pre-Ukraine war capability. If US forces disengage from the European theatre over the same period, the window of vulnerability for Baltic NATO members opens quickly. The countries that would face the most immediate danger — Poland, Estonia, Latvia, Lithuania — are precisely the ones most desperately trying to fill the gap with their own rearmament spending. But spending cannot substitute for capability that takes years to build, and 2027 is not far away.`,
+        `The American soldier stationed in Germany or Romania today serves in a command structure that is being restructured. Reports emerged in early 2026 that the US would be transferring command of key NATO structures — including Allied Joint Command in Naples and Joint Force Command Norfolk — to European leadership. This is presented as burden-sharing. It looks, to European military planners, like retreat.`
+      ]
+    },
+    {
+      id: "part-five",
+      eyebrow: "Part Five",
+      heading: "The Trust Deficit and Its Long Shadow",
+      paragraphs: [
+        `Numbers explain part of this story. The trust deficit explains the rest.`,
+        `Polling conducted across Europe in early 2026 found that public opinion toward the United States had deteriorated sharply. Among Danes — bruised by Trump's repeated territorial threats toward Greenland — 84% now view the United States unfavourably, up from just 20% in July 2023. Eighty-one percent of European publics support greater European military integration. Social media across the continent is saturated with imagery of a unified European defence force, of soldiers from France, Germany, Poland, and the Nordic states standing together without an American flag in sight.`,
+        `This is not just sentiment. Sentiment drives procurement decisions, alliance politics, and the willingness of European governments to take risks on behalf of an alliance with Washington. The more the European public demands independence from American security guarantees, the more European leaders feel the political pressure to demonstrate that independence — by buying European weapons, by building European command structures, by developing, as some are now openly discussing, a European nuclear deterrent.`,
+        `France already has nuclear weapons. The idea that French nuclear capability might underpin a European deterrent — rather than the American one — would have been considered a fringe position five years ago. Today it is being debated in serious policy circles in Berlin and Warsaw.`,
+        `Mark Carney, Canada's Prime Minister, described what was happening as "a rupture in the world order." Christian Mölling of the European Defence in a New Age think tank wrote in Der Spiegel in April 2026 that Europeans continue to behave as though they can preserve US security guarantees through careful diplomacy — but "that is why many heads of government avoid criticising the United States." The politeness is strategic. The pivot is happening anyway.`
+      ]
+    },
+    {
+      id: "part-six",
+      eyebrow: "Part Six",
+      heading: "The Costs That Don't Appear in the Budget",
+      pullQuote: "An America that has abandoned its allies does not become more powerful. It becomes more alone.",
+      paragraphs: [
+        `There is a cost to American retreat that does not appear in any Pentagon budget line: the loss of intelligence networks, of forward positioning, of the relationships and interoperability built over seven decades of joint operations.`,
+        `When the UK quietly began exploring a European intelligence-sharing arrangement — an alternative to the Five Eyes framework that has long anchored Anglophone security cooperation — the signal was unmistakeable. When France called for European nations to consider procuring Chinese foreign direct investment in key sectors, it was less an endorsement of Beijing than a demonstration of how thoroughly Washington had eroded its own position as the indispensable partner.`,
+        `The United States spent 77 years building an alliance network that gave it intelligence access, forward basing rights, diplomatic leverage, and a coalition of partners in every major geopolitical contest. That network was not built cheaply. It was paid for in Marshall Plan dollars, in lives during the Cold War, in decades of security commitments that allowed European democracies to invest in their economies instead of their militaries.`,
+        `The question American taxpayers should be asking — and largely are not — is what they are getting for the dissolution of that network. If Europe builds its own security architecture, it will not need American permission for anything. It will not need American bases. It will not need American weapons. It will not need to consult Washington before acting in its own interests. The leverage that generations of American diplomats spent their careers accumulating will have been voluntarily surrendered.`,
+        `An America that has abandoned its allies does not become more powerful. It becomes more alone. And a more alone America, in a world where China is rising, Russia is recalcitrant, and BRICS is building alternative financial infrastructure, is a less safe America — whatever the National Defense Strategy says about putting the homeland first.`
+      ]
+    }
+  ]
+};
+
+const JOBS_ARTICLE = {
+  slug: "white-collar-bloodbath",
+  status: "published",
+  category: "Technology",
+  kicker: "Original investigation",
+  title: "The White-Collar Bloodbath",
+  dek: "Your children's careers are being automated away. The people who built the technology are telling you exactly that. Why isn't anyone listening?",
+  cardDek: "Entry-level white-collar hiring is collapsing as AI absorbs the first rungs of the career ladder — and Washington is largely silent.",
+  standfirst: "An original investigation for Chronicle Future Magazine · June 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 2026",
+  readingTime: "10 min read",
+  epigraph: {
+    quote: "AI could eliminate roughly 50% of entry-level white-collar positions within five years… I'd call it what it is — a white-collar bloodbath.",
+    source: "Dario Amodei, CEO of Anthropic, 2025"
+  },
+  lead: "Dario Amodei is not a doom-sayer. He is the chief executive of one of the most sophisticated AI laboratories in the world — and he is warning you about the technology he built.",
+  sections: [
+    {
+      id: "intro",
+      paragraphs: [
+        `Dario Amodei is not a doom-sayer. He is not a politician trying to scare voters or a pundit hunting for clicks. He is the chief executive of one of the most sophisticated artificial intelligence laboratories in the world, a man who has spent his career building the technology he is now warning you about. When he chose the words "white-collar bloodbath," he was not speaking carelessly.`,
+        `He made this prediction in 2025. The year that followed is beginning to confirm it.`,
+        `The story of AI and employment is told in two parallel registers that almost never intersect in public conversation. In one register, the technology industry's boosters speak of augmentation, of humans and machines working together, of new jobs being created to replace old ones — the soothing historical argument that every wave of automation has ultimately produced more work, not less. In the other register, the people who are actually losing their jobs, or finding that the entry-level roles they trained for no longer exist, experience something that no macroeconomic chart can capture: the feeling of arriving at the bottom of a ladder and finding that someone removed the first six rungs.`,
+        `This is a story about both registers. And about who is paying the price for a technological transformation that nobody voted for and that is accelerating partly because of a geopolitical competition most Americans barely follow.`
+      ]
+    },
+    {
+      id: "part-one",
+      figures: ["jobs-stats"],
+      eyebrow: "Part One",
+      heading: "The Numbers Behind the Headline",
+      pullQuote: "A 35% decline in entry-level postings is a structural collapse in the on-ramp to professional careers.",
+      paragraphs: [
+        `Begin with what the data actually shows, because it is considerably more specific than the general anxiety would suggest.`,
+        `Goldman Sachs analysed employment trends among workers in AI-exposed roles. Among people aged 22 to 25 — those who would normally be entering the workforce in entry-level professional positions — employment fell 16% between late 2022 and mid-2025. Among young software developers, the decline was nearly 20%. The Federal Reserve Bank of St Louis confirmed the pattern: occupations with higher AI exposure showed larger unemployment rate increases across the same period.`,
+        `Entry-level job postings across all white-collar sectors are down 35% since January 2023, according to labour research firm Revelio Labs. This is not a minor statistical wobble. A 35% decline in entry-level job postings is a structural collapse in the traditional on-ramp to professional careers. The jobs that have always served as the first step — basic financial analyst, junior paralegal, entry-level copywriter, data processor, junior software tester, customer service associate — are shrinking because AI systems are handling the tasks that previously justified those hires.`,
+        `McKinsey estimated in late 2025 that current AI technology — not future iterations, the systems that exist and are deployed today — could theoretically automate approximately 57% of all US work hours. That figure is frequently misquoted as meaning 57% of jobs would be eliminated. It does not mean that. It means that across the entire working population, just over half of the hours worked involve tasks that a sufficiently deployed AI system could, technically, handle. Deployment is the limiting factor. Capability is not.`,
+        `And deployment is accelerating.`
+      ]
+    },
+    {
+      id: "part-two",
+      figures: ["jobs-decline"],
+      eyebrow: "Part Two",
+      heading: "The Entry-Level Extinction",
+      pullQuote: "You can see the efficiency gain. You cannot see the missing professionals of 2035.",
+      paragraphs: [
+        `The jobs disappearing first are not random. They follow a clear pattern that maps almost perfectly onto the structure of professional career ladders in America.`,
+        `Entry-level white-collar roles have historically served two purposes simultaneously. The obvious purpose is production — an entry-level financial analyst produces spreadsheet analysis, a junior paralegal produces document review, a junior coder produces working software. The less obvious but equally important purpose is training — these roles exist because experienced professionals cannot operate without a pipeline of junior staff absorbing institutional knowledge, developing judgment, and eventually becoming mid-level and senior professionals themselves.`,
+        `AI is disrupting both simultaneously. It can produce the spreadsheet analysis faster and without the mistakes a tired junior employee makes at 11pm. But in doing so, it removes the training environment through which the next generation of senior professionals would have developed. Law firms that once hired twenty junior associates to do document review now hire two to supervise an AI system that does the work of eighteen. The two remaining associates are more productive than those eighteen ever were. They are also not being given the foundational work that would have turned them, in ten years, into partners.`,
+        `This is the quiet catastrophe that the productivity numbers don't capture. You can see the efficiency gain. You cannot see the missing professionals of 2035.`,
+        `The roles most exposed read like a list of the jobs that parents most reliably point their children toward as safe, respectable, middle-class careers: accounting, legal work, financial analysis, journalism, basic coding, data entry, customer service, HR administration, marketing analytics, medical transcription. These are not fringe occupations. They represent tens of millions of Americans.`
+      ]
+    },
+    {
+      id: "part-three",
+      eyebrow: "Part Three",
+      heading: "Three People, One Broken Ladder",
+      points: [
+        { lead: "Kayla, 24, Columbus, Ohio.", text: `Graduated in 2024 with a degree in accounting from Ohio State. Spent the better part of 2024 applying for entry-level positions at accounting firms. She kept being told that the firm was restructuring its junior workforce. She is currently working in retail management and studying for her CPA certification, hoping that licensure will provide the protection that a degree no longer does. She has heard that several of the firms that rejected her have since implemented AI audit tools that handle the work she was trained to do. "They kept saying the economy was doing well," she says. "The economy was doing well. I just couldn't find a job in it."` },
+        { lead: "Marcus, 27, Charlotte, North Carolina.", text: `Spent three years as a junior paralegal at a mid-size litigation firm before his role was eliminated in early 2025. The firm had adopted a document review AI platform that processed discovery materials at a rate no human team could match, at a fraction of the cost. He was offered a position as an "AI output reviewer" — essentially a quality-control role checking the AI's work — at a significantly reduced salary. He took it. "I don't know if it counts as still being a paralegal," he says. "I'm not really doing law. I'm grading a robot's homework."` },
+        { lead: "Priya, 26, Seattle, Washington.", text: `A software engineering graduate who found herself in a paradox: she entered one of the fields most associated with the AI boom and discovered that the boom was destroying the entry-level roles in her own sector. Junior software testing positions — traditionally the foot-in-the-door for new computer science graduates — had been automated at companies across the tech sector. She found a position at a startup, but it was a contract role with no benefits. When the startup pivoted its AI strategy, the contract was not renewed. She is now freelancing. "Everyone I know who's doing well in tech is either senior enough that they supervise the AI, or they got in five years ago before this started. There's basically no way in anymore."` }
+      ]
+    },
+    {
+      id: "part-three-coda",
+      paragraphs: [
+        `None of these three individuals appears in AI employment statistics as an AI-displaced worker. Kayla couldn't find a job and is miscounted as inactive or employed elsewhere. Marcus is still technically employed in a legal-adjacent role. Priya is a freelancer, classified as self-employed. The official data understates what is happening by an order of magnitude.`
+      ]
+    },
+    {
+      id: "part-four",
+      eyebrow: "Part Four",
+      heading: "The Geopolitical Accelerant",
+      paragraphs: [
+        `There is a dimension to this story that rarely appears in US domestic coverage: the role of the US-China technological competition in accelerating the pace of AI deployment that is displacing American workers.`,
+        `The race between American and Chinese technology companies to achieve AI dominance is, at its core, a race about who can deploy AI most aggressively, scale it most rapidly, and demonstrate the most impressive productivity gains. The financial incentive for American tech companies to automate as aggressively as possible is compounded by the geopolitical fear that falling behind China in AI capability is existential — not merely commercially but in terms of military power, economic influence, and the shape of the coming technological order.`,
+        `This means the pace of AI deployment in American industries is being driven not only by what makes business sense in isolation, but by a competitive dynamic with a foreign adversary that American workers had no hand in creating. The geopolitical urgency to win the AI race shortens the timelines, reduces the consideration given to workforce transition, and creates pressure on companies to deploy now rather than plan carefully.`,
+        `Meta's Mark Zuckerberg said in January 2025 that by the end of that year, AI would function as a "mid-level engineer" at the company — and announced a 5% workforce reduction shortly after. Microsoft, Google, Amazon, and Meta collectively committed over $200 billion in data centre spending through 2025. Each dollar of that infrastructure investment was explicitly aimed at reducing the need for human cognitive labour at scale.`,
+        `Anthropic's own research, published in 2026, found that AI tools were substantially integrated into the cognitive tasks of the most-exposed professional roles — and that the exposure rate had increased dramatically in a single year. In the computer and mathematical occupational group alone, the share of employment that was substantially automated rose nearly 20 percentage points between the 2025 and 2026 assessments.`
+      ]
+    },
+    {
+      id: "part-five",
+      eyebrow: "Part Five",
+      heading: "What Comes Next — And What Doesn't",
+      pullQuote: "The transition costs are borne by individuals. The productivity gains accrue to shareholders.",
+      paragraphs: [
+        `The standard rebuttal to every wave of automation anxiety is historical: new technologies create new jobs. The cotton gin displaced textile workers and eventually created the modern textile industry. The automobile destroyed the horse-and-buggy sector and created millions of jobs in manufacturing, logistics, and retail. The personal computer threatened clerical workers and produced the modern knowledge economy. Each time, the doom was overstated and the creation was underestimated.`,
+        `This argument is not wrong. It is also not sufficient.`,
+        `The relevant question is not whether AI eventually creates new jobs. It almost certainly will. The relevant question is: how long does the transition take, how much pain is suffered in the interim, and — critically — are the new jobs accessible to the same people who lost the old ones?`,
+        `The cotton gin transition unfolded over decades and generations. People did not retrain from hand-spinning to factory work overnight. The personal computer transition built new jobs that broadly fit the skill profiles of educated workers willing to learn. The AI transition is moving faster than either precedent, is specifically targeting the cognitive tasks that previously distinguished educated workers from manual workers, and is arriving at a moment when the social safety net for workforce transition is thinner than at any point since the Great Depression.`,
+        `Goldman Sachs estimates that AI will ultimately displace roughly 6-7% of the US workforce in net terms — approximately 11 million workers — while creating roughly equal numbers of new positions. But 11 million displaced workers and 11 million new workers are not the same people. The new jobs created by AI — building AI systems, supervising them, integrating them, governing them — require skills that the paralegal whose document review job was automated does not have and cannot quickly acquire. The transition costs are borne by individuals. The productivity gains accrue to shareholders.`,
+        `Gartner's hype cycle had predicted exactly the phase that enterprise AI adoption entered in late 2025 and early 2026: the Trough of Disillusionment, where the gap between AI's promised productivity miracle and its messy, expensive, slower-than-expected reality began to show. Boards that had approved AI pilots hoping to automate away labour costs found themselves managing implementation challenges, regulatory concerns, and quality control problems that the demos had not prepared them for. Some initiatives are being quietly shelved. But the jobs that were eliminated in anticipation of those initiatives are not being brought back.`
+      ]
+    },
+    {
+      id: "epilogue",
+      eyebrow: "Epilogue",
+      heading: "The Question Nobody in Washington Is Asking",
+      paragraphs: [
+        `Congress has held numerous hearings on AI. The themes are familiar: safety, bias, misinformation, electoral interference, national security. These are real concerns and they deserve attention.`,
+        `What is striking about the hearing transcripts is the near-total absence of a sustained, serious conversation about the 11 million Americans who may find themselves on the wrong side of the transition — and what obligation, if any, the nation has toward them. There is no Marshall Plan for the AI transition. There is no serious retraining programme commensurate with the scale of disruption underway. There is no policy discussion remotely equivalent to the urgency with which Washington discusses AI safety or AI competitiveness.`,
+        `Kayla in Columbus, Marcus in Charlotte, and Priya in Seattle are not asking to slow down technological progress. They are asking whether the country that is winning the AI race has any intention of bringing them along for the ride. So far, the answer has been mostly silence. And the bloodbath, Amodei warned, is still in its early innings.`
+      ]
+    }
+  ]
+};
+
+const NEWS_ARTICLES_LIST = [FEATURE_ARTICLE, METAL_ARTICLE, WAR_ARTICLE, NATO_ARTICLE, JOBS_ARTICLE];
+const NEWS_ARTICLES = Object.fromEntries(NEWS_ARTICLES_LIST.map((article) => [article.slug, article]));
 
 const SIGNAL_GROUPS = ["Local", "State", "National", "Global", "Technology", "Commodity"];
 const BRIEF_FIELDS = {
@@ -628,7 +1077,7 @@ function PublicLanding({ user, onWorkspace, onOpenArticle }) {
   const ranked = [...PUBLIC_SIGNALS]
     .sort((a, b) => b.impact - a.impact)
     .map((signal) => ({ label: signal.scope, value: signal.impact }));
-  const desk = [lead, ...UPCOMING_ARTICLES];
+  const desk = NEWS_ARTICLES_LIST;
   const serviceSignal = PUBLIC_SIGNALS[1];
   return (
     <main className="editorial-home">
@@ -973,6 +1422,44 @@ function FxDominanceFigure() {
   );
 }
 
+function StatBand({ items }) {
+  return (
+    <div className="fig-keynumbers">
+      {items.map((item) => <KeyNumber key={item.label} value={item.value} label={item.label} note={item.note} />)}
+    </div>
+  );
+}
+
+// Generic vertical bar chart for single-series comparisons.
+function BarChart({ data, max, unit = "", axisTitle }) {
+  const L = 84, R = 612, T = 30, B = 198, bw = 66;
+  const yOf = (v) => B - (v / max) * (B - T);
+  const slot = (R - L) / data.length;
+  const mid = (T + B) / 2;
+  return (
+    <svg viewBox="0 0 640 232" role="img" aria-label="Bar chart">
+      {[0, max / 2, max].map((g) => (
+        <g key={g}>
+          <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
+          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{Math.round(g)}</text>
+        </g>
+      ))}
+      <line x1={L} y1={B} x2={R} y2={B} className="c-axis" />
+      {data.map((d, i) => {
+        const cx = L + slot * i + slot / 2;
+        return (
+          <g key={d.label}>
+            <rect x={cx - bw / 2} y={yOf(d.value)} width={bw} height={B - yOf(d.value)} className={d.soft ? "c-bar-2" : "c-bar"} />
+            <text x={cx} y={yOf(d.value) - 8} textAnchor="middle" className="c-value">{d.value}{unit}</text>
+            <text x={cx} y={B + 22} textAnchor="middle" className="c-label">{d.label}</text>
+          </g>
+        );
+      })}
+      {axisTitle ? <text x={22} y={mid} textAnchor="middle" className="c-axis-title" transform={`rotate(-90 22 ${mid})`}>{axisTitle}</text> : null}
+    </svg>
+  );
+}
+
 const FIGURES = {
   "key-numbers": {
     title: "The state of the dollar order, early 2026.",
@@ -1008,6 +1495,83 @@ const FIGURES = {
     title: "Reality check: the dollar still sits on one side of 89.2% of FX trades; the yuan, 8.5%. Each trade has two sides, so shares sum to ~200%.",
     source: "Source: BIS Triennial Survey, 2025.",
     render: () => <FxDominanceFigure />
+  },
+  "metal-stats": {
+    title: "Precious metals have repriced sharply through 2025–26.",
+    source: "Sources: market data; JPMorgan silver ETF.",
+    render: () => <StatBand items={[
+      { value: "$4,000+", label: "Gold / oz", note: "Record high" },
+      { value: "$94", label: "Silver / oz", note: "Decades-high" },
+      { value: "+87%", label: "Platinum, 2025" },
+      { value: "+118%", label: "Silver ETF, 2025" }
+    ]} />
+  },
+  "metal-2025": {
+    title: "2025 price performance across the precious-metals complex.",
+    source: "Source: market data, as cited.",
+    render: () => <BarChart unit="%" max={130} axisTitle="2025 return" data={[
+      { label: "Silver ETF", value: 118 },
+      { label: "Platinum", value: 87, soft: true },
+      { label: "Palladium", value: 68, soft: true }
+    ]} />
+  },
+  "war-stats": {
+    title: "What the Iran war did to American prices and the public ledger.",
+    source: "Sources: ITEP; Moody's; US Treasury, as cited.",
+    render: () => <StatBand items={[
+      { value: "$130", label: "Oil / bbl, peak", note: "From $75" },
+      { value: "+45%", label: "Diesel fuel" },
+      { value: "$397", label: "Avg household fuel cost", note: "To Jun 15" },
+      { value: "$39T", label: "US national debt" }
+    ]} />
+  },
+  "war-prices": {
+    title: "Price increases since the February 2026 airstrikes.",
+    source: "Sources: EIA; GasBuddy; industry data, as cited.",
+    render: () => <BarChart unit="%" max={60} axisTitle="Increase" data={[
+      { label: "Diesel", value: 45 },
+      { label: "Brent", value: 44 },
+      { label: "Gasoline", value: 40 },
+      { label: "Sulfuric", value: 30, soft: true }
+    ]} />
+  },
+  "nato-stats": {
+    title: "Two sets of numbers, moving in opposite directions.",
+    source: "Sources: SIPRI; IISS; national budgets, as cited.",
+    render: () => <StatBand items={[
+      { value: "$864B", label: "Europe defence, 2025", note: "+14% YoY" },
+      { value: "−7.5%", label: "US military spending" },
+      { value: "+24%", label: "Germany's budget" },
+      { value: "$1T", label: "Cost to replace US role" }
+    ]} />
+  },
+  "nato-spending": {
+    title: "2025 defence-budget change by country. US military spending fell 7.5% over the same period.",
+    source: "Sources: national budgets; SIPRI, as cited.",
+    render: () => <BarChart unit="%" max={60} axisTitle="2025 change" data={[
+      { label: "Spain", value: 50 },
+      { label: "Germany", value: 24 },
+      { label: "Europe", value: 14, soft: true }
+    ]} />
+  },
+  "jobs-stats": {
+    title: "The entry-level labour market for AI-exposed roles.",
+    source: "Sources: Goldman Sachs; Revelio Labs; McKinsey, as cited.",
+    render: () => <StatBand items={[
+      { value: "−35%", label: "Entry-level postings", note: "Since Jan 2023" },
+      { value: "−16%", label: "Jobs, ages 22–25" },
+      { value: "−20%", label: "Young developers" },
+      { value: "57%", label: "US work hours automatable" }
+    ]} />
+  },
+  "jobs-decline": {
+    title: "Decline in hiring across AI-exposed entry roles since early 2023.",
+    source: "Sources: Goldman Sachs; Revelio Labs, as cited.",
+    render: () => <BarChart unit="%" max={40} axisTitle="Decline" data={[
+      { label: "Entry-level", value: 35 },
+      { label: "Young devs", value: 20, soft: true },
+      { label: "Ages 22–25", value: 16, soft: true }
+    ]} />
   }
 };
 
@@ -1076,7 +1640,7 @@ function NewsArticlePage({ slug, onBack }) {
             <section className="prose-section" key={section.id || sectionIndex}>
               {section.eyebrow ? <p className="prose-eyebrow">{section.eyebrow}</p> : null}
               {section.heading ? <h2>{section.heading}</h2> : null}
-              {section.paragraphs.map((paragraph, paragraphIndex) => (
+              {(section.paragraphs || []).map((paragraph, paragraphIndex) => (
                 <Fragment key={paragraphIndex}>
                   <p className={sectionIndex === 0 && paragraphIndex === 0 ? "has-dropcap" : undefined}>{paragraph}</p>
                   {paragraphIndex === 0 && section.pullQuote ? <p className="pull-quote">{section.pullQuote}</p> : null}
