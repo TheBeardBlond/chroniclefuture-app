@@ -36,6 +36,7 @@ const FEATURE_ARTICLE = {
   sections: [
     {
       id: "intro",
+      figures: ["key-numbers"],
       paragraphs: [
         `There is a deal most Americans have never heard of that has quietly shaped the price of everything they buy, the interest rate on every mortgage they've ever signed, and the foreign policy of every president since Richard Nixon. It was brokered not in public, not by treaty, not with the fanfare of a G7 summit, but in a private arrangement between Henry Kissinger and the Saudi royal family in the summer of 1974. It was never written into law. It was never ratified. But for fifty years, it functioned as the invisible skeleton of the global financial order.`,
         `The deal was simple, and elegant in its ruthlessness: Saudi Arabia would price its oil exclusively in US dollars, and invest its surplus revenues in US Treasury bonds. In exchange, Washington would guarantee the security of the kingdom. Because oil is the foundational input of every modern economy — you cannot make fertiliser, plastics, pharmaceuticals, or microchip coolant without it — every country on Earth that needed oil needed dollars first. And because every oil-producing nation followed Saudi Arabia's lead, the dollar became, effectively, the oxygen of global commerce.`,
@@ -45,6 +46,7 @@ const FEATURE_ARTICLE = {
     },
     {
       id: "part-one",
+      figures: ["petrodollar-loop"],
       eyebrow: "Part One",
       heading: "The Architecture of American Power",
       pullQuote: "Remove that demand, and the entire edifice begins to wobble.",
@@ -74,6 +76,7 @@ const FEATURE_ARTICLE = {
     },
     {
       id: "part-three",
+      figures: ["reserve-decline"],
       eyebrow: "Part Three",
       heading: "The Cracks in the Foundation",
       pullQuote: "The tools Trump is using to defend dollar dominance may be the very things eroding it.",
@@ -99,6 +102,7 @@ const FEATURE_ARTICLE = {
     },
     {
       id: "part-five",
+      figures: ["hormuz-share"],
       eyebrow: "Part Five",
       heading: "The Strait of Hormuz and the Iran War — The Petrodollar's Crucible",
       pullQuote: "A key catalyst for erosion in petrodollar dominance, and the beginnings of the petroyuan.",
@@ -112,6 +116,7 @@ const FEATURE_ARTICLE = {
     },
     {
       id: "part-six",
+      figures: ["gold-buying", "treasury-holdings", "fx-dominance"],
       eyebrow: "Part Six",
       heading: "The BRICS Challenge — Ambition Meets Reality",
       paragraphs: [
@@ -646,10 +651,10 @@ function PublicLanding({ user, onWorkspace, onOpenArticle }) {
           <button className="btn btn-green" onClick={() => onOpenArticle(lead.slug)}>Read the investigation</button>
         </div>
         <aside className="news-lead-aside">
-          <figure className="news-lead-figure" aria-hidden="true">
-            <span className="news-lead-figure-kicker">Chronicle Future</span>
-            <span className="news-lead-figure-mark">Oil &amp; the Dollar</span>
-            <span className="news-lead-figure-note">Original investigation · June 2026</span>
+          <figure className="hero-trend" aria-label="US dollar share of global reserves, 2001 to 2025">
+            <figcaption className="hero-trend-head"><span>USD share of global reserves</span><strong>56.9%</strong></figcaption>
+            <HeroTrendFigure />
+            <p className="hero-trend-note">Down from ~72% in 2001 — the lowest since 1995. Source: IMF COFER.</p>
           </figure>
           <blockquote className="news-lead-quote">
             <p>“{lead.epigraph.quote}”</p>
@@ -727,6 +732,278 @@ function PublicLanding({ user, onWorkspace, onOpenArticle }) {
 }
 
 /* ----------------------------------------------------------------------------
+   Editorial figures — sleek, print-safe inline-SVG charts and diagrams
+   (Nature-style: hairline rules, restrained palette, numbered captions).
+   No external assets, no dependencies.
+---------------------------------------------------------------------------- */
+
+const ARROW_DEFS = (
+  <defs>
+    <marker id="cf-arrow" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L7,3 L0,6 Z" className="c-arrow" />
+    </marker>
+  </defs>
+);
+
+function Figure({ number, title, source, children }) {
+  return (
+    <figure className="fig">
+      <div className="fig-frame">{children}</div>
+      <figcaption className="fig-cap">
+        <strong>Figure {number}</strong> {title}
+        {source ? <span className="fig-source">{source}</span> : null}
+      </figcaption>
+    </figure>
+  );
+}
+
+function KeyNumbersFigure() {
+  const items = [
+    { value: "$39T", label: "US national debt", note: "Crossed in March 2026" },
+    { value: "56.9%", label: "USD share of reserves", note: "Q3 2025 · lowest since 1995" },
+    { value: "89.2%", label: "USD share of FX trades", note: "2025 · up from 88.4% (2022)" },
+    { value: "≈10%", label: "Dollar index decline", note: "2025 · worst in 50+ years" }
+  ];
+  return (
+    <div className="fig-keynumbers">
+      {items.map((item) => <KeyNumber key={item.label} value={item.value} label={item.label} note={item.note} />)}
+    </div>
+  );
+}
+
+// The self-reinforcing petrodollar cycle, as a five-step flow that loops back.
+function PetrodollarLoopFigure() {
+  const steps = [
+    ["Oil priced", "in dollars"],
+    ["Exporters", "earn dollars"],
+    ["Dollars buy", "US Treasuries"],
+    ["Cheap US", "borrowing"],
+    ["Military", "secures the Gulf"]
+  ];
+  const boxW = 156, boxH = 74, gap = 25, y = 34;
+  return (
+    <svg viewBox="0 0 920 250" role="img" aria-label="Diagram: the self-reinforcing petrodollar cycle">
+      {ARROW_DEFS}
+      {steps.map((lines, index) => {
+        const x = 10 + index * (boxW + gap);
+        return (
+          <g key={index}>
+            <rect x={x} y={y} width={boxW} height={boxH} rx="3" className="c-node" />
+            <text x={x + boxW / 2} y={y + 31} textAnchor="middle" className="c-node-label">{lines[0]}</text>
+            <text x={x + boxW / 2} y={y + 49} textAnchor="middle" className="c-node-label">{lines[1]}</text>
+            {index < steps.length - 1
+              ? <line x1={x + boxW + 3} y1={y + boxH / 2} x2={x + boxW + gap - 5} y2={y + boxH / 2} className="c-flow" markerEnd="url(#cf-arrow)" />
+              : null}
+          </g>
+        );
+      })}
+      <path d="M 838 132 C 838 210, 88 210, 88 116" className="c-flow" markerEnd="url(#cf-arrow)" />
+      <text x="463" y="226" textAnchor="middle" className="c-label">…and the cycle reinforces itself</text>
+    </svg>
+  );
+}
+
+// Dollar share of global FX reserves: two cited reference points, 2001 → 2025.
+function ReserveDeclineFigure() {
+  const L = 56, R = 600, T = 28, B = 232, lo = 50, hi = 75;
+  const yOf = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
+  const grid = [55, 60, 65, 70, 75];
+  const p1 = { x: L, y: yOf(72) }, p2 = { x: R, y: yOf(56.9) };
+  return (
+    <svg viewBox="0 0 640 270" role="img" aria-label="Line chart: USD share of global reserves fell from 72% in 2001 to 56.9% in 2025">
+      {grid.map((g) => (
+        <g key={g}>
+          <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
+          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g}%</text>
+        </g>
+      ))}
+      <polygon points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p2.x},${B} ${p1.x},${B}`} className="c-area" />
+      <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} className="c-line" />
+      <circle cx={p1.x} cy={p1.y} r="5" className="c-dot" />
+      <circle cx={p2.x} cy={p2.y} r="5" className="c-dot" />
+      <text x={p1.x + 8} y={p1.y - 10} className="c-value">72.0%</text>
+      <text x={p2.x} y={p2.y - 12} textAnchor="end" className="c-value">56.9%</text>
+      <text x={L} y={B + 22} textAnchor="middle" className="c-label">2001</text>
+      <text x={R} y={B + 22} textAnchor="middle" className="c-label">Q3 2025</text>
+    </svg>
+  );
+}
+
+// Roughly one-fifth of world oil supply transits the Strait of Hormuz.
+function HormuzShareFigure() {
+  const L = 20, W = 600, y = 34, h = 46, share = 0.2;
+  const sw = W * share;
+  return (
+    <svg viewBox="0 0 640 120" role="img" aria-label="Proportion bar: about one-fifth of world oil supply transits the Strait of Hormuz">
+      <rect x={L} y={y} width={W} height={h} rx="3" className="c-track" />
+      <rect x={L} y={y} width={sw} height={h} rx="3" className="c-bar-accent" />
+      <text x={L + sw / 2} y={y + h + 22} textAnchor="middle" className="c-value">≈20%</text>
+      <text x={L + sw + 14} y={y + 28} className="c-label">Rest of global seaborne oil</text>
+      <text x={L} y={y - 12} className="c-value">Strait of Hormuz</text>
+    </svg>
+  );
+}
+
+// Central-bank net gold purchases — recent years vs the 2010–21 average.
+function GoldBuyingFigure() {
+  const cats = [
+    { label: "2010–21 avg", value: 473, accent: false },
+    { label: "2022", value: 1082, accent: true },
+    { label: "2023", value: 1037, accent: true },
+    { label: "2024", value: 1045, accent: true }
+  ];
+  const L = 64, R = 612, T = 26, B = 232, max = 1200, bw = 78;
+  const yOf = (v) => B - (v / max) * (B - T);
+  const slot = (R - L) / cats.length;
+  return (
+    <svg viewBox="0 0 640 270" role="img" aria-label="Bar chart: central-bank gold purchases by year in tonnes">
+      {[0, 400, 800, 1200].map((g) => (
+        <g key={g}>
+          <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
+          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g}</text>
+        </g>
+      ))}
+      {cats.map((c, i) => {
+        const cx = L + slot * i + slot / 2;
+        const x = cx - bw / 2;
+        return (
+          <g key={c.label}>
+            <rect x={x} y={yOf(c.value)} width={bw} height={B - yOf(c.value)} className={c.accent ? "c-bar" : "c-bar-2"} />
+            <text x={cx} y={yOf(c.value) - 8} textAnchor="middle" className="c-value">{c.value.toLocaleString()}</text>
+            <text x={cx} y={B + 22} textAnchor="middle" className="c-label">{c.label}</text>
+          </g>
+        );
+      })}
+      <text x={L - 44} y={T + 4} className="c-label">tonnes</text>
+    </svg>
+  );
+}
+
+// US Treasury holdings, 2013 vs 2025 — China halves, Russia exits.
+function TreasuryHoldingsFigure() {
+  const groups = [
+    { label: "China", a: 1320, b: 756 },
+    { label: "Russia", a: 96, b: 2 }
+  ];
+  const L = 70, R = 612, T = 26, B = 232, max = 1400, bw = 56, pair = 10;
+  const yOf = (v) => B - (v / max) * (B - T);
+  const slot = (R - L) / groups.length;
+  const fmt = (v) => v >= 1000 ? `$${(v / 1000).toFixed(2)}T` : v < 5 ? "≈$0" : `$${v}B`;
+  return (
+    <svg viewBox="0 0 640 280" role="img" aria-label="Grouped bar chart: US Treasury holdings in 2013 versus 2025 for China and Russia">
+      {[0, 350, 700, 1050, 1400].map((g) => (
+        <g key={g}>
+          <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
+          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g >= 1000 ? (g / 1000) + "T" : g}</text>
+        </g>
+      ))}
+      {groups.map((grp, i) => {
+        const cx = L + slot * i + slot / 2;
+        return (
+          <g key={grp.label}>
+            <rect x={cx - bw - pair / 2} y={yOf(grp.a)} width={bw} height={B - yOf(grp.a)} className="c-bar-2" />
+            <rect x={cx + pair / 2} y={yOf(grp.b)} width={bw} height={B - yOf(grp.b)} className="c-bar" />
+            <text x={cx - bw / 2 - pair / 2} y={yOf(grp.a) - 8} textAnchor="middle" className="c-value">{fmt(grp.a)}</text>
+            <text x={cx + bw / 2 + pair / 2} y={yOf(grp.b) - 8} textAnchor="middle" className="c-value">{fmt(grp.b)}</text>
+            <text x={cx} y={B + 22} textAnchor="middle" className="c-label">{grp.label}</text>
+          </g>
+        );
+      })}
+      <g className="c-legend">
+        <rect x={L} y={T - 2} width="12" height="12" className="c-bar-2" />
+        <text x={L + 18} y={T + 8} className="c-label">2013</text>
+        <rect x={L + 72} y={T - 2} width="12" height="12" className="c-bar" />
+        <text x={L + 90} y={T + 8} className="c-label">2025</text>
+      </g>
+    </svg>
+  );
+}
+
+// Share of FX transactions, 2025 — the dollar's persistence vs the yuan.
+function FxDominanceFigure() {
+  const rows = [
+    { label: "US dollar", value: 89.2, accent: true },
+    { label: "Chinese yuan", value: 8.5, accent: false }
+  ];
+  const L = 130, R = 600, top = 24, rh = 46, gap = 22, max = 100;
+  const wOf = (v) => (v / max) * (R - L);
+  return (
+    <svg viewBox="0 0 640 170" role="img" aria-label="Bar chart: share of FX transactions in 2025, US dollar versus Chinese yuan">
+      {rows.map((row, i) => {
+        const y = top + i * (rh + gap);
+        return (
+          <g key={row.label}>
+            <text x={L - 12} y={y + rh / 2 + 4} textAnchor="end" className="c-label">{row.label}</text>
+            <rect x={L} y={y} width={R - L} height={rh} className="c-track" />
+            <rect x={L} y={y} width={wOf(row.value)} height={rh} className={row.accent ? "c-bar" : "c-bar-accent"} />
+            <text x={L + wOf(row.value) + 10} y={y + rh / 2 + 5} className="c-value">{row.value}%</text>
+          </g>
+        );
+      })}
+      <text x={L} y={top + 2 * rh + gap + 30} className="c-label">Each trade has two sides, so shares sum to ~200%.</text>
+    </svg>
+  );
+}
+
+const FIGURES = {
+  "key-numbers": {
+    title: "The state of the dollar order, early 2026.",
+    source: "Sources: US Treasury; IMF COFER; BIS.",
+    render: () => <KeyNumbersFigure />
+  },
+  "petrodollar-loop": {
+    title: "The petrodollar feedback loop — why dollar demand sustains itself.",
+    source: "Chronicle Future analysis.",
+    render: () => <PetrodollarLoopFigure />
+  },
+  "reserve-decline": {
+    title: "The dollar's receding share of global reserves, ~72% (2001) to 56.9% (Q3 2025) — the lowest since 1995. Points are cited reference years, not a continuous series.",
+    source: "Source: IMF COFER.",
+    render: () => <ReserveDeclineFigure />
+  },
+  "hormuz-share": {
+    title: "Roughly one-fifth of the world's seaborne oil transits the Strait of Hormuz.",
+    source: "Chronicle Future analysis of published shipping data.",
+    render: () => <HormuzShareFigure />
+  },
+  "gold-buying": {
+    title: "Central-bank net gold purchases topped 1,000 tonnes for three straight years — more than double the prior-decade average.",
+    source: "Source: World Gold Council.",
+    render: () => <GoldBuyingFigure />
+  },
+  "treasury-holdings": {
+    title: "Reserve repositioning: China roughly halved its US Treasury holdings while Russia exited almost entirely, 2013 to 2025.",
+    source: "Source: US Treasury (TIC).",
+    render: () => <TreasuryHoldingsFigure />
+  },
+  "fx-dominance": {
+    title: "Reality check: the dollar still sits on one side of 89.2% of FX trades; the yuan, 8.5%.",
+    source: "Source: BIS Triennial Survey, 2025.",
+    render: () => <FxDominanceFigure />
+  }
+};
+
+// Compact dark trend used in the front-page lead.
+function HeroTrendFigure() {
+  const L = 26, R = 296, T = 22, B = 96, lo = 50, hi = 75;
+  const yOf = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
+  const p1 = { x: L, y: yOf(72) }, p2 = { x: R, y: yOf(56.9) };
+  return (
+    <svg viewBox="0 0 320 140" role="img" aria-label="Trend: USD share of global reserves declined from 72% in 2001 to 56.9% in 2025">
+      <polygon points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p2.x},${B} ${p1.x},${B}`} className="ht-area" />
+      <line x1={L} y1={B} x2={R} y2={B} className="ht-axis" />
+      <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} className="ht-line" />
+      <circle cx={p1.x} cy={p1.y} r="4" className="ht-dot" />
+      <circle cx={p2.x} cy={p2.y} r="4" className="ht-dot" />
+      <text x={p1.x} y={p1.y - 10} className="ht-val">72%</text>
+      <text x={p2.x} y={p2.y - 12} textAnchor="end" className="ht-val">56.9%</text>
+      <text x={L} y={B + 18} className="ht-tick">2001</text>
+      <text x={R} y={B + 18} textAnchor="end" className="ht-tick">2025</text>
+    </svg>
+  );
+}
+
+/* ----------------------------------------------------------------------------
    Public news article reader
 ---------------------------------------------------------------------------- */
 
@@ -741,6 +1018,9 @@ function NewsArticlePage({ slug, onBack }) {
       </main>
     );
   }
+  const figureNumbers = {};
+  let figureCount = 0;
+  article.sections.forEach((section) => (section.figures || []).forEach((id) => { figureCount += 1; figureNumbers[id] = figureCount; }));
   return (
     <main className="article-page">
       <div className="article-toolbar">
@@ -781,6 +1061,11 @@ function NewsArticlePage({ slug, onBack }) {
                   ))}
                 </ul>
               ) : null}
+              {section.figures ? section.figures.map((figId) => {
+                const fig = FIGURES[figId];
+                if (!fig) return null;
+                return <Figure key={figId} number={figureNumbers[figId]} title={fig.title} source={fig.source}>{fig.render()}</Figure>;
+              }) : null}
             </section>
           ))}
         </div>
@@ -1904,11 +2189,52 @@ const STYLES = `
   .article-sourcenote { border-top: 1px solid var(--line); margin: 36px 0 0; padding-top: 16px; color: var(--ink-4); font-size: 13px; font-style: italic; line-height: 1.6; }
   .article-end { border-top: 1px solid var(--line-soft); margin-top: 30px; padding-top: 20px; }
 
+  /* Editorial figures + charts */
+  .fig { margin: 34px 0; break-inside: avoid; }
+  .fig-frame { border: 1px solid var(--line); background: #fff; padding: clamp(16px, 3vw, 24px); }
+  .fig-cap { margin-top: 12px; padding-left: 2px; color: var(--ink-2); font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .fig-cap strong { color: var(--ink); font-weight: 800; }
+  .fig-source { display: block; margin-top: 4px; color: var(--ink-4); font-size: 11px; }
+  .fig svg { display: block; width: 100%; height: auto; }
+  .fig-keynumbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 24px); }
+  .fig-keynumbers .key-number { border-left: 3px solid var(--green); padding-left: 14px; }
+  .c-grid { stroke: var(--line-soft); stroke-width: 1; }
+  .c-label { fill: var(--ink-4); font-family: var(--sans); font-size: 12px; font-weight: 700; }
+  .c-value { fill: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 800; }
+  .c-line { fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+  .c-area { fill: var(--green); opacity: .09; }
+  .c-dot { fill: var(--green); }
+  .c-bar { fill: var(--green); }
+  .c-bar-2 { fill: var(--ink-2); }
+  .c-bar-accent { fill: var(--lime); }
+  .c-track { fill: var(--paper-3); }
+  .c-node { fill: var(--paper-2); stroke: var(--green); stroke-width: 1.3; }
+  .c-node-label { fill: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 700; }
+  .c-flow { fill: none; stroke: var(--green); stroke-width: 1.6; }
+  .c-arrow { fill: var(--green); }
+
+  /* Front-page hero trend (dark) */
+  .hero-trend { margin: 0; background: var(--green-deep); color: #fff; padding: 20px 22px; }
+  .hero-trend-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid #54798b; padding-bottom: 12px; }
+  .hero-trend-head span { color: #b9d2dd; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .hero-trend-head strong { color: var(--lime); font-family: var(--serif); font-size: 28px; line-height: 1; }
+  .hero-trend svg { display: block; width: 100%; height: auto; margin: 10px 0 4px; }
+  .hero-trend-note { margin: 0; color: #b9d2dd; font-size: 11px; line-height: 1.5; }
+  .ht-area { fill: var(--lime); opacity: .16; }
+  .ht-axis { stroke: #54798b; stroke-width: 1; }
+  .ht-line { fill: none; stroke: var(--lime); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .ht-dot { fill: var(--lime); }
+  .ht-val { fill: #fff; font-family: var(--sans); font-size: 12px; font-weight: 800; }
+  .ht-tick { fill: #89a8b7; font-family: var(--sans); font-size: 11px; font-weight: 700; }
+
   @media (max-width: 900px) {
     .news-lead, .service-showcase .service-grid { grid-template-columns: 1fr; }
     .news-lead-aside { border-left: 0; padding-left: 0; }
     .service-copy { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 24px; }
     .news-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .fig-keynumbers { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 560px) {
     .news-masthead-row { flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -1966,6 +2292,9 @@ const STYLES = `
     .prose-points li { font-size: 12px; line-height: 1.5; }
     .article-epigraph p { font-size: 16px; }
     .prose-section h2 { break-after: avoid; }
+    .fig { break-inside: avoid; margin: 18px 0; }
+    .fig svg { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .fig-frame { border-color: #bbb; }
     .magazine-page { padding: 0; }
     .magazine-edition { max-width: none; box-shadow: none; }
     .magazine-cover { break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
