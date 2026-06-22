@@ -780,43 +780,45 @@ function PetrodollarLoopFigure() {
     ["Cheap US", "borrowing"],
     ["Military", "secures the Gulf"]
   ];
-  const boxW = 156, boxH = 74, gap = 25, y = 34;
+  const boxW = 156, boxH = 64, gap = 25, y = 26;
   return (
-    <svg viewBox="0 0 920 250" role="img" aria-label="Diagram: the self-reinforcing petrodollar cycle">
+    <svg viewBox="0 0 920 210" role="img" aria-label="Diagram: the self-reinforcing petrodollar cycle">
       {ARROW_DEFS}
       {steps.map((lines, index) => {
         const x = 10 + index * (boxW + gap);
         return (
           <g key={index}>
             <rect x={x} y={y} width={boxW} height={boxH} rx="3" className="c-node" />
-            <text x={x + boxW / 2} y={y + 31} textAnchor="middle" className="c-node-label">{lines[0]}</text>
-            <text x={x + boxW / 2} y={y + 49} textAnchor="middle" className="c-node-label">{lines[1]}</text>
+            <text x={x + boxW / 2} y={y + 27} textAnchor="middle" className="c-node-label">{lines[0]}</text>
+            <text x={x + boxW / 2} y={y + 45} textAnchor="middle" className="c-node-label">{lines[1]}</text>
             {index < steps.length - 1
               ? <line x1={x + boxW + 3} y1={y + boxH / 2} x2={x + boxW + gap - 5} y2={y + boxH / 2} className="c-flow" markerEnd="url(#cf-arrow)" />
               : null}
           </g>
         );
       })}
-      <path d="M 838 132 C 838 210, 88 210, 88 116" className="c-flow" markerEnd="url(#cf-arrow)" />
-      <text x="463" y="226" textAnchor="middle" className="c-label">…and the cycle reinforces itself</text>
+      <path d="M 812 96 C 812 172, 88 172, 88 96" className="c-flow" markerEnd="url(#cf-arrow)" />
+      <text x="450" y="194" textAnchor="middle" className="c-label">…and the cycle reinforces itself</text>
     </svg>
   );
 }
 
 // Dollar share of global FX reserves: two cited reference points, 2001 → 2025.
 function ReserveDeclineFigure() {
-  const L = 56, R = 600, T = 28, B = 232, lo = 50, hi = 75;
+  const L = 84, R = 600, T = 24, B = 196, lo = 50, hi = 75;
   const yOf = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
   const grid = [55, 60, 65, 70, 75];
   const p1 = { x: L, y: yOf(72) }, p2 = { x: R, y: yOf(56.9) };
+  const mid = (T + B) / 2;
   return (
-    <svg viewBox="0 0 640 270" role="img" aria-label="Line chart: USD share of global reserves fell from 72% in 2001 to 56.9% in 2025">
+    <svg viewBox="0 0 640 232" role="img" aria-label="Line chart: USD share of global reserves fell from 72% in 2001 to 56.9% in 2025">
       {grid.map((g) => (
         <g key={g}>
           <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
           <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g}%</text>
         </g>
       ))}
+      <line x1={L} y1={B} x2={R} y2={B} className="c-axis" />
       <polygon points={`${p1.x},${p1.y} ${p2.x},${p2.y} ${p2.x},${B} ${p1.x},${B}`} className="c-area" />
       <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} className="c-line" />
       <circle cx={p1.x} cy={p1.y} r="5" className="c-dot" />
@@ -825,21 +827,31 @@ function ReserveDeclineFigure() {
       <text x={p2.x} y={p2.y - 12} textAnchor="end" className="c-value">56.9%</text>
       <text x={L} y={B + 22} textAnchor="middle" className="c-label">2001</text>
       <text x={R} y={B + 22} textAnchor="middle" className="c-label">Q3 2025</text>
+      <text x={22} y={mid} textAnchor="middle" className="c-axis-title" transform={`rotate(-90 22 ${mid})`}>Share of allocated reserves</text>
     </svg>
   );
 }
 
-// Roughly one-fifth of world oil supply transits the Strait of Hormuz.
-function HormuzShareFigure() {
-  const L = 20, W = 600, y = 34, h = 46, share = 0.2;
-  const sw = W * share;
+// Stylized locator: the Strait of Hormuz chokepoint between the Gulf and open sea.
+function HormuzLocatorFigure() {
   return (
-    <svg viewBox="0 0 640 120" role="img" aria-label="Proportion bar: about one-fifth of world oil supply transits the Strait of Hormuz">
-      <rect x={L} y={y} width={W} height={h} rx="3" className="c-track" />
-      <rect x={L} y={y} width={sw} height={h} rx="3" className="c-bar-accent" />
-      <text x={L + sw / 2} y={y + h + 22} textAnchor="middle" className="c-value">≈20%</text>
-      <text x={L + sw + 14} y={y + 28} className="c-label">Rest of global seaborne oil</text>
-      <text x={L} y={y - 12} className="c-value">Strait of Hormuz</text>
+    <svg viewBox="0 0 640 240" role="img" aria-label="Locator diagram: the Strait of Hormuz chokepoint between the Gulf and the Gulf of Oman">
+      {ARROW_DEFS}
+      <rect x="0" y="0" width="640" height="240" className="c-water" />
+      <polygon points="0,0 640,0 640,58 408,58 348,104 288,58 0,58" className="c-land" />
+      <polygon points="0,240 640,240 640,182 408,182 348,134 288,182 0,182" className="c-land" />
+      <path d="M288,58 348,104" className="c-coast" />
+      <path d="M408,58 348,104" className="c-coast" />
+      <path d="M288,182 348,134" className="c-coast" />
+      <path d="M408,182 348,134" className="c-coast" />
+      <line x1="70" y1="119" x2="566" y2="119" className="c-flow" strokeWidth="3" markerEnd="url(#cf-arrow)" />
+      <circle cx="348" cy="119" r="6" className="c-dot" />
+      <text x="348" y="34" textAnchor="middle" className="c-axis-title">Iran</text>
+      <text x="348" y="218" textAnchor="middle" className="c-axis-title">Arabian Peninsula</text>
+      <text x="120" y="100" textAnchor="middle" className="c-label">The Gulf</text>
+      <text x="520" y="100" textAnchor="middle" className="c-label">Gulf of Oman</text>
+      <text x="348" y="150" textAnchor="middle" className="c-value">Strait of Hormuz</text>
+      <text x="348" y="168" textAnchor="middle" className="c-label">≈20% of world seaborne oil</text>
     </svg>
   );
 }
@@ -852,17 +864,23 @@ function GoldBuyingFigure() {
     { label: "2023", value: 1037, accent: true },
     { label: "2024", value: 1045, accent: true }
   ];
-  const L = 64, R = 612, T = 26, B = 232, max = 1200, bw = 78;
+  const L = 84, R = 612, T = 46, B = 204, max = 1200, bw = 74;
   const yOf = (v) => B - (v / max) * (B - T);
   const slot = (R - L) / cats.length;
+  const mid = (T + B) / 2;
   return (
-    <svg viewBox="0 0 640 270" role="img" aria-label="Bar chart: central-bank gold purchases by year in tonnes">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Bar chart: central-bank gold purchases by year in tonnes">
+      <g>
+        <rect x={L} y="14" width="12" height="12" className="c-bar" /><text x={L + 18} y="24" className="c-label">recent years</text>
+        <rect x={L + 138} y="14" width="12" height="12" className="c-bar-2" /><text x={L + 156} y="24" className="c-label">2010–21 average</text>
+      </g>
       {[0, 400, 800, 1200].map((g) => (
         <g key={g}>
           <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
-          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g}</text>
+          <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g.toLocaleString()}</text>
         </g>
       ))}
+      <line x1={L} y1={B} x2={R} y2={B} className="c-axis" />
       {cats.map((c, i) => {
         const cx = L + slot * i + slot / 2;
         const x = cx - bw / 2;
@@ -874,7 +892,7 @@ function GoldBuyingFigure() {
           </g>
         );
       })}
-      <text x={L - 44} y={T + 4} className="c-label">tonnes</text>
+      <text x={22} y={mid} textAnchor="middle" className="c-axis-title" transform={`rotate(-90 22 ${mid})`}>Net purchases (tonnes)</text>
     </svg>
   );
 }
@@ -885,18 +903,24 @@ function TreasuryHoldingsFigure() {
     { label: "China", a: 1320, b: 756 },
     { label: "Russia", a: 96, b: 2 }
   ];
-  const L = 70, R = 612, T = 26, B = 232, max = 1400, bw = 56, pair = 10;
+  const L = 88, R = 612, T = 46, B = 204, max = 1400, bw = 54, pair = 10;
   const yOf = (v) => B - (v / max) * (B - T);
   const slot = (R - L) / groups.length;
+  const mid = (T + B) / 2;
   const fmt = (v) => v >= 1000 ? `$${(v / 1000).toFixed(2)}T` : v < 5 ? "≈$0" : `$${v}B`;
   return (
-    <svg viewBox="0 0 640 280" role="img" aria-label="Grouped bar chart: US Treasury holdings in 2013 versus 2025 for China and Russia">
+    <svg viewBox="0 0 640 240" role="img" aria-label="Grouped bar chart: US Treasury holdings in 2013 versus 2025 for China and Russia">
+      <g>
+        <rect x={L} y="14" width="12" height="12" className="c-bar-2" /><text x={L + 18} y="24" className="c-label">2013</text>
+        <rect x={L + 66} y="14" width="12" height="12" className="c-bar" /><text x={L + 84} y="24" className="c-label">2025</text>
+      </g>
       {[0, 350, 700, 1050, 1400].map((g) => (
         <g key={g}>
           <line x1={L} y1={yOf(g)} x2={R} y2={yOf(g)} className="c-grid" />
           <text x={L - 10} y={yOf(g) + 4} textAnchor="end" className="c-label">{g >= 1000 ? (g / 1000) + "T" : g}</text>
         </g>
       ))}
+      <line x1={L} y1={B} x2={R} y2={B} className="c-axis" />
       {groups.map((grp, i) => {
         const cx = L + slot * i + slot / 2;
         return (
@@ -909,12 +933,7 @@ function TreasuryHoldingsFigure() {
           </g>
         );
       })}
-      <g className="c-legend">
-        <rect x={L} y={T - 2} width="12" height="12" className="c-bar-2" />
-        <text x={L + 18} y={T + 8} className="c-label">2013</text>
-        <rect x={L + 72} y={T - 2} width="12" height="12" className="c-bar" />
-        <text x={L + 90} y={T + 8} className="c-label">2025</text>
-      </g>
+      <text x={24} y={mid} textAnchor="middle" className="c-axis-title" transform={`rotate(-90 24 ${mid})`}>US Treasury holdings ($)</text>
     </svg>
   );
 }
@@ -925,10 +944,18 @@ function FxDominanceFigure() {
     { label: "US dollar", value: 89.2, accent: true },
     { label: "Chinese yuan", value: 8.5, accent: false }
   ];
-  const L = 130, R = 600, top = 24, rh = 46, gap = 22, max = 100;
+  const L = 132, R = 596, top = 22, rh = 42, gap = 20, max = 100;
   const wOf = (v) => (v / max) * (R - L);
+  const baseY = top + rows.length * rh + (rows.length - 1) * gap;
+  const ticks = [0, 25, 50, 75, 100];
   return (
-    <svg viewBox="0 0 640 170" role="img" aria-label="Bar chart: share of FX transactions in 2025, US dollar versus Chinese yuan">
+    <svg viewBox="0 0 640 168" role="img" aria-label="Bar chart: share of FX transactions in 2025, US dollar versus Chinese yuan">
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={L + wOf(t)} y1={top - 4} x2={L + wOf(t)} y2={baseY} className="c-grid" />
+          <text x={L + wOf(t)} y={baseY + 18} textAnchor="middle" className="c-label">{t}%</text>
+        </g>
+      ))}
       {rows.map((row, i) => {
         const y = top + i * (rh + gap);
         return (
@@ -940,7 +967,8 @@ function FxDominanceFigure() {
           </g>
         );
       })}
-      <text x={L} y={top + 2 * rh + gap + 30} className="c-label">Each trade has two sides, so shares sum to ~200%.</text>
+      <line x1={L} y1={baseY} x2={R} y2={baseY} className="c-axis" />
+      <text x={(L + R) / 2} y={baseY + 36} textAnchor="middle" className="c-axis-title">Share of FX transactions, 2025</text>
     </svg>
   );
 }
@@ -962,9 +990,9 @@ const FIGURES = {
     render: () => <ReserveDeclineFigure />
   },
   "hormuz-share": {
-    title: "Roughly one-fifth of the world's seaborne oil transits the Strait of Hormuz.",
-    source: "Chronicle Future analysis of published shipping data.",
-    render: () => <HormuzShareFigure />
+    title: "The chokepoint: roughly one-fifth of the world's seaborne oil transits the narrow Strait of Hormuz between the Gulf and the Gulf of Oman.",
+    source: "Chronicle Future schematic; not to scale.",
+    render: () => <HormuzLocatorFigure />
   },
   "gold-buying": {
     title: "Central-bank net gold purchases topped 1,000 tonnes for three straight years — more than double the prior-decade average.",
@@ -977,7 +1005,7 @@ const FIGURES = {
     render: () => <TreasuryHoldingsFigure />
   },
   "fx-dominance": {
-    title: "Reality check: the dollar still sits on one side of 89.2% of FX trades; the yuan, 8.5%.",
+    title: "Reality check: the dollar still sits on one side of 89.2% of FX trades; the yuan, 8.5%. Each trade has two sides, so shares sum to ~200%.",
     source: "Source: BIS Triennial Survey, 2025.",
     render: () => <FxDominanceFigure />
   }
@@ -2190,28 +2218,34 @@ const STYLES = `
   .article-end { border-top: 1px solid var(--line-soft); margin-top: 30px; padding-top: 20px; }
 
   /* Editorial figures + charts */
-  .fig { margin: 34px 0; break-inside: avoid; }
-  .fig-frame { border: 1px solid var(--line); background: #fff; padding: clamp(16px, 3vw, 24px); }
-  .fig-cap { margin-top: 12px; padding-left: 2px; color: var(--ink-2); font-family: var(--sans); font-size: 13px; line-height: 1.5; }
+  .fig { margin: 26px 0; break-inside: avoid; }
+  .fig-frame { border: 1px solid var(--line); background: #fff; padding: clamp(14px, 2.4vw, 20px); }
+  .fig-cap { margin-top: 10px; padding-left: 2px; color: var(--ink-2); font-family: var(--sans); font-size: 12.5px; line-height: 1.45; }
   .fig-cap strong { color: var(--ink); font-weight: 800; }
-  .fig-source { display: block; margin-top: 4px; color: var(--ink-4); font-size: 11px; }
+  .fig-source { display: block; margin-top: 3px; color: var(--ink-4); font-size: 11px; }
   .fig svg { display: block; width: 100%; height: auto; }
-  .fig-keynumbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 24px); }
-  .fig-keynumbers .key-number { border-left: 3px solid var(--green); padding-left: 14px; }
+  .fig-keynumbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(14px, 2.4vw, 20px); }
+  .fig-keynumbers .key-number { border-left: 3px solid var(--green); padding-left: 13px; }
+  .fig-keynumbers .key-number strong { font-size: clamp(26px, 4vw, 38px); }
   .c-grid { stroke: var(--line-soft); stroke-width: 1; }
+  .c-axis { stroke: var(--line-strong); stroke-width: 1; }
   .c-label { fill: var(--ink-4); font-family: var(--sans); font-size: 12px; font-weight: 700; }
+  .c-axis-title { fill: var(--ink-3); font-family: var(--sans); font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
   .c-value { fill: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 800; }
   .c-line { fill: none; stroke: var(--green); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
-  .c-area { fill: var(--green); opacity: .09; }
+  .c-area { fill: var(--green); opacity: .12; }
   .c-dot { fill: var(--green); }
   .c-bar { fill: var(--green); }
-  .c-bar-2 { fill: var(--ink-2); }
+  .c-bar-2 { fill: var(--lime); }
   .c-bar-accent { fill: var(--lime); }
   .c-track { fill: var(--paper-3); }
   .c-node { fill: var(--paper-2); stroke: var(--green); stroke-width: 1.3; }
   .c-node-label { fill: var(--ink); font-family: var(--sans); font-size: 13px; font-weight: 700; }
   .c-flow { fill: none; stroke: var(--green); stroke-width: 1.6; }
   .c-arrow { fill: var(--green); }
+  .c-water { fill: var(--lime-soft); opacity: .55; }
+  .c-land { fill: var(--paper-3); stroke: var(--line-strong); stroke-width: 1; }
+  .c-coast { fill: none; stroke: var(--green); stroke-width: 1.4; opacity: .5; }
 
   /* Front-page hero trend (dark) */
   .hero-trend { margin: 0; background: var(--green-deep); color: #fff; padding: 20px 22px; }
