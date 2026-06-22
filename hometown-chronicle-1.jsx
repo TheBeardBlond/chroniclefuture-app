@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { supabase } from "./src/utils/supabase.js";
 
 const PUBLIC_SIGNALS = [
@@ -9,6 +9,183 @@ const PUBLIC_SIGNALS = [
   { scope: "Resources", region: "Americas / Indo-Pacific", title: "Critical minerals are moving closer to national strategy", summary: "Permitting, processing capacity, recycling, and secure access to industrial inputs are becoming competitive advantages for regions and firms.", impact: 86, horizon: "3-10 years" },
   { scope: "Demographics", region: "Advanced economies", title: "Aging populations are reshaping labor and essential services", summary: "Healthcare, housing, mobility, automation, and workforce availability will be influenced by a growing share of older residents.", impact: 89, horizon: "5-15 years" }
 ];
+
+/* ----------------------------------------------------------------------------
+   News outlet — public editorial content (front-end only; no backend, no RLS,
+   no entitlement changes). Structured so additional articles can be added by
+   appending objects here, or migrated to a CMS/database later.
+---------------------------------------------------------------------------- */
+
+const FEATURE_ARTICLE = {
+  slug: "last-empire-of-oil",
+  status: "published",
+  category: "Investigation",
+  kicker: "Original investigation",
+  title: "The Last Empire of Oil",
+  dek: "How Donald Trump's gamble to reimpose the petrodollar could reshape — or fracture — the world economy.",
+  cardDek: "The secret 1974 bargain that made the dollar the oxygen of global commerce — and why it is now under its most serious threat in fifty years.",
+  standfirst: "An original investigation for Chronicle Future Magazine · June 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 2026",
+  readingTime: "18 min read",
+  epigraph: {
+    quote: "The world saves in dollars in large part because it pays in dollars.",
+    source: "Deutsche Bank, March 2026"
+  },
+  lead: "There is a deal most Americans have never heard of that has quietly shaped the price of everything they buy, the interest rate on every mortgage they've ever signed, and the foreign policy of every president since Richard Nixon.",
+  sections: [
+    {
+      id: "intro",
+      paragraphs: [
+        `There is a deal most Americans have never heard of that has quietly shaped the price of everything they buy, the interest rate on every mortgage they've ever signed, and the foreign policy of every president since Richard Nixon. It was brokered not in public, not by treaty, not with the fanfare of a G7 summit, but in a private arrangement between Henry Kissinger and the Saudi royal family in the summer of 1974. It was never written into law. It was never ratified. But for fifty years, it functioned as the invisible skeleton of the global financial order.`,
+        `The deal was simple, and elegant in its ruthlessness: Saudi Arabia would price its oil exclusively in US dollars, and invest its surplus revenues in US Treasury bonds. In exchange, Washington would guarantee the security of the kingdom. Because oil is the foundational input of every modern economy — you cannot make fertiliser, plastics, pharmaceuticals, or microchip coolant without it — every country on Earth that needed oil needed dollars first. And because every oil-producing nation followed Saudi Arabia's lead, the dollar became, effectively, the oxygen of global commerce.`,
+        `It was what the late French finance minister Valéry Giscard d'Estaing once famously called America's exorbitant privilege. And for half a century, the United States used it to borrow cheaply, run persistent deficits, fund its military, and project power in ways no other nation could afford to replicate.`,
+        `Now, in the spring of 2026, that privilege is under the most serious threat in its history. And the man who set the most dramatic recent events in motion is the same man who insists he is trying to save it: Donald J. Trump.`
+      ]
+    },
+    {
+      id: "part-one",
+      eyebrow: "Part One",
+      heading: "The Architecture of American Power",
+      pullQuote: "Remove that demand, and the entire edifice begins to wobble.",
+      paragraphs: [
+        `To understand what is at stake, you have to understand what the petrodollar actually does — and why its collapse would be so catastrophic for the United States.`,
+        `When an economy runs a persistent trade deficit, as the US has done for decades, it must continuously attract foreign capital to balance the books. Under any other currency regime, this would eventually force discipline: a weaker currency, higher interest rates, reduced borrowing. But the dollar's status as the world's reserve currency exempts Washington from this ordinary arithmetic. Because global trade is denominated in dollars, and because oil — the most widely traded commodity in the world — is priced in dollars, there is always a structural demand for the currency. Countries must hold dollar reserves simply to participate in the modern economy.`,
+        `This creates a circular, self-reinforcing mechanism. Oil exporters earn dollars. They invest those dollars in US Treasury bonds, which are the world's most liquid safe-haven asset. This demand for Treasuries keeps US borrowing costs lower than they would otherwise be. Those low borrowing costs allow Washington to fund its military and social programmes without facing the fiscal constraints that discipline every other major economy. That military, in turn, protects the Gulf states that price their oil in dollars, which sustains the demand for those dollars, which funds that military. Around and around it goes.`,
+        `The numbers tell the story starkly. As of early 2026, the United States carries a national debt of $39 trillion — a figure that crossed that threshold in March of this year, weeks into the US military engagement with Iran. Each percentage point rise in the interest rate on that debt costs the Treasury hundreds of billions of dollars annually. The only reason this does not trigger an immediate fiscal crisis is that foreign demand for dollar-denominated assets keeps those rates suppressed. Remove that demand, and the entire edifice begins to wobble.`,
+        `This is what Trump's advisers understand. And it is what drives — beneath the tariff wars, the territorial rhetoric, and the spectacular diplomatic ruptures — a coherent, if brutally blunt, strategy to ensure that no country feels comfortable moving away from the dollar.`
+      ]
+    },
+    {
+      id: "part-two",
+      eyebrow: "Part Two",
+      heading: "The Trump Strategy — Coercion as Currency Policy",
+      paragraphs: [
+        `Trump has never been a subtle architect of geopolitical theory. But those around him — and analysts parsing the patterns in his second-term foreign policy — see something that looks less like chaos and more like a coherent doctrine: the restoration of what political economist Peter Gowan once called the Dollar-Wall Street Regime.`,
+        `The strategy has several interlocking components.`
+      ],
+      points: [
+        { lead: "Tariffs as dollar weaponry.", text: `When Trump announced sweeping tariff increases on April 2, 2025 — a day he labelled "Liberation Day" — most analysts focused on the trade war dimension. But the logic also operated at a currency level: by imposing tariffs, the administration sought to strengthen the dollar (a stronger dollar makes imports cheaper, partially offsetting tariff costs) and to force surplus countries to negotiate on US terms, including financial terms. Tariff threats have also been deployed explicitly against any nation contemplating a move away from the dollar. In early 2025, Trump threatened 100% tariffs on BRICS nations pursuing de-dollarisation efforts. "BRICS is dead," he declared in February of that year — a statement that proved premature, but that illustrated the willingness to use economic coercion in service of currency dominance.` },
+        { lead: "Energy dominance as geopolitical leverage.", text: `From his first term, Trump has insisted on what he calls "American energy dominance" — maximum fossil fuel production, minimal climate regulation, and the active promotion of US liquefied natural gas exports. This is not only industrial policy. It is petrodollar policy. Every long-term LNG contract signed between a US producer and an Asian buyer is a contract denominated in dollars. Every barrel of American shale oil on the global market reinforces the dollar's centrality to energy trade. In this framing, abandoning fossil fuels is not just bad for the economy — it is geopolitical surrender.` },
+        { lead: "Resource acquisition as security strategy.", text: `The administration's aggressive posture toward Venezuela, its repeated interest in acquiring Greenland, and its minerals-for-security deals in various developing nations all follow a similar logic: securing the physical commodity base that underpins both fossil fuel economies and the emerging green technology supply chain. When Trump said of Venezuelan oil seized by US forces in January 2026, "Well, we keep it, I guess," he articulated the bluntest possible version of this strategy. Control the resources, control the currency that prices them.` },
+        { lead: "Alliance pressure and NATO leverage.", text: `By repeatedly questioning US commitments to NATO and demanding that European allies pay more for their own defence, Trump has sought to reframe the post-war security bargain. The implicit logic: American military protection is not free, and countries that benefit from the US security umbrella should pay for it in kind — including through continued participation in dollar-denominated financial systems.` },
+        { lead: "Intimidation of the Federal Reserve.", text: `Trump's repeated attacks on Federal Reserve Chairman Jerome Powell, and his reported attempts to remove or undermine him before his term ended, have been widely condemned as an assault on institutional independence. But they also serve a more specific purpose in the currency strategy: a Fed that accommodates executive pressure is a Fed that can be directed to maintain policies that serve the dollar's reserve status over inflation control, if necessary.` }
+      ]
+    },
+    {
+      id: "part-three",
+      eyebrow: "Part Three",
+      heading: "The Cracks in the Foundation",
+      pullQuote: "The tools Trump is using to defend dollar dominance may be the very things eroding it.",
+      paragraphs: [
+        `Here is where the strategy encounters a paradox so profound it threatens to undo itself: the tools Trump is using to defend dollar dominance may be the very things eroding it.`,
+        `The most dramatic illustration came on and after April 2, 2025. When Liberation Day tariffs were announced, financial markets did something they had never done in living memory during a period of acute uncertainty. The dollar fell. Not slightly — sharply. And it fell even as the VIX index, Wall Street's fear gauge, spiked upward. This violated one of the most reliable rules of modern finance: in a crisis, investors flee to the dollar. The dollar is supposed to be the safe haven. Instead, investors appeared to be fleeing from the dollar — and from US Treasury bonds — simultaneously.`,
+        `By the end of 2025, the dollar index, which tracks the greenback against a basket of major currencies, had fallen nearly 10%. This was the worst annual performance for the dollar in over fifty years. Central banks began diversifying reserves at an accelerating pace. The share of the dollar in global foreign exchange reserves, which had already declined from 72% in 2001, fell to approximately 56.9% by the third quarter of 2025 — its lowest level since 1995, according to IMF data.`,
+        `The reasons were not mysterious. Trump's tariff regime, the exploding national debt, and rising inflation expectations all fed a "Sell America" trade among global investors. More damaging still was the question of institutional credibility. For the dollar's reserve status to hold, foreign investors must trust that US institutions — the Fed, the courts, the Treasury — will behave predictably and in accordance with the rule of law. Trump's attacks on those institutions, his firings of officials he deemed insufficiently loyal, and what a peer-reviewed study in the journal International Organization described as "erratic" and "capricious" policies combined to raise a question that investors are never comfortable asking: is the United States still a safe bet?`,
+        `As measured by credit default swaps — essentially insurance contracts against a country defaulting on its debt — the United States had, by May 2025, the highest perceived default risk of any G7 nation. This was a staggering reversal. In 2021, it had the lowest.`,
+        `The deeper contradiction runs still further. Trump's energy dominance strategy is premised on the continued centrality of fossil fuels to the global economy. But the petrodollar system's long-term viability faces a challenge that no amount of gunboat diplomacy can resolve: the accelerating global transition away from oil. The Gulf states themselves have long-term plans to diversify their economies away from petroleum revenues and into green technologies and sovereign wealth funds. As renewable energy becomes cheaper than oil across more of the global South, the structural demand for petrodollars — countries needing dollars to buy oil — will naturally diminish. The Trump administration's response to this reality, doubling down on arms sales and fossil fuel infrastructure, has been characterised by some economists as a "long-term strategic failure" that fundamentally misreads the direction of history.`
+      ]
+    },
+    {
+      id: "part-four",
+      eyebrow: "Part Four",
+      heading: "The Saudi Pivot and the Petrodollar's Quiet Death Notice",
+      paragraphs: [
+        `Buried in the diplomatic calendar of June 2024 — largely overlooked at the time — was a notice that the original 1974 petrodollar agreement between the United States and Saudi Arabia had lapsed and would not be formally renewed. Riyadh declined to recommit to pricing its oil exclusively in dollars. The deal that Henry Kissinger had spent years constructing, the foundational bargain of the entire system, simply expired without fanfare.`,
+        `Saudi Arabia has not, it should be emphasised, stopped trading in dollars. The Kingdom still held $149.5 billion in US Treasury securities as of December 2025, and actually increased those holdings by $12 billion over the course of that year. But the non-renewal of the formal agreement was a signal. The Saudis have simultaneously joined the mBridge project — a central bank digital currency initiative led by China specifically designed to create an alternative to dollar-payment infrastructure. They are building hedges.`,
+        `The reasons are not difficult to understand. A 2016 piece of US legislation exposed Saudi sovereign assets to potential seizure through American courts. The precedent was noted not only in Riyadh but in every capital that holds dollar-denominated reserves. If the United States can freeze or seize Russian dollar assets as a sanction, and if it can pursue Saudi assets through domestic courts, then holding dollars comes with a form of political risk that was never part of the original bargain. This "weaponisation" of the dollar — the use of dollar-system access as a geopolitical weapon — has accelerated precisely as the Trump administration leans more heavily on it.`,
+        `It is a trap of the system's own making. The more aggressively the US deploys dollar dominance as a coercive tool, the more urgently its targets seek alternatives. And the more they build those alternatives, the more the dominance they were designed to coerce begins to hollow out.`
+      ]
+    },
+    {
+      id: "part-five",
+      eyebrow: "Part Five",
+      heading: "The Strait of Hormuz and the Iran War — The Petrodollar's Crucible",
+      pullQuote: "A key catalyst for erosion in petrodollar dominance, and the beginnings of the petroyuan.",
+      paragraphs: [
+        `No single event has tested the petrodollar's structural resilience more acutely than the military conflict with Iran that began in February 2026. The Strait of Hormuz — the narrow chokepoint through which roughly one-fifth of the world's oil supply passes — became the most consequential stretch of water in global finance.`,
+        `Iran's ability to threaten, and periodically disrupt, shipping through the Strait has done something peculiar to the dollar. In the short term, conflict has supported the dollar, as investors historically seek safe-haven assets during Middle East crises, and as a higher oil price — priced in dollars — temporarily increases global demand for the currency. The dollar strengthened against all major currencies after hostilities commenced, and moved in unusual tandem with the oil price.`,
+        `But the longer-term analysis tells a more complicated story. Deutsche Bank analysts noted in late March 2026 that the Iran conflict may prove to be "a key catalyst for erosion in petrodollar dominance, and the beginnings of the petroyuan." The mechanism they identified was precise: if Iran can credibly threaten the Strait, and if China can offer Gulf states passage guarantees in exchange for oil payments in yuan, then a structural incentive emerges for regional producers to price at least some of their oil in China's currency. Reports that Iran was, in some instances, demanding yuan payments for safe passage through its controlled waters were described by Deutsche Bank analysts as something that "should be closely followed."`,
+        `The US-Israel military campaign against Iran has, meanwhile, drawn those two regional adversaries — Iran and China — into a tighter strategic embrace. German economists warned in April 2026 that continued US and Israeli military pressure would deepen Iran's ties to China, bolstering the yuan's international role at the dollar's expense. The very intervention designed to protect the petrodollar system's physical infrastructure — secure Gulf shipping lanes — may be simultaneously accelerating the political and financial conditions for that system's erosion.`,
+        `There is a brutal irony at the heart of this. The historical logic of US military engagement in the Middle East has always been, at least in part, about maintaining the conditions under which oil continues to be priced in dollars. Iraq's Saddam Hussein and Libya's Muammar Gaddafi both experimented with accepting non-dollar currencies for oil in the years before their governments were overthrown. The connection is rarely stated in official policy documents. But it hangs in the air of every serious strategic discussion about the region. Now, Trump's Iran campaign risks producing the very outcome it was designed to prevent: a legitimised alternative architecture for oil-for-currency transactions that bypasses the dollar entirely.`
+      ]
+    },
+    {
+      id: "part-six",
+      eyebrow: "Part Six",
+      heading: "The BRICS Challenge — Ambition Meets Reality",
+      paragraphs: [
+        `Against this backdrop of dollar vulnerability, the BRICS bloc — now expanded to eleven full members including Iran, Saudi Arabia, the UAE, Indonesia, Egypt, and Ethiopia, representing over 45% of the world's population and more than 35% of global GDP by purchasing power parity — has accelerated its push to build alternative financial infrastructure. Understanding what they have actually achieved, versus what has been hyped, requires separating signal from noise.`,
+        `The signal is real. Russia and China now settle approximately 90% of their bilateral trade in rubles and yuan, bypassing dollar intermediaries entirely. Russia developed its own SWIFT alternative (SPFS) and its Mir payment network after Western sanctions froze it out of dollar channels. China's Cross-Border Interbank Payment System (CIPS) processed the equivalent of $245 trillion in yuan-denominated transactions in 2025 — genuine, operational infrastructure providing a settlement alternative to dollar-denominated SWIFT channels. In October 2025, BRICS researchers launched a pilot "Unit" — a digital trade settlement instrument backed 40% by gold and 60% by a basket of BRICS currencies — designed specifically to reduce dollar dependency in cross-border transactions. Intra-BRICS trade hit $500 billion in 2025, with certain corridors seeing over 90% of transactions conducted without dollar intermediation.`,
+        `Perhaps most consequentially, central banks globally have been accumulating gold at a historic pace. The World Gold Council reported that central banks purchased over 1,000 tonnes of gold in each of the three consecutive years from 2022 to 2024 — more than double the average annual purchase rate from 2010 to 2021. Russia and China have both dramatically increased their gold reserves while reducing their exposure to US Treasuries. Russia liquidated virtually its entire $96 billion US Treasury holding between 2013 and 2025. China nearly halved its holdings from $1.32 trillion to $756 billion over the same period, while doubling its gold reserves.`,
+        `The noise, however, is also significant. The grand unified BRICS currency that occupied so many headlines in 2024 and 2025 has not materialised, and experts do not expect it before 2028 at the earliest. The July 2025 BRICS summit in Rio de Janeiro produced a 126-point communiqué that did not mention de-dollarisation directly — a tactical step back under pressure from Trump's tariff threats. Brazil's President Lula, previously one of the loudest advocates for a shared BRICS currency, quietly removed the proposal from the agenda after Liberation Day. India, the new BRICS chair for 2026, has been explicit: its External Affairs Minister stated flatly that India has no policy to replace the dollar, and that the dollar remains the foundation of global economic stability.`,
+        `The BIS 2025 Triennial Survey, the most comprehensive measure of global currency use, found the dollar on one side of 89.2% of all foreign exchange transactions — actually an increase from 88.4% in 2022. The yuan's share, while growing, remains at 8.5% of FX transactions. China's capital controls, which prevent the free convertibility of the renminbi, remain the fundamental structural barrier to any genuine petroyuan competing with the petrodollar. You cannot replace the world's reserve currency with one that investors cannot freely move in and out of.`,
+        `What is emerging is not a replacement for the dollar system, but a series of parallel tracks running alongside it — bilateral arrangements, commodity-backed instruments, digital payment corridors — that reduce some nations' dependence on the dollar without eliminating it. "Gradual erosion" rather than "sudden collapse" is the consensus view among serious economists. The dollar is weakened but not replaced; challenged but not dethroned.`
+      ]
+    },
+    {
+      id: "part-seven",
+      eyebrow: "Part Seven",
+      heading: "Scenario One — If America Wins",
+      paragraphs: [
+        `What does success look like for Trump's strategy? In the scenario where the US emerges from the Iran conflict having neutralised Iran's Hormuz threat, restored Gulf oil flows through dollar-denominated channels, and reasserted its position as the indispensable guarantor of global energy security, the petrodollar gets a reprieve.`,
+        `In this scenario, BRICS fractures under tariff pressure and internal contradictions. India continues to prioritise its bilateral relationship with Washington. Saudi Arabia, reassured by US military protection, maintains its practical reliance on dollar infrastructure even without the formal 1974 agreement. China's capital controls continue to prevent the yuan from achieving reserve currency status. The BRICS Unit remains a niche settlement instrument used for a fraction of intra-bloc trade, never scaling to challenge the dollar's centrality.`,
+        `In this scenario, Trump's approach — maximalist coercion, resource control, military projection — is vindicated as effective, if brutal, dollar management. The United States continues to borrow cheaply, run its deficits, and fund its priorities without facing the fiscal discipline that would otherwise be demanded.`,
+        `But even this success scenario carries significant long-term costs. The dollar's position has been bought, in this telling, through intimidation and confrontation rather than through the institutional trust and rule-of-law credibility that historically underpinned it. Allies who have been alternately threatened and abandoned — Canada's Prime Minister Mark Carney spoke of "a rupture in the world order" following Trump's Greenland and Venezuela moves — may maintain dollar exposure for now, while quietly accelerating their diversification plans. The weaponisation of dollar-system access means that every nation now rationally considers what it would look like to have alternatives available. Even nations that choose not to use those alternatives have stronger incentives to build them.`,
+        `There is also the energy transition wildcard. Even a triumphant petrodollar faces a structural horizon question: in a world moving away from fossil fuels, what does oil-price-denominated dollar demand eventually become? The Gulf states are already investing massively in solar, green hydrogen, and sovereign wealth funds oriented toward non-oil assets. The petrodollar system that a Trump victory shores up today may still be living on borrowed time in a decade.`
+      ]
+    },
+    {
+      id: "part-eight",
+      eyebrow: "Part Eight",
+      heading: "Scenario Two — If America Fails",
+      paragraphs: [
+        `The failure scenario is harder to dismiss than it might have seemed two years ago. In this scenario, the Iran conflict drags on without resolution, with Iran maintaining enough leverage over Hormuz to sustain a credible threat. The cost of the conflict, added to an already spiralling national debt, pushes the United States' fiscal trajectory into territory that begins to genuinely alarm bond markets. Already, by March 2026, Moody's — the last of the three major credit rating agencies to act — had downgraded US sovereign debt. Interest costs become the fastest-growing item in the federal budget.`,
+        `Foreign investors, watching institutional credibility erode — through Fed independence attacks, through court-packing concerns, through the politicisation of the regulatory state — continue to demand a premium for holding dollar assets that they did not previously require. The dollar continues to weaken, not dramatically but persistently, as the "Sell America" trade that dominated 2025 resumes after any Iran ceasefire.`,
+        `In this scenario, BRICS alternatives gain genuine traction. Not because any single alternative is ready to replace the dollar, but because enough nations find it rational to route enough of their trade through non-dollar channels that the dollar's share of global transactions falls below a psychological threshold. The dollar goes from being the automatic default to one among several options depending on the trading relationship.`,
+        `The consequences for ordinary Americans would be severe and diffuse. Higher interest rates on the national debt would crowd out public investment in infrastructure, healthcare, and education. The "exorbitant privilege" that allowed the United States to borrow at below-market rates would diminish, meaning Americans would pay more for mortgages, car loans, and credit cards. Import prices would rise as the dollar's purchasing power abroad declined. The United States would no longer be able to sanction adversaries as effectively, since dollar-system exclusion becomes less punishing if dollar-system alternatives are accessible.`,
+        `It would not be a sudden crash. Economists are unanimous that the dollar has no realistic near-term replacement, and that any transition away from dollar dominance would unfold over decades, not years. China cannot step into the vacuum while maintaining capital controls. The euro lacks the scale and geopolitical unity required. The BRICS Unit is a settlement instrument, not a full-spectrum reserve currency. But a dollar that is weakened, that no longer commands the automatic deference it once did, would represent a fundamental shift in the American standard of living — a closing of the gap between what the United States can afford and what any other large economy in its position would have to pay.`
+      ]
+    },
+    {
+      id: "part-nine",
+      eyebrow: "Part Nine",
+      heading: "The Third Path — Energy Transition as Wildcard",
+      paragraphs: [
+        `There is a third scenario that neither Trump's advisers nor most mainstream financial analysts have fully reckoned with, and it may ultimately be the most consequential: the energy transition itself makes the entire petrodollar debate moot.`,
+        `The petrodollar system rests on a simple physical fact: global commerce requires oil, and oil is priced in dollars. Remove that fact — or substantially diminish it — and the structural demand for dollars that underpins the system evaporates regardless of what Trump or BRICS or the Saudi royal family decide to do.`,
+        `Renewable energy prices have fallen faster than virtually every projection predicted. Solar and wind are now cheaper than fossil fuels across most of the world. Electric vehicles are displacing internal combustion engines at an accelerating rate. Green hydrogen — produced by splitting water molecules using renewable electricity — is beginning to challenge the fossil fuel dominance of industrial processes. As these transitions compound, the fraction of global economic activity that requires oil, and therefore dollars, steadily shrinks.`,
+        `The Gulf states are not naive about this. Their massive sovereign wealth fund diversification — into technology, real estate, financial services, and green energy itself — reflects an acute awareness that their oil-revenue model has a finite horizon. Saudi Arabia's Vision 2030 is, at its core, a plan for the post-oil economy. The petrodollar system that Trump is fighting so hard to defend may be structurally undermined not by BRICS currencies or Iranian missiles, but by the solar panel and the lithium battery.`,
+        `This creates a profound strategic irony. Trump's insistence on fossil fuel expansion — presented as a defence of the petrodollar — may actually be prolonging the United States' dependence on the very system that is most vulnerable to long-term disruption. A US that had led the green energy transition would be positioned to become the provider of the next generation's energy security infrastructure, potentially denominating a different but equally central set of commodity contracts in dollars. Instead, the current strategy bets everything on a system whose physical foundation is eroding under the pressure of technological change.`
+      ]
+    },
+    {
+      id: "epilogue",
+      eyebrow: "Epilogue",
+      heading: "The Weight of the Exorbitant Privilege",
+      pullQuote: "The petrodollar was always more than an oil deal. It was a promise.",
+      paragraphs: [
+        `In the spring of 2026, as US aircraft carriers manoeuvre through the Persian Gulf and BRICS finance ministers convene to finalise the Unit pilot programme and the national debt ticks past $39 trillion, the fundamental question hanging over global finance is whether the architecture Henry Kissinger built in 1974 can survive the strains of the 2020s.`,
+        `The honest answer is: probably, for now — but in diminished form, and on borrowed time. The dollar remains, by overwhelming metrics, the world's dominant reserve currency. No alternative comes close to matching the liquidity, institutional depth, and sheer transactional scale of the dollar system. The yuan faces structural barriers that require political decisions China has shown no willingness to make. The BRICS Unit is a genuine development but not yet a threat to dollar hegemony.`,
+        `What has changed is not the dollar's position today, but the direction of travel, and the confidence with which that travel can be accelerated. A decade ago, de-dollarisation was an aspiration discussed mostly by fringe economists and geopolitical revanchists. Today it is a line item in the strategic plans of central banks representing billions of people, funded by gold reserves accumulated at historically unprecedented rates, implemented through genuine payment infrastructure that routes real transactions around the dollar system every day.`,
+        `Trump's strategy assumes that American power, aggressively deployed, can freeze that trajectory. The counter-argument — made by everyone from Deutsche Bank economists to Cambridge political scientists to economists at the Peterson Institute — is that aggressive deployment of American power is precisely what is accelerating it. Every sanction that demonstrates the dollar's weaponisability gives another nation another reason to build an exit. Every institutional norm shattered in the name of restoring American dominance removes another brick from the foundation on which that dominance actually rests.`,
+        `The petrodollar was always more than an oil deal. It was a promise — implicit, unwritten, but deeply held — that the United States would be a predictable custodian of the global financial system, that its institutions would hold, that the rule of law would constrain even the most powerful. That promise, extended by a secret handshake in 1974, was the true engine of fifty years of American economic supremacy.`,
+        `The question for the next decade is not whether a new currency will replace the dollar. It almost certainly will not, at least not in any of our lifetimes. The question is whether the United States can repair enough of what has been damaged — in alliance relationships, in institutional credibility, in the global trust that makes safe-haven status self-fulfilling — to maintain the substance of the privilege even after some of its form has eroded.`,
+        `That is not a question any tariff can answer, and no missile can resolve it. It is, in the end, a question about what kind of country America chooses to be. And the world — having watched the events of the past eighteen months with a mixture of alarm and calculation — is waiting, and planning, and quietly building its alternatives, just in case the answer turns out to be the wrong one.`
+      ]
+    }
+  ],
+  sourceNote: `Chronicle Future Magazine is an independent publication. The views expressed in this exposé represent an analysis of publicly available economic, financial, and geopolitical evidence. This article draws on reporting from Fortune, the Centre for Economic Policy Research, Cambridge's International Organization journal, Deutsche Bank research, IMF COFER data, Green Central Banking, and multiple institutional analyses published between 2025 and 2026.`
+};
+
+const UPCOMING_ARTICLES = [
+  { slug: "grid-cant-keep-up", status: "upcoming", category: "Energy", title: "The Grid Can't Keep Up", cardDek: "Why power capacity — not chips — is becoming the real constraint on the AI build-out.", dateLabel: "Forthcoming" },
+  { slug: "mineral-nationalism", status: "upcoming", category: "Resources", title: "Mineral Nationalism", cardDek: "Permitting, processing, and the quiet race to control the inputs of the next economy.", dateLabel: "Forthcoming" },
+  { slug: "aging-balance-sheet", status: "upcoming", category: "Demographics", title: "The Aging Balance Sheet", cardDek: "How shifting demographics will reprice labor, housing, and the essential services that hold a region together.", dateLabel: "Forthcoming" },
+  { slug: "resilience-premium", status: "upcoming", category: "Trade", title: "The Resilience Premium", cardDek: "Supply chains are still choosing reliability over pure efficiency. The question is who pays for it.", dateLabel: "Forthcoming" }
+];
+
+const NEWS_ARTICLES = { [FEATURE_ARTICLE.slug]: FEATURE_ARTICLE };
 
 const SIGNAL_GROUPS = ["Local", "State", "National", "Global", "Technology", "Commodity"];
 const BRIEF_FIELDS = {
@@ -372,7 +549,7 @@ function Header({ user, onWorkspace, onHome, onSignOut }) {
       <header className="site-header">
         <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
         <nav aria-label="Primary navigation">
-          <button className="nav-link" onClick={onHome}>Global feed</button>
+          <button className="nav-link" onClick={onHome}>Front page</button>
           {user ? <button className="nav-link" onClick={onWorkspace}>My locations</button> : null}
         </nav>
         {user ? (
@@ -441,135 +618,91 @@ function AuthPanel() {
    Public global intelligence feed (landing experience)
 ---------------------------------------------------------------------------- */
 
-function PublicLanding({ user, onWorkspace }) {
-  const lead = PUBLIC_SIGNALS[0];
+function PublicLanding({ user, onWorkspace, onOpenArticle }) {
+  const lead = FEATURE_ARTICLE;
   const ranked = [...PUBLIC_SIGNALS]
     .sort((a, b) => b.impact - a.impact)
     .map((signal) => ({ label: signal.scope, value: signal.impact }));
-  const latest = PUBLIC_SIGNALS.slice(1, 5);
-  const research = PUBLIC_SIGNALS.slice(2);
+  const desk = [lead, ...UPCOMING_ARTICLES];
+  const serviceSignal = PUBLIC_SIGNALS[1];
   return (
     <main className="editorial-home">
-      <section className="editorial-lead-band">
-        <div className="editorial-lead-copy">
-          <p className="publication-line">Global intelligence briefing · {longDate()}</p>
-          <p className="kicker light">Lead assessment</p>
+      <section className="news-masthead">
+        <div className="news-masthead-row">
+          <p className="news-edition">Chronicle Future · Intelligence &amp; Investigations</p>
+          <p className="news-dateline">{longDate()}</p>
+        </div>
+      </section>
+
+      <section className="news-lead" aria-label="Lead investigation">
+        <div className="news-lead-main">
+          <p className="kicker">{lead.kicker}</p>
           <h1>{lead.title}</h1>
-          <p>{lead.summary}</p>
-          <div className="editorial-lead-meta">
-            <span>{lead.scope}</span><span>{lead.region}</span><span>{lead.horizon}</span>
+          <p className="news-lead-dek">{lead.dek}</p>
+          <p className="news-lead-standfirst">{lead.lead}</p>
+          <div className="news-byline">
+            <span>By {lead.byline}</span><span>{lead.dateLabel}</span><span>{lead.readingTime}</span>
           </div>
+          <button className="btn btn-green" onClick={() => onOpenArticle(lead.slug)}>Read the investigation</button>
         </div>
-        <div className="editorial-lead-visual" aria-label="Structural impact ranking">
-          <div className="visual-heading"><span>Structural impact index</span><strong>{lead.impact}</strong></div>
-          <RankedBars items={ranked.slice(0, 5)} />
-          <p>Relative impact across Chronicle Future's active global watchlist.</p>
-        </div>
+        <aside className="news-lead-aside">
+          <figure className="news-lead-figure" aria-hidden="true">
+            <span className="news-lead-figure-kicker">Chronicle Future</span>
+            <span className="news-lead-figure-mark">Oil &amp; the Dollar</span>
+            <span className="news-lead-figure-note">Original investigation · June 2026</span>
+          </figure>
+          <blockquote className="news-lead-quote">
+            <p>“{lead.epigraph.quote}”</p>
+            <cite>— {lead.epigraph.source}</cite>
+          </blockquote>
+        </aside>
       </section>
 
-      <section className="briefing-ribbon" aria-label="Chronicle Future briefing">
-        <div><strong>Chronicle briefing</strong><span>Signals selected for consequence, not headline volume.</span></div>
-        <a href="#latest-signals">Explore today’s intelligence</a>
-      </section>
-
-      <section className="editorial-section" id="latest-signals">
+      <section className="editorial-section">
         <header className="editorial-section-head">
-          <h2>News &amp; Signals</h2>
-          <span>Global developments with local consequences</span>
+          <h2>From the Desk</h2>
+          <span>Investigations &amp; analysis</span>
         </header>
-        <div className="editorial-news-grid">
-          <article className="editorial-feature">
-            <div className="feature-visual">
-              <div className="feature-index"><span>Impact</span><strong>{lead.impact}</strong></div>
-              <div className="feature-bars" aria-hidden="true">
-                {[78, 94, 64, 86, 72, 90, 58, 82].map((value, index) => <i key={index} style={{ height: value + "%" }} />)}
-              </div>
-            </div>
-            <p className="story-label">{lead.scope} · {lead.region}</p>
-            <h3>{lead.title}</h3>
-            <p>{lead.summary}</p>
-            <footer><span>Lead intelligence</span><time>{lead.horizon}</time></footer>
-          </article>
-          <div className="editorial-story-grid">
-            {latest.map((signal, index) => (
-              <article className="editorial-story" key={signal.title}>
-                <div className={"story-marker marker-" + (index + 1)} aria-hidden="true"><span>{signal.impact}</span></div>
-                <p className="story-label">{signal.scope}</p>
-                <h3>{signal.title}</h3>
-                <p>{signal.summary}</p>
-                <footer><span>{signal.region}</span><time>{signal.horizon}</time></footer>
+        <div className="news-grid">
+          {desk.map((story) => {
+            const live = story.status !== "upcoming";
+            return (
+              <article className={live ? "news-card" : "news-card is-upcoming"} key={story.slug}>
+                <p className="story-label">{story.category}</p>
+                <h3>{story.title}</h3>
+                <p className="news-card-dek">{story.cardDek || story.dek}</p>
+                <footer>
+                  {live
+                    ? <button className="text-link" onClick={() => onOpenArticle(story.slug)}>Read the full story →</button>
+                    : <span className="news-flag">Coming soon</span>}
+                  <time>{story.dateLabel}</time>
+                </footer>
               </article>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </section>
 
-      <section className="editorial-section analysis-desk">
+      <section className="editorial-section service-showcase" id="service">
         <header className="editorial-section-head">
-          <h2>Latest Analysis</h2>
-          <span>Evidence, trajectory, and strategic consequence</span>
+          <h2>The Intelligence Service</h2>
+          <span>From global signal to local consequence</span>
         </header>
-        <div className="analysis-desk-grid">
-          <article className="analysis-main">
-            <p className="story-label">Technology &amp; infrastructure</p>
-            <h3>{PUBLIC_SIGNALS[1].title}</h3>
-            <p>{PUBLIC_SIGNALS[1].summary}</p>
+        <div className="service-grid">
+          <div className="service-copy">
+            <p className="kicker">Private intelligence</p>
+            <h3>{serviceSignal.title}</h3>
+            <p>Alongside the newsroom, Chronicle Future operates a private decision-support service. It connects world-scale change to a specific city, workforce, industry mix, and business environment — with scored opportunities, risks, geographic SWOT, and a decade outlook.</p>
             <HorizonMap lanes={[
               { label: "Near term", tone: "up", items: PUBLIC_SIGNALS.slice(0, 3).map((item) => ({ title: item.title, horizon: item.horizon })) },
               { label: "Long term", tone: "down", items: PUBLIC_SIGNALS.slice(3).map((item) => ({ title: item.title, horizon: item.horizon })) }
             ]} />
-          </article>
-          <aside className="analysis-index">
-            <p className="panel-eyebrow">Impact index</p>
+          </div>
+          <aside className="service-index">
+            <p className="panel-eyebrow">Structural impact index</p>
             <RankedBars items={ranked} />
-            <p className="panel-foot">Updated from the current public watchlist.</p>
+            <p className="panel-foot">Relative impact across the active global watchlist.</p>
           </aside>
-          <aside className="analysis-rail">
-            {PUBLIC_SIGNALS.slice(4).map((signal) => (
-              <article key={signal.title}>
-                <p className="story-label">{signal.scope}</p>
-                <h3>{signal.title}</h3>
-                <span>{signal.horizon}</span>
-              </article>
-            ))}
-          </aside>
-        </div>
-
-        <div className="research-grid">
-          {research.map((signal, index) => (
-            <article key={signal.title}>
-              <span className="research-number">{String(index + 1).padStart(2, "0")}</span>
-              <p className="story-label">{signal.scope} research</p>
-              <h3>{signal.title}</h3>
-              <p>{signal.summary}</p>
-              <footer>{signal.region} · {signal.horizon}</footer>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="editorial-section research-list-section">
-        <header className="editorial-section-head">
-          <h2>Research &amp; Outlook</h2>
-          <span>Chronicle Future intelligence desk</span>
-        </header>
-        <div className="research-list">
-          {PUBLIC_SIGNALS.map((signal, index) => (
-            <article key={signal.title}>
-              <span><small>Analysis</small>{String(index + 1).padStart(2, "0")}</span>
-              <div><h3>{signal.title}</h3><p>{signal.summary}</p></div>
-              <strong>{signal.impact}</strong>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="editorial-section collections-section">
-        <header className="editorial-section-head"><h2>Collections</h2><span>Persistent themes under active watch</span></header>
-        <div className="collection-grid">
-          {["AI & compute", "Energy systems", "Trade & industry", "Resources", "Demographics"].map((item, index) => (
-            <article key={item}><span>{String(index + 1).padStart(2, "0")}</span><h3>{item}</h3><p>Signals, analysis, and location implications.</p></article>
-          ))}
         </div>
       </section>
 
@@ -584,11 +717,78 @@ function PublicLanding({ user, onWorkspace }) {
 
       <footer className="editorial-footer">
         <div className="footer-brand"><strong>CHRONICLE <span>FUTURE</span></strong><p>Intelligence for decisions that cannot wait for certainty.</p></div>
-        <div><h3>Intelligence</h3><span>Global signals</span><span>Location briefs</span><span>Opportunity radar</span></div>
-        <div><h3>Publication</h3><span>Magazine editions</span><span>Research &amp; outlook</span><span>Collections</span></div>
+        <div><h3>Newsroom</h3><span>Investigations</span><span>Analysis</span><span>From the desk</span></div>
+        <div><h3>Service</h3><span>Location briefs</span><span>Opportunity radar</span><span>Magazine editions</span></div>
         <div><h3>Company</h3><span>About Chronicle Future</span><span>Methodology</span><span>Contact</span></div>
-        <small>© {new Date().getFullYear()} Chronicle Future. Decision intelligence for operators and forward thinkers.</small>
+        <small>© {new Date().getFullYear()} Chronicle Future. Independent intelligence and investigations for operators and forward thinkers.</small>
       </footer>
+    </main>
+  );
+}
+
+/* ----------------------------------------------------------------------------
+   Public news article reader
+---------------------------------------------------------------------------- */
+
+function NewsArticlePage({ slug, onBack }) {
+  const article = NEWS_ARTICLES[slug];
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+  if (!article) {
+    return (
+      <main className="page article-page">
+        <button className="text-button" onClick={onBack}>← Back to the front page</button>
+        <p className="error" role="alert">That article could not be found.</p>
+      </main>
+    );
+  }
+  return (
+    <main className="article-page">
+      <div className="article-toolbar">
+        <button className="text-button" onClick={onBack}>← Back to the front page</button>
+        <button className="btn btn-outline btn-sm" onClick={() => window.print()}>Print / Save PDF</button>
+      </div>
+      <article className="article-reader">
+        <header className="article-masthead">
+          <p className="kicker">{article.kicker}</p>
+          <h1>{article.title}</h1>
+          <p className="article-dek">{article.dek}</p>
+          <p className="article-standfirst">{article.standfirst}</p>
+          <div className="article-byline">
+            <span>By {article.byline}</span><span>{article.dateLabel}</span><span>{article.readingTime}</span>
+          </div>
+        </header>
+        {article.epigraph ? (
+          <blockquote className="article-epigraph">
+            <p>“{article.epigraph.quote}”</p>
+            <cite>— {article.epigraph.source}</cite>
+          </blockquote>
+        ) : null}
+        <div className="prose">
+          {article.sections.map((section, sectionIndex) => (
+            <section className="prose-section" key={section.id || sectionIndex}>
+              {section.eyebrow ? <p className="prose-eyebrow">{section.eyebrow}</p> : null}
+              {section.heading ? <h2>{section.heading}</h2> : null}
+              {section.paragraphs.map((paragraph, paragraphIndex) => (
+                <Fragment key={paragraphIndex}>
+                  <p className={sectionIndex === 0 && paragraphIndex === 0 ? "has-dropcap" : undefined}>{paragraph}</p>
+                  {paragraphIndex === 0 && section.pullQuote ? <p className="pull-quote">{section.pullQuote}</p> : null}
+                </Fragment>
+              ))}
+              {section.points ? (
+                <ul className="prose-points">
+                  {section.points.map((point, pointIndex) => (
+                    <li key={pointIndex}><strong>{point.lead}</strong> {point.text}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </section>
+          ))}
+        </div>
+        {article.sourceNote ? <p className="article-sourcenote">{article.sourceNote}</p> : null}
+        <footer className="article-end">
+          <button className="text-button" onClick={onBack}>← Back to the front page</button>
+        </footer>
+      </article>
     </main>
   );
 }
@@ -1087,6 +1287,7 @@ export default function App() {
   const [view, setView] = useState("public");
   const [briefId, setBriefId] = useState(null);
   const [issueId, setIssueId] = useState(null);
+  const [articleSlug, setArticleSlug] = useState(null);
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const sessionUser = data.session?.user || null;
@@ -1106,11 +1307,12 @@ export default function App() {
     });
     return () => data.subscription.unsubscribe();
   }, []);
-  const home = () => { setView("public"); setBriefId(null); setIssueId(null); window.scrollTo(0, 0); };
-  const workspace = () => { if (user) { setView("workspace"); setBriefId(null); setIssueId(null); window.scrollTo(0, 0); } };
+  const home = () => { setView("public"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); };
+  const workspace = () => { if (user) { setView("workspace"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); } };
   const signOut = async () => { await supabase.auth.signOut(); home(); };
   const openBrief = (id) => { setIssueId(null); setBriefId(id); window.scrollTo(0, 0); };
   const openIssue = (id) => { setBriefId(null); setIssueId(id); window.scrollTo(0, 0); };
+  const openArticle = (slug) => { setView("public"); setBriefId(null); setIssueId(null); setArticleSlug(slug); window.scrollTo(0, 0); };
   return (
     <>
       <style>{STYLES}</style>
@@ -1121,8 +1323,9 @@ export default function App() {
           ? <main className="loading-screen">Loading Chronicle Future…</main>
           : issueId ? <MagazinePage issueId={issueId} user={user} onBack={workspace} />
           : briefId ? <BriefPage briefId={briefId} onBack={workspace} />
+          : articleSlug ? <NewsArticlePage slug={articleSlug} onBack={home} />
           : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} />
-          : <PublicLanding user={user} onWorkspace={workspace} />}
+          : <PublicLanding user={user} onWorkspace={workspace} onOpenArticle={openArticle} />}
       </div>
     </>
   );
@@ -1636,6 +1839,83 @@ const STYLES = `
     .editorial-footer > small { grid-column: auto; }
   }
 
+  /* News front page */
+  .news-masthead { max-width: var(--maxw); margin: 0 auto; padding: 22px var(--gutter) 0; }
+  .news-masthead-row { display: flex; justify-content: space-between; align-items: baseline; gap: 18px; border-bottom: 3px solid var(--ink); padding-bottom: 12px; }
+  .news-edition { margin: 0; font-family: var(--serif); font-size: clamp(17px, 2.6vw, 24px); font-weight: 600; }
+  .news-dateline { margin: 0; color: var(--ink-3); font-size: 12px; font-weight: 700; letter-spacing: .03em; }
+
+  .news-lead { max-width: var(--maxw); display: grid; grid-template-columns: 1.55fr .95fr; gap: clamp(24px, 4vw, 48px); margin: 0 auto; padding: clamp(28px, 4vw, 44px) var(--gutter); border-bottom: 1px solid var(--ink); }
+  .news-lead-main { min-width: 0; }
+  .news-lead-main h1 { margin: 8px 0 14px; font-size: clamp(40px, 7vw, 78px); line-height: .96; }
+  .news-lead-dek { max-width: 26ch; margin: 0 0 20px; font-family: var(--serif); font-size: clamp(19px, 2.8vw, 27px); font-style: italic; color: var(--ink-2); line-height: 1.28; }
+  .news-lead-standfirst { max-width: 62ch; margin: 0 0 22px; color: var(--ink-2); font-size: clamp(16px, 2.2vw, 18px); line-height: 1.65; }
+  .news-byline { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 24px; color: var(--ink-3); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .news-byline span + span { position: relative; padding-left: 20px; }
+  .news-byline span + span::before { content: "·"; position: absolute; left: 6px; color: var(--ink-4); }
+  .news-lead-aside { display: grid; align-content: start; gap: 18px; border-left: 1px solid var(--line); padding-left: clamp(20px, 3vw, 40px); }
+  .news-lead-figure { display: grid; align-content: center; justify-items: center; gap: 12px; min-height: 230px; text-align: center; background: var(--green-deep); color: #fff; padding: 30px; }
+  .news-lead-figure-kicker { color: var(--lime-soft); font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+  .news-lead-figure-mark { font-family: var(--serif); font-size: clamp(28px, 5vw, 44px); font-weight: 600; color: var(--lime); letter-spacing: .01em; line-height: 1; }
+  .news-lead-figure-note { color: #b9d2dd; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .news-lead-quote { margin: 0; border-top: 3px solid var(--green); padding-top: 16px; }
+  .news-lead-quote p { margin: 0 0 8px; font-family: var(--serif); font-size: clamp(18px, 2.4vw, 22px); font-style: italic; line-height: 1.3; color: var(--ink); }
+  .news-lead-quote cite { color: var(--ink-3); font-size: 12px; font-style: normal; font-weight: 700; }
+
+  .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); }
+  .news-card { display: flex; flex-direction: column; min-height: 230px; border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); background: var(--paper-2); padding: 22px; }
+  .news-card h3 { margin: 0 0 10px; font-size: clamp(20px, 2.4vw, 26px); line-height: 1.1; }
+  .news-card-dek { flex: 1; margin: 0 0 16px; color: var(--ink-3); font-size: 14px; line-height: 1.55; }
+  .news-card footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .news-card footer time { color: var(--ink-4); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .news-card.is-upcoming { background: var(--paper); }
+  .news-card.is-upcoming h3 { color: var(--ink-2); }
+  .news-flag { background: var(--paper-3); color: var(--ink-3); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; padding: 4px 9px; border-radius: 3px; }
+
+  .service-showcase .service-grid { display: grid; grid-template-columns: 1.5fr .9fr; gap: clamp(24px, 4vw, 44px); }
+  .service-copy { border-right: 1px solid var(--line); padding-right: clamp(20px, 3vw, 36px); }
+  .service-copy h3 { max-width: 20ch; margin: 0 0 14px; font-size: clamp(24px, 3.4vw, 36px); line-height: 1.06; }
+  .service-copy > p:not(.kicker) { max-width: 60ch; margin: 0 0 24px; color: var(--ink-3); line-height: 1.6; }
+  .service-index .panel-eyebrow { margin: 0 0 16px; color: var(--green); }
+  .service-index .panel-foot { margin: 16px 0 0; color: var(--ink-4); font-size: 11px; }
+
+  /* News article reader */
+  .article-page { min-height: 100vh; padding: 24px var(--gutter) 90px; }
+  .article-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; max-width: 760px; margin: 0 auto 26px; }
+  .article-reader { max-width: 760px; margin: 0 auto; }
+  .article-masthead { border-top: 4px solid var(--green); padding-top: 22px; margin-bottom: 26px; }
+  .article-masthead h1 { margin: 10px 0 16px; font-size: clamp(36px, 6vw, 60px); line-height: 1.02; }
+  .article-dek { margin: 0 0 20px; font-family: var(--serif); font-size: clamp(20px, 3vw, 27px); font-style: italic; color: var(--ink-2); line-height: 1.3; }
+  .article-standfirst { margin: 0 0 18px; color: var(--ink-3); font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .article-byline { display: flex; flex-wrap: wrap; gap: 6px 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 14px 0; color: var(--ink-3); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+  .article-byline span + span { position: relative; padding-left: 20px; }
+  .article-byline span + span::before { content: "·"; position: absolute; left: 6px; color: var(--ink-4); }
+  .article-epigraph { max-width: 58ch; margin: 0 auto 30px; padding: 8px 0; text-align: center; }
+  .article-epigraph p { margin: 0 0 8px; font-family: var(--serif); font-size: clamp(18px, 2.6vw, 22px); font-style: italic; color: var(--ink-2); line-height: 1.4; }
+  .article-epigraph cite { color: var(--ink-3); font-size: 12px; font-style: normal; font-weight: 700; }
+  .prose-section { margin-bottom: 6px; }
+  .prose-eyebrow { margin: 38px 0 0; color: var(--green); font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+  .prose-section h2 { margin: 8px 0 16px; font-size: clamp(24px, 3.4vw, 34px); line-height: 1.1; }
+  .prose p { margin: 0 0 20px; color: #2d3940; font-family: var(--serif); font-size: 19px; line-height: 1.78; }
+  .prose p.has-dropcap::first-letter { float: left; padding: 8px 10px 0 0; color: var(--green); font-family: var(--serif); font-weight: 600; font-size: 4.2em; line-height: .8; }
+  .prose-points { margin: 0 0 20px; padding: 0; list-style: none; display: grid; gap: 16px; }
+  .prose-points li { border-left: 3px solid var(--lime); padding-left: 16px; color: #2d3940; font-family: var(--serif); font-size: 18px; line-height: 1.7; }
+  .prose-points strong { color: var(--ink); }
+  .article-sourcenote { border-top: 1px solid var(--line); margin: 36px 0 0; padding-top: 16px; color: var(--ink-4); font-size: 13px; font-style: italic; line-height: 1.6; }
+  .article-end { border-top: 1px solid var(--line-soft); margin-top: 30px; padding-top: 20px; }
+
+  @media (max-width: 900px) {
+    .news-lead, .service-showcase .service-grid { grid-template-columns: 1fr; }
+    .news-lead-aside { border-left: 0; padding-left: 0; }
+    .service-copy { border-right: 0; padding-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+    .news-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .news-masthead-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .news-grid { grid-template-columns: 1fr; }
+    .prose p { font-size: 18px; }
+  }
+
   /* Responsive */
   @media (max-width: 1080px) {
     .feed-layout { grid-template-columns: 1fr; }
@@ -1678,7 +1958,14 @@ const STYLES = `
     @page { size: letter; margin: .55in; }
     :root { background: #fff; }
     body { background: #fff; }
-    .header-stack, .studio-toolbar, .skip-link { display: none !important; }
+    .header-stack, .studio-toolbar, .skip-link, .article-toolbar, .article-end { display: none !important; }
+    .article-page { padding: 0; }
+    .article-reader { max-width: none; }
+    .prose p { font-size: 12px; line-height: 1.55; }
+    .prose p.has-dropcap::first-letter { font-size: 3.4em; }
+    .prose-points li { font-size: 12px; line-height: 1.5; }
+    .article-epigraph p { font-size: 16px; }
+    .prose-section h2 { break-after: avoid; }
     .magazine-page { padding: 0; }
     .magazine-edition { max-width: none; box-shadow: none; }
     .magazine-cover { break-after: page; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
