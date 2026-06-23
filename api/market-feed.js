@@ -52,11 +52,11 @@ const COMMODITIES = [
 const NEWS_SEARCHES = [
   {
     kind: "breaking",
-    query: "breaking (economy OR markets OR oil OR commodities OR technology OR geopolitics) when:2h -sports -NFL -NBA -NHL -MLB"
+    query: '("breaking news" OR "just in") (markets OR economy OR oil OR commodities OR technology OR geopolitics) when:2h -sports -NFL -NBA -NHL -MLB'
   },
   {
     kind: "latest",
-    query: "global economy financial markets commodities energy trade policy technology geopolitics when:12h -sports"
+    query: "(markets OR economy OR commodities OR energy OR trade policy OR technology OR geopolitics) when:12h -sports -NFL -NBA -NHL -MLB"
   }
 ];
 
