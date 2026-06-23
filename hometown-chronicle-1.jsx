@@ -923,6 +923,7 @@ function MarketTicker() {
     as_of: null
   });
   const [status, setStatus] = useState("loading");
+  const [quoteMode, setQuoteMode] = useState("companies");
 
   useEffect(() => {
     let active = true;
@@ -963,7 +964,24 @@ function MarketTicker() {
     };
   }, []);
 
+  useEffect(() => {
+    let timer;
+    const schedule = (mode) => {
+      timer = window.setTimeout(() => {
+        const nextMode = mode === "companies" ? "commodities" : "companies";
+        setQuoteMode(nextMode);
+        schedule(nextMode);
+      }, mode === "companies" ? 30000 : 12000);
+    };
+
+    schedule("companies");
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const companyTape = [...feed.markets, ...feed.companies];
+  const showingCommodities = quoteMode === "commodities" && feed.commodities.length > 0;
+  const activeQuoteMode = showingCommodities ? "commodities" : "companies";
+  const activeQuotes = showingCommodities ? feed.commodities : companyTape;
 
   const renderQuoteSet = (items, copy, loadingLabel, hidden = false) => (
     <div className="market-tape-set" aria-hidden={hidden || undefined}>
@@ -1009,26 +1027,25 @@ function MarketTicker() {
 
   return (
     <>
-      <section className="market-tape market-tape-companies" aria-label="Delayed major indexes and large United States company prices">
-        <div className="market-tape-label"><strong>COMPANIES</strong><span>Indexes + leaders</span></div>
-        <div className={`market-tape-window ${companyTape.length ? "is-moving" : ""}`}>
-          <div className="market-tape-track">
-            {renderQuoteSet(companyTape, "company-primary", "company prices")}
-            {companyTape.length ? renderQuoteSet(companyTape, "company-copy", "company prices", true) : null}
+      <section
+        className={`market-tape market-tape-rotating market-tape-${activeQuoteMode}`}
+        aria-label={showingCommodities
+          ? "Delayed energy, metals, and agricultural commodity prices"
+          : "Delayed major indexes and large United States company prices"}
+      >
+        <div className="market-tape-label">
+          <strong>{showingCommodities ? "COMMODITIES" : "COMPANIES"}</strong>
+          <span>{showingCommodities ? "Energy · metals · agriculture" : "Indexes + leaders"}</span>
+        </div>
+        <div className={`market-tape-window ${activeQuotes.length ? "is-moving" : ""}`}>
+          <div className="market-tape-track" key={activeQuoteMode}>
+            {renderQuoteSet(activeQuotes, `${activeQuoteMode}-primary`, showingCommodities ? "commodity prices" : "company prices")}
+            {activeQuotes.length
+              ? renderQuoteSet(activeQuotes, `${activeQuoteMode}-copy`, showingCommodities ? "commodity prices" : "company prices", true)
+              : null}
           </div>
         </div>
-        <time>{companyTape.length ? `${companyTape.length} quotes` : feedTime}</time>
-      </section>
-
-      <section className="market-tape market-tape-commodities" aria-label="Delayed energy, metals, and agricultural commodity prices">
-        <div className="market-tape-label"><strong>COMMODITIES</strong><span>Energy · metals · agriculture</span></div>
-        <div className={`market-tape-window ${feed.commodities.length ? "is-moving" : ""}`}>
-          <div className="market-tape-track">
-            {renderQuoteSet(feed.commodities, "commodity-primary", "commodity prices")}
-            {feed.commodities.length ? renderQuoteSet(feed.commodities, "commodity-copy", "commodity prices", true) : null}
-          </div>
-        </div>
-        <time>{feedTime}</time>
+        <time>{showingCommodities ? feedTime : companyTape.length ? `${companyTape.length} quotes` : feedTime}</time>
       </section>
 
       <section className="market-tape market-tape-news" aria-label="Current breaking global business, economic, technology, and geopolitical headlines">
@@ -2385,7 +2402,7 @@ const STYLES = `
 
   /* Header tickers */
   .header-stack { position: sticky; top: 0; z-index: 20; }
-  .market-tape { height: 32px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; overflow: hidden; color: #d9edf7; border-bottom: 1px solid #477488; font-size: 11px; }
+  .market-tape { height: 32px; display: grid; transition: background-color .25s ease; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; overflow: hidden; color: #d9edf7; border-bottom: 1px solid #477488; font-size: 11px; }
   .market-tape-label { align-self: stretch; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 0 16px; padding-left: max(16px, env(safe-area-inset-left)); white-space: nowrap; }
   .market-tape-label strong { color: #d8f2ff; font-size: 10px; letter-spacing: .1em; }
   .market-tape-label span { color: #b8d4e0; font-size: 9px; text-transform: uppercase; }
