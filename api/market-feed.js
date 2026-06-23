@@ -55,6 +55,10 @@ const NEWS_SEARCHES = [
     query: '("breaking news" OR "just in") (markets OR economy OR oil OR commodities OR technology OR geopolitics) when:2h -sports -NFL -NBA -NHL -MLB'
   },
   {
+    kind: "trusted",
+    query: '(source:Reuters OR source:Bloomberg OR source:CNBC OR source:"Associated Press" OR source:"Financial Times") (markets OR economy OR energy OR technology OR geopolitics) when:12h'
+  },
+  {
     kind: "latest",
     query: "(markets OR economy OR commodities OR energy OR trade policy OR technology OR geopolitics) when:12h -sports -NFL -NBA -NHL -MLB"
   }
