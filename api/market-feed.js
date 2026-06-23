@@ -1,16 +1,67 @@
 import { XMLParser } from "fast-xml-parser";
 
-const INSTRUMENTS = [
+const MARKET_INDEXES = [
   { symbol: "^GSPC", label: "S&P 500", type: "index" },
   { symbol: "^DJI", label: "Dow", type: "index" },
   { symbol: "^IXIC", label: "Nasdaq", type: "index" },
+  { symbol: "^RUT", label: "Russell 2000", type: "index" }
+];
+
+const COMPANIES = [
+  { symbol: "WMT", label: "Walmart", type: "company" },
+  { symbol: "AMZN", label: "Amazon", type: "company" },
+  { symbol: "AAPL", label: "Apple", type: "company" },
+  { symbol: "UNH", label: "UnitedHealth", type: "company" },
+  { symbol: "BRK-B", label: "Berkshire", type: "company" },
+  { symbol: "CVS", label: "CVS Health", type: "company" },
+  { symbol: "XOM", label: "Exxon Mobil", type: "company" },
+  { symbol: "GOOGL", label: "Alphabet", type: "company" },
+  { symbol: "COST", label: "Costco", type: "company" },
+  { symbol: "MSFT", label: "Microsoft", type: "company" },
+  { symbol: "CVX", label: "Chevron", type: "company" },
+  { symbol: "HD", label: "Home Depot", type: "company" },
+  { symbol: "JPM", label: "JPMorgan", type: "company" },
+  { symbol: "META", label: "Meta", type: "company" },
+  { symbol: "NVDA", label: "Nvidia", type: "company" },
+  { symbol: "F", label: "Ford", type: "company" },
+  { symbol: "GM", label: "GM", type: "company" },
+  { symbol: "CAT", label: "Caterpillar", type: "company" }
+];
+
+const COMMODITIES = [
   { symbol: "GC=F", label: "Gold", type: "commodity" },
+  { symbol: "SI=F", label: "Silver", type: "commodity" },
+  { symbol: "HG=F", label: "Copper", type: "commodity" },
+  { symbol: "PL=F", label: "Platinum", type: "commodity" },
+  { symbol: "PA=F", label: "Palladium", type: "commodity" },
   { symbol: "CL=F", label: "WTI Oil", type: "commodity" },
-  { symbol: "HG=F", label: "Copper", type: "commodity" }
+  { symbol: "BZ=F", label: "Brent Oil", type: "commodity" },
+  { symbol: "NG=F", label: "Natural Gas", type: "commodity" },
+  { symbol: "RB=F", label: "Gasoline", type: "commodity" },
+  { symbol: "HO=F", label: "Heating Oil", type: "commodity" },
+  { symbol: "ZC=F", label: "Corn", type: "commodity" },
+  { symbol: "ZW=F", label: "Wheat", type: "commodity" },
+  { symbol: "ZS=F", label: "Soybeans", type: "commodity" },
+  { symbol: "KC=F", label: "Coffee", type: "commodity" },
+  { symbol: "SB=F", label: "Sugar", type: "commodity" },
+  { symbol: "CC=F", label: "Cocoa", type: "commodity" },
+  { symbol: "CT=F", label: "Cotton", type: "commodity" },
+  { symbol: "LE=F", label: "Live Cattle", type: "commodity" }
+];
+
+const NEWS_SEARCHES = [
+  {
+    kind: "breaking",
+    query: '("breaking news" OR "just in") (markets OR economy OR oil OR commodities OR technology OR geopolitics) when:2h'
+  },
+  {
+    kind: "latest",
+    query: "(markets OR economy OR commodities OR energy OR trade OR technology OR geopolitics) when:12h"
+  }
 ];
 
 async function fetchQuote(instrument) {
-  const url = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(instrument.symbol)}`);
+  const url = new URL("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(instrument.symbol));
   url.searchParams.set("interval", "1d");
   url.searchParams.set("range", "5d");
 
@@ -19,9 +70,9 @@ async function fetchQuote(instrument) {
       Accept: "application/json",
       "User-Agent": "ChronicleFuture/1.0"
     },
-    signal: AbortSignal.timeout(8000)
+    signal: AbortSignal.timeout(6500)
   });
-  if (!response.ok) throw new Error(`Quote source returned ${response.status}.`);
+  if (!response.ok) throw new Error("Quote source returned " + response.status + ".");
 
   const payload = await response.json();
   const result = payload?.chart?.result?.[0];
@@ -46,63 +97,119 @@ async function fetchQuote(instrument) {
   };
 }
 
-function buildNewsUrl() {
+function buildNewsUrl(query) {
   const url = new URL("https://news.google.com/rss/search");
-  url.searchParams.set("q", "global economy OR financial markets OR commodities");
+  url.searchParams.set("q", query);
   url.searchParams.set("hl", "en-US");
   url.searchParams.set("gl", "US");
   url.searchParams.set("ceid", "US:en");
   return url;
 }
 
-async function fetchHeadlines() {
-  const response = await fetch(buildNewsUrl(), {
+function readNewsSource(article) {
+  return typeof article?.source === "string"
+    ? article.source
+    : article?.source?.["#text"] || "News source";
+}
+
+function parsePublishedAt(value) {
+  const timestamp = Date.parse(value || "");
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
+}
+
+async function fetchNewsSearch(search) {
+  const response = await fetch(buildNewsUrl(search.query), {
     headers: { "User-Agent": "ChronicleFuture/1.0" },
-    signal: AbortSignal.timeout(10000)
+    signal: AbortSignal.timeout(8000)
   });
-  if (!response.ok) throw new Error(`News source returned ${response.status}.`);
+  if (!response.ok) throw new Error("News source returned " + response.status + ".");
 
   const xml = await response.text();
   const payload = new XMLParser({ ignoreAttributes: false, trimValues: true }).parse(xml);
   const items = payload?.rss?.channel?.item;
   const articles = Array.isArray(items) ? items : items ? [items] : [];
+
+  return articles.slice(0, 20).flatMap((article) => {
+    if (!article?.title || !/^https?:\/\//.test(article?.link || "")) return [];
+
+    const publishedAt = parsePublishedAt(article.pubDate);
+    const ageMs = publishedAt ? Date.now() - Date.parse(publishedAt) : Number.POSITIVE_INFINITY;
+    const breaking = search.kind === "breaking" && ageMs >= 0 && ageMs <= 2 * 60 * 60 * 1000;
+
+    return [{
+      title: String(article.title).slice(0, 220),
+      url: article.link,
+      source: readNewsSource(article),
+      published_at: publishedAt,
+      breaking
+    }];
+  });
+}
+
+function normalizeHeadline(title) {
+  return String(title || "")
+    .toLowerCase()
+    .replace(/\s+-\s+[^-]+$/, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+async function fetchHeadlines() {
+  const results = await Promise.allSettled(NEWS_SEARCHES.map(fetchNewsSearch));
   const seen = new Set();
-  return articles
+
+  return results
+    .flatMap((result, index) => {
+      if (result.status === "fulfilled") return result.value;
+      console.error("market-feed news " + NEWS_SEARCHES[index].kind + ":", result.reason?.message || "Unknown error");
+      return [];
+    })
     .filter((article) => {
-      if (!article?.title || !/^https?:\/\//.test(article?.link || "") || seen.has(article.link)) return false;
-      seen.add(article.link);
+      const key = normalizeHeadline(article.title);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
       return true;
     })
-    .slice(0, 5)
-    .map((article) => ({
-      title: String(article.title).slice(0, 180),
-      url: article.link,
-      source: typeof article.source === "string" ? article.source : article.source?.["#text"] || "News source"
-    }));
+    .sort((left, right) => {
+      if (left.breaking !== right.breaking) return left.breaking ? -1 : 1;
+      return Date.parse(right.published_at || 0) - Date.parse(left.published_at || 0);
+    })
+    .slice(0, 12);
+}
+
+async function fetchQuoteGroup(instruments, groupName) {
+  const results = await Promise.allSettled(instruments.map(fetchQuote));
+  return results.flatMap((result, index) => {
+    if (result.status === "fulfilled") return [result.value];
+    console.error(
+      "market-feed " + groupName + " " + instruments[index].symbol + ":",
+      result.reason?.message || "Unknown error"
+    );
+    return [];
+  });
 }
 
 export default async function handler(request, response) {
   if (request.method !== "GET") return response.status(405).json({ error: "Method not allowed." });
 
-  response.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900");
+  response.setHeader("Cache-Control", "public, s-maxage=90, stale-while-revalidate=300");
 
-  const [quoteResults, newsResult] = await Promise.all([
-    Promise.allSettled(INSTRUMENTS.map(fetchQuote)),
+  const [markets, companies, commodities, news] = await Promise.all([
+    fetchQuoteGroup(MARKET_INDEXES, "index"),
+    fetchQuoteGroup(COMPANIES, "company"),
+    fetchQuoteGroup(COMMODITIES, "commodity"),
     fetchHeadlines().catch((error) => {
       console.error("market-feed news:", error.message);
       return [];
     })
   ]);
 
-  const market = quoteResults.flatMap((result, index) => {
-    if (result.status === "fulfilled") return [result.value];
-    console.error(`market-feed quote ${INSTRUMENTS[index].symbol}:`, result.reason?.message || "Unknown error");
-    return [];
-  });
-
   return response.status(200).json({
-    market,
-    news: newsResult,
+    markets,
+    companies,
+    commodities,
+    news,
+    market: [...markets, ...companies],
     delayed: true,
     as_of: new Date().toISOString()
   });
