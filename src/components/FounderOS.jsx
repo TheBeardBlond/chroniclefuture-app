@@ -25,7 +25,7 @@ const EMPTY_FINANCIALS = {
   monthly_growth_rate: 5,
   cash_on_hand: 30000,
   loan_amount: 0,
-  annual_interest_rate: 9
+  annual_interest_rate: 9,\n  loan_term_months: 60
 };
 
 const EMPTY_BUSINESS = {
@@ -64,8 +64,8 @@ function calculateFinancials(input) {
   const monthlyRate = assumptions.annual_interest_rate / 1200;
   const loanPayment = assumptions.loan_amount > 0
     ? monthlyRate > 0
-      ? assumptions.loan_amount * (monthlyRate / (1 - Math.pow(1 + monthlyRate, -60)))
-      : assumptions.loan_amount / 60
+      ? assumptions.loan_amount * (monthlyRate / (1 - Math.pow(1 + monthlyRate, -Math.max(1, assumptions.loan_term_months))))
+      : assumptions.loan_amount / Math.max(1, assumptions.loan_term_months)
     : 0;
   const monthlyOperatingProfit = monthlyGrossProfit - assumptions.monthly_fixed_costs - loanPayment;
   const breakEvenUnits = contribution > 0
@@ -192,7 +192,7 @@ export default function FounderOS({ user, onBack }) {
       );
     }
     const [planResult, financialResult, tasksResult, swotResult] = await Promise.all(requests);
-    const error = planResult.error || financialResult.error || tasksResult.error || swotResult?.error;
+    const error = planResult.error || financialResult.error || tasksResult.error;
     if (error) setMessage(error.message || "Unable to load this business.");
     setPlan(planResult.data?.plan || {});
     setFinancials({ ...EMPTY_FINANCIALS, ...(financialResult.data?.assumptions || {}) });
@@ -213,7 +213,7 @@ export default function FounderOS({ user, onBack }) {
     setLoading(false);
   };
 
-  useEffect(() => { loadBusinessWorkspace(activeBusiness); }, [activeBusinessId]);
+  useEffect(() => { loadBusinessWorkspace(activeBusiness); }, [activeBusinessId, activeBusiness?.location_id]);
 
   const updateBusinessDraft = (field) => (event) => {
     setBusinessDraft((current) => ({ ...current, [field]: event.target.value }));
@@ -507,7 +507,7 @@ export default function FounderOS({ user, onBack }) {
                 ["monthly_growth_rate", "Monthly sales growth", "%"],
                 ["cash_on_hand", "Cash available", "$"],
                 ["loan_amount", "Planned loan amount", "$"],
-                ["annual_interest_rate", "Annual interest rate", "%"]
+                ["annual_interest_rate", "Annual interest rate", "%"],\n                ["loan_term_months", "Loan term", "months"]
               ].map(([key, label, unit]) => (
                 <label key={key}>{label}<span><small>{unit}</small><input type="number" min="0" step="any" value={financials[key]} onChange={(event) => setFinancials((current) => ({ ...current, [key]: event.target.value }))} /></span></label>
               ))}
