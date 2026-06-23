@@ -52,12 +52,40 @@ const COMMODITIES = [
 const NEWS_SEARCHES = [
   {
     kind: "breaking",
-    query: '("breaking news" OR "just in") (markets OR economy OR oil OR commodities OR technology OR geopolitics) when:2h'
+    query: "breaking (economy OR markets OR oil OR commodities OR technology OR geopolitics) when:2h -sports -NFL -NBA -NHL -MLB"
   },
   {
     kind: "latest",
-    query: "(markets OR economy OR commodities OR energy OR trade OR technology OR geopolitics) when:12h"
+    query: "global economy financial markets commodities energy trade policy technology geopolitics when:12h -sports"
   }
+];
+
+const TRUSTED_NEWS_SOURCES = [
+  "Reuters", "Associated Press", "AP News", "Bloomberg", "CNBC", "Financial Times",
+  "The Wall Street Journal", "The New York Times", "BBC", "NPR", "Axios", "Politico",
+  "MarketWatch", "Barron's", "Fortune", "Forbes", "The Guardian", "Washington Post",
+  "CBS News", "NBC News", "ABC News", "CNN", "Al Jazeera", "Nikkei Asia", "TechCrunch",
+  "The Verge", "WIRED"
+];
+
+const EXCLUDED_NEWS_PATTERNS = [
+  /\b(nba|nfl|nhl|mlb|ncaa)\b/i,
+  /\b(football|basketball|baseball|hockey|soccer|playoffs?)\b/i,
+  /\b(trade rumor|offseason|free agent|quarterback|touchdown)\b/i,
+  /\b(bucks|celtics|ravens|yankees|lakers)\b/i,
+  /\b(comet|asteroid|horoscope|celebrity|box office)\b/i
+];
+
+const RELEVANT_NEWS_PATTERNS = [
+  /\b(economy|economic|gdp|inflation|recession|employment|jobs|labor)\b/i,
+  /\b(market|markets|stock|stocks|shares|equities|bond|bonds|treasury|earnings)\b/i,
+  /\b(federal reserve|\bfed\b|central bank|interest rate|rate hike|rate cut)\b/i,
+  /\b(oil|gas|energy|power|electricity|commodity|commodities)\b/i,
+  /\b(gold|silver|copper|lithium|uranium|wheat|corn|soybeans|cocoa|coffee|fertili[sz]er)\b/i,
+  /\b(tariff|sanction|trade war|supply chain|shipping|manufacturing)\b/i,
+  /\b(technology|artificial intelligence|\bAI\b|semiconductor|chip|chips|data center)\b/i,
+  /\b(geopolitic|war|conflict|nato|china|russia|iran|israel|europe|middle east)\b/i,
+  /\b(dollar|currency|yuan|euro|bitcoin|crypto|financial)\b/i
 ];
 
 async function fetchQuote(instrument) {
@@ -117,6 +145,17 @@ function parsePublishedAt(value) {
   return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
 }
 
+function isTrustedSource(source) {
+  const normalized = String(source || "").toLowerCase();
+  return TRUSTED_NEWS_SOURCES.some((trusted) => normalized.includes(trusted.toLowerCase()));
+}
+
+function isRelevantHeadline(title) {
+  const value = String(title || "");
+  if (EXCLUDED_NEWS_PATTERNS.some((pattern) => pattern.test(value))) return false;
+  return RELEVANT_NEWS_PATTERNS.some((pattern) => pattern.test(value));
+}
+
 async function fetchNewsSearch(search) {
   const response = await fetch(buildNewsUrl(search.query), {
     headers: { "User-Agent": "ChronicleFuture/1.0" },
@@ -132,16 +171,25 @@ async function fetchNewsSearch(search) {
   return articles.slice(0, 20).flatMap((article) => {
     if (!article?.title || !/^https?:\/\//.test(article?.link || "")) return [];
 
+    const title = String(article.title).slice(0, 220);
+    const source = readNewsSource(article);
+    if (!isRelevantHeadline(title)) return [];
+
     const publishedAt = parsePublishedAt(article.pubDate);
     const ageMs = publishedAt ? Date.now() - Date.parse(publishedAt) : Number.POSITIVE_INFINITY;
-    const breaking = search.kind === "breaking" && ageMs >= 0 && ageMs <= 2 * 60 * 60 * 1000;
+    const trusted = isTrustedSource(source);
+    const breaking = search.kind === "breaking"
+      && trusted
+      && ageMs >= 0
+      && ageMs <= 2 * 60 * 60 * 1000;
 
     return [{
-      title: String(article.title).slice(0, 220),
+      title,
       url: article.link,
-      source: readNewsSource(article),
+      source,
       published_at: publishedAt,
-      breaking
+      breaking,
+      trusted
     }];
   });
 }
@@ -172,9 +220,11 @@ async function fetchHeadlines() {
     })
     .sort((left, right) => {
       if (left.breaking !== right.breaking) return left.breaking ? -1 : 1;
+      if (left.trusted !== right.trusted) return left.trusted ? -1 : 1;
       return Date.parse(right.published_at || 0) - Date.parse(left.published_at || 0);
     })
-    .slice(0, 12);
+    .slice(0, 12)
+    .map(({ trusted, ...article }) => article);
 }
 
 async function fetchQuoteGroup(instruments, groupName) {
