@@ -25,7 +25,8 @@ const EMPTY_FINANCIALS = {
   monthly_growth_rate: 5,
   cash_on_hand: 30000,
   loan_amount: 0,
-  annual_interest_rate: 9,\n  loan_term_months: 60
+  annual_interest_rate: 9,
+  loan_term_months: 60
 };
 
 const EMPTY_BUSINESS = {
@@ -507,7 +508,8 @@ export default function FounderOS({ user, onBack }) {
                 ["monthly_growth_rate", "Monthly sales growth", "%"],
                 ["cash_on_hand", "Cash available", "$"],
                 ["loan_amount", "Planned loan amount", "$"],
-                ["annual_interest_rate", "Annual interest rate", "%"],\n                ["loan_term_months", "Loan term", "months"]
+                ["annual_interest_rate", "Annual interest rate", "%"],
+                ["loan_term_months", "Loan term", "months"]
               ].map(([key, label, unit]) => (
                 <label key={key}>{label}<span><small>{unit}</small><input type="number" min="0" step="any" value={financials[key]} onChange={(event) => setFinancials((current) => ({ ...current, [key]: event.target.value }))} /></span></label>
               ))}
