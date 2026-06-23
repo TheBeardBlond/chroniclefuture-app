@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "./src/utils/supabase.js";
-import FounderOS from "./src/components/FounderOS.jsx";
+const FounderOS = lazy(() => import("./src/components/FounderOS.jsx"));
 
 const PUBLIC_SIGNALS = [
   { scope: "Global economy", region: "Worldwide", title: "Capital is repricing around slower growth and higher uncertainty", summary: "Operators are balancing tighter financing conditions against uneven demand, making cash discipline and flexible investment timing more valuable.", impact: 88, horizon: "0-18 months" },
@@ -2204,7 +2204,7 @@ export default function App() {
           : issueId ? <MagazinePage issueId={issueId} user={user} onBack={workspace} />
           : briefId ? <BriefPage briefId={briefId} onBack={workspace} />
           : articleSlug ? <NewsArticlePage slug={articleSlug} onBack={home} />
-          : view === "founder" && user ? <FounderOS user={user} onBack={workspace} />
+          : view === "founder" && user ? <Suspense fallback={<main className="loading-screen">Loading Founder OS...</main>}><FounderOS user={user} onBack={workspace} /></Suspense>
           : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={founder} />
           : <PublicLanding user={user} onWorkspace={workspace} onOpenArticle={openArticle} />}
       </div>
