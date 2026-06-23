@@ -1,5 +1,6 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "./src/utils/supabase.js";
+const FounderOS = lazy(() => import("./src/components/FounderOS.jsx"));
 
 const PUBLIC_SIGNALS = [
   { scope: "Global economy", region: "Worldwide", title: "Capital is repricing around slower growth and higher uncertainty", summary: "Operators are balancing tighter financing conditions against uneven demand, making cash discipline and flexible investment timing more valuable.", impact: 88, horizon: "0-18 months" },
@@ -888,11 +889,11 @@ function PricingSection({ user }) {
         <article className="price-card featured">
           <span className="price-flag">Most chosen</span>
           <header><p className="kicker light">Monthly intelligence</p><h3><span className="price-figure">$39</span><span className="price-unit">per month</span></h3></header>
-          <p className="price-copy">Four briefs every billing period, a saved archive, and access to Chronicle Future's publisher-produced magazine editions.</p>
+          <p className="price-copy">Four briefs every billing period, Founder OS planning tools, and every publisher-produced magazine edition.</p>
           <ul className="price-list">
             <li>Four location briefs each period</li>
-            <li>Persistent intelligence archive</li>
-            <li>Every published magazine edition</li>
+            <li>Founder OS business plan and financial model</li>
+            <li>90-day execution plan and magazine library</li>
           </ul>
           <button className="btn btn-lime" onClick={() => checkout("monthly")} disabled={!!loading}>{loading === "monthly" ? "Opening checkout…" : user ? "Start monthly access" : "Sign in to subscribe"}</button>
         </article>
@@ -991,7 +992,7 @@ function MarketTicker() {
   );
 }
 
-function Header({ user, onWorkspace, onHome, onSignOut }) {
+function Header({ user, onWorkspace, onFounder, onHome, onSignOut }) {
   const accountName = user?.user_metadata?.username
     || user?.user_metadata?.full_name
     || user?.email?.split("@")[0]
@@ -1004,7 +1005,7 @@ function Header({ user, onWorkspace, onHome, onSignOut }) {
         <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
         <nav aria-label="Primary navigation">
           <button className="nav-link" onClick={onHome}>Front page</button>
-          {user ? <button className="nav-link" onClick={onWorkspace}>My locations</button> : null}
+          {user ? <><button className="nav-link" onClick={onWorkspace}>My locations</button><button className="nav-link" onClick={onFounder}>Founder OS</button></> : null}
         </nav>
         {user ? (
           <div className="account-actions">
@@ -1702,7 +1703,7 @@ function LocationForm({ userId, onCreated }) {
   );
 }
 
-function Dashboard({ user, onOpenBrief, onOpenIssue }) {
+function Dashboard({ user, onOpenBrief, onOpenIssue, onOpenFounder }) {
   const [locations, setLocations] = useState([]);
   const [briefs, setBriefs] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -1774,6 +1775,7 @@ function Dashboard({ user, onOpenBrief, onOpenIssue }) {
           <p className="kicker">Private intelligence workspace</p>
           <h1>Your locations</h1>
           <p className="workspace-deck">Turn global change into local risks, opportunities, SWOT, and forward scenarios.</p>
+          <button className="btn btn-green founder-launch-button" onClick={onOpenFounder}>Open Founder OS</button>
         </div>
         <LocationForm userId={user.id} onCreated={refresh} />
       </section>
@@ -2186,6 +2188,7 @@ export default function App() {
   }, []);
   const home = () => { setView("public"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); };
   const workspace = () => { if (user) { setView("workspace"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); } };
+  const founder = () => { if (user) { setView("founder"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); } };
   const signOut = async () => { await supabase.auth.signOut(); home(); };
   const openBrief = (id) => { setIssueId(null); setBriefId(id); window.scrollTo(0, 0); };
   const openIssue = (id) => { setBriefId(null); setIssueId(id); window.scrollTo(0, 0); };
@@ -2194,14 +2197,15 @@ export default function App() {
     <>
       <style>{STYLES}</style>
       <a className="skip-link" href="#cf-content">Skip to intelligence</a>
-      <Header user={user} onHome={home} onWorkspace={workspace} onSignOut={signOut} />
+      <Header user={user} onHome={home} onWorkspace={workspace} onFounder={founder} onSignOut={signOut} />
       <div id="cf-content" tabIndex={-1}>
         {!authReady
           ? <main className="loading-screen">Loading Chronicle Future…</main>
           : issueId ? <MagazinePage issueId={issueId} user={user} onBack={workspace} />
           : briefId ? <BriefPage briefId={briefId} onBack={workspace} />
           : articleSlug ? <NewsArticlePage slug={articleSlug} onBack={home} />
-          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} />
+          : view === "founder" && user ? <Suspense fallback={<main className="loading-screen">Loading Founder OS...</main>}><FounderOS user={user} onBack={workspace} /></Suspense>
+          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={founder} />
           : <PublicLanding user={user} onWorkspace={workspace} onOpenArticle={openArticle} />}
       </div>
     </>
@@ -2450,6 +2454,7 @@ const STYLES = `
   .workspace-head { display: grid; grid-template-columns: 1fr 460px; gap: clamp(32px, 5vw, 70px); align-items: center; }
   .workspace-head h1 { margin: 0 0 18px; font-size: clamp(40px, 6vw, 68px); line-height: 1; }
   .workspace-deck { max-width: 610px; margin: 0; color: var(--ink-2); font-size: clamp(16px, 2.2vw, 18px); line-height: 1.6; }
+  .founder-launch-button { margin-top: 20px; }
   .plan-bar { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 15px 0; }
   .plan-id { display: flex; align-items: center; gap: 12px; }
   .plan-id > div { display: grid; gap: 2px; }
