@@ -1,5 +1,6 @@
 import { Fragment, lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { supabase } from "./src/utils/supabase.js";
+import ProductWorkspace from "./src/components/ProductWorkspace.jsx";
 const FounderOS = lazy(() => import("./src/components/FounderOS.jsx"));
 
 const PUBLIC_SIGNALS = [
@@ -1063,11 +1064,21 @@ function MarketTicker() {
   );
 }
 
-function Header({ user, onWorkspace, onFounder, onHome, onSignOut }) {
+function Header({ user, currentView, onNavigate, onHome, onSignOut }) {
   const accountName = user?.user_metadata?.username
     || user?.user_metadata?.full_name
     || user?.email?.split("@")[0]
     || "Account";
+  const initials = accountName
+    .split(/[\s._-]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "CF";
+  const choose = (event, destination, detail) => {
+    event.currentTarget.closest("details")?.removeAttribute("open");
+    onNavigate(destination, detail);
+  };
 
   return (
     <div className="header-stack">
@@ -1075,17 +1086,33 @@ function Header({ user, onWorkspace, onFounder, onHome, onSignOut }) {
       <header className="site-header">
         <button className="brand" onClick={onHome}>CHRONICLE <span>FUTURE</span></button>
         <nav aria-label="Primary navigation">
-          <button className="nav-link" onClick={onHome}>Front page</button>
-          {user ? <><button className="nav-link" onClick={onWorkspace}>My locations</button><button className="nav-link" onClick={onFounder}>Founder OS</button></> : null}
+          {user ? <>
+            <button className={`nav-link ${currentView === "main" ? "active" : ""}`} onClick={() => onNavigate("main")}>Main</button>
+            <button className={`nav-link ${currentView === "tools" ? "active" : ""}`} onClick={() => onNavigate("tools")}>Tools</button>
+            <button className={`nav-link ${currentView === "industry" ? "active" : ""}`} onClick={() => onNavigate("industry")}>Industry Outlook</button>
+          </> : <button className="nav-link" onClick={onHome}>Front page</button>}
         </nav>
         {user ? (
-          <div className="account-actions">
-            <button className="account-identity" onClick={onWorkspace} title={user.email}>
-              <span className="account-dot" aria-hidden="true" />
-              <span><small>Signed in</small><strong>{accountName}</strong></span>
-            </button>
-            <button className="signout-button" onClick={onSignOut}>Sign out</button>
-          </div>
+          <details className="account-menu">
+            <summary aria-label={`Open account menu for ${accountName}`} title={user.email}>
+              <span className="account-initials" aria-hidden="true">{initials}</span>
+              <span className="account-label"><small>Signed in</small><strong>{accountName}</strong></span>
+              <span className="account-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div className="account-dropdown" role="menu">
+              <header><strong>{accountName}</strong><small>{user.email}</small></header>
+              <button role="menuitem" onClick={(event) => choose(event, "main")}>Main</button>
+              <button role="menuitem" onClick={(event) => choose(event, "tools")}>Tools</button>
+              <button role="menuitem" onClick={(event) => choose(event, "forecast")}>Forecast Models</button>
+              <button role="menuitem" onClick={(event) => choose(event, "industry")}>Industry Outlook</button>
+              <button role="menuitem" onClick={(event) => choose(event, "founder", "overview")}>Build and Grow Your Business</button>
+              <button role="menuitem" onClick={(event) => choose(event, "investors")}><span>Find Investors</span><small>Coming soon</small></button>
+              <div className="account-menu-rule" />
+              <button role="menuitem" onClick={(event) => choose(event, "workspace")}>My Locations & Briefs</button>
+              <button role="menuitem" onClick={(event) => choose(event, "public")}>Public Front Page</button>
+              <button className="account-signout" role="menuitem" onClick={onSignOut}>Sign out</button>
+            </div>
+          </details>
         ) : <a className="account-button" href="#access">Open your intelligence</a>}
       </header>
     </div>
@@ -1791,9 +1818,14 @@ function Dashboard({ user, onOpenBrief, onOpenIssue, onOpenFounder }) {
   useEffect(() => { refresh(); }, [user.id]);
   useEffect(() => {
     const checkoutStatus = new URLSearchParams(window.location.search).get("checkout");
-    if (checkoutStatus === "success") setMessage("Payment received. Your access will update in a moment.");
+    let refreshTimer;
+    if (checkoutStatus === "success") {
+      setMessage("Payment received. Confirming your access now.");
+      refreshTimer = window.setTimeout(refresh, 2500);
+    }
     if (checkoutStatus === "cancelled") setMessage("Checkout was cancelled. No charge was made.");
     if (checkoutStatus) window.history.replaceState({}, "", window.location.pathname);
+    return () => window.clearTimeout(refreshTimer);
   }, []);
   const briefsByLocation = useMemo(() => briefs.reduce((map, brief) => ({ ...map, [brief.location_id]: [...(map[brief.location_id] || []), brief] }), {}), [briefs]);
   const run = async (type, locationId) => {
@@ -2238,18 +2270,19 @@ export default function App() {
   const [briefId, setBriefId] = useState(null);
   const [issueId, setIssueId] = useState(null);
   const [articleSlug, setArticleSlug] = useState(null);
+  const [founderTab, setFounderTab] = useState("overview");
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const sessionUser = data.session?.user || null;
       setUser(sessionUser);
-      if (sessionUser) setView("workspace");
+      if (sessionUser) setView("main");
       setAuthReady(true);
     });
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       const sessionUser = session?.user || null;
       setUser(sessionUser);
       if (sessionUser && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        setView("workspace");
+        setView("main");
         setBriefId(null);
         setIssueId(null);
       }
@@ -2258,8 +2291,18 @@ export default function App() {
     return () => data.subscription.unsubscribe();
   }, []);
   const home = () => { setView("public"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); };
-  const workspace = () => { if (user) { setView("workspace"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); } };
-  const founder = () => { if (user) { setView("founder"); setBriefId(null); setIssueId(null); setArticleSlug(null); window.scrollTo(0, 0); } };
+  const navigate = (destination, detail) => {
+    if (destination !== "public" && !user) return;
+    if (destination === "public") return home();
+    setView(destination);
+    if (destination === "founder") setFounderTab(detail || "overview");
+    setBriefId(null);
+    setIssueId(null);
+    setArticleSlug(null);
+    window.scrollTo(0, 0);
+  };
+  const workspace = () => navigate("workspace");
+  const founder = (tab = "overview") => navigate("founder", tab);
   const signOut = async () => { await supabase.auth.signOut(); home(); };
   const openBrief = (id) => { setIssueId(null); setBriefId(id); window.scrollTo(0, 0); };
   const openIssue = (id) => { setBriefId(null); setIssueId(id); window.scrollTo(0, 0); };
@@ -2268,15 +2311,16 @@ export default function App() {
     <>
       <style>{STYLES}</style>
       <a className="skip-link" href="#cf-content">Skip to intelligence</a>
-      <Header user={user} onHome={home} onWorkspace={workspace} onFounder={founder} onSignOut={signOut} />
+      <Header user={user} currentView={view} onHome={home} onNavigate={navigate} onSignOut={signOut} />
       <div id="cf-content" tabIndex={-1}>
         {!authReady
           ? <main className="loading-screen">Loading Chronicle Future…</main>
           : issueId ? <MagazinePage issueId={issueId} user={user} onBack={workspace} />
           : briefId ? <BriefPage briefId={briefId} onBack={workspace} />
           : articleSlug ? <NewsArticlePage slug={articleSlug} onBack={home} />
-          : view === "founder" && user ? <Suspense fallback={<main className="loading-screen">Loading Founder OS...</main>}><FounderOS user={user} onBack={workspace} /></Suspense>
-          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={founder} />
+          : view === "founder" && user ? <Suspense fallback={<main className="loading-screen">Loading Founder OS...</main>}><FounderOS key={founderTab} user={user} initialTab={founderTab} onBack={() => navigate("main")} /></Suspense>
+          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={() => founder("overview")} />
+          : ["main", "tools", "forecast", "industry", "investors"].includes(view) && user ? <ProductWorkspace user={user} section={view} onNavigate={navigate} />
           : <PublicLanding user={user} onWorkspace={workspace} onOpenArticle={openArticle} />}
       </div>
     </>
@@ -2450,13 +2494,27 @@ const STYLES = `
   nav { display: flex; gap: 28px; }
   .nav-link { border: 0; background: none; color: var(--ink-2); padding: 8px 0; font-size: 14px; font-weight: 600; }
   .nav-link:hover { color: var(--green); }
+  .nav-link.active { color: var(--green); box-shadow: inset 0 -2px var(--green); }
   .account-button { justify-self: end; border: 1px solid var(--green-700); border-radius: var(--r); background: var(--green-700); color: #fff; padding: 10px 15px; font-size: 13px; font-weight: 700; text-decoration: none; }
   .account-button:hover { background: var(--green); }
-  .account-actions { justify-self: end; display: flex; align-items: center; gap: 10px; }
-  .account-identity { display: flex; align-items: center; gap: 9px; border: 0; background: transparent; color: var(--ink); padding: 5px 0; text-align: left; }
-  .account-identity span:last-child { display: grid; gap: 1px; }
-  .account-identity small { color: var(--ink-4); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-  .account-identity strong { max-width: 150px; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+  .account-menu { position: relative; justify-self: end; }
+  .account-menu summary { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 5px 0; cursor: pointer; list-style: none; }
+  .account-menu summary::-webkit-details-marker { display: none; }
+  .account-initials { width: 38px; height: 38px; display: grid; place-items: center; flex: none; border-radius: 50%; background: var(--green-800); color: #fff; font-size: 12px; font-weight: 900; letter-spacing: .04em; }
+  .account-label { display: grid; gap: 1px; text-align: left; }
+  .account-label small { color: var(--ink-4); font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .account-label strong { max-width: 150px; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+  .account-chevron { color: var(--ink-4); transition: transform .15s ease; }
+  .account-menu[open] .account-chevron { transform: rotate(180deg); }
+  .account-dropdown { position: absolute; z-index: 40; top: calc(100% + 10px); right: 0; width: min(340px, calc(100vw - 24px)); display: grid; border: 1px solid var(--line-strong); background: #fff; box-shadow: 0 18px 55px rgba(24,36,43,.18); padding: 8px; }
+  .account-dropdown header { display: grid; gap: 3px; border-bottom: 1px solid var(--line); margin-bottom: 6px; padding: 12px 12px 14px; }
+  .account-dropdown header strong { font-family: var(--serif); font-size: 18px; }
+  .account-dropdown header small { overflow: hidden; color: var(--ink-4); text-overflow: ellipsis; }
+  .account-dropdown button { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 0; background: transparent; padding: 11px 12px; text-align: left; font-size: 13px; font-weight: 750; }
+  .account-dropdown button:hover { background: #edf5f8; color: var(--green-800); }
+  .account-dropdown button small { border-radius: 2px; background: var(--paper-3); color: var(--ink-4); padding: 3px 5px; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+  .account-menu-rule { border-top: 1px solid var(--line); margin: 6px 4px; }
+  .account-dropdown .account-signout { color: var(--down); }
   .account-dot { width: 9px; height: 9px; border-radius: 50%; background: #20a66a; box-shadow: 0 0 0 4px rgba(32,166,106,.12); flex: none; }
   .signout-button { border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--ink-2); padding: 8px 10px; font-size: 11px; font-weight: 800; }
   .signout-button:hover { border-color: var(--green); color: var(--green); }
@@ -2948,8 +3006,8 @@ const STYLES = `
     .market-tape-prices .market-tape-track { animation-duration: 42s; }
     .market-tape-news .market-tape-track { animation-duration: 68s; }
     .account-button { padding: 9px 10px; font-size: 11px; } .brand { font-size: 12px; }
-    .account-identity small, .signout-button { display: none; }
-    .account-identity strong { max-width: 105px; font-size: 12px; }
+    .account-label { display: none; }
+    .account-chevron { display: none; }
     .workspace-head { gap: 26px; }
     .location-row, .location-actions { display: grid; }
     .location-actions { grid-template-columns: 1fr; gap: 8px; }

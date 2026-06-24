@@ -136,7 +136,7 @@ function FounderGate({ onBack }) {
   );
 }
 
-export default function FounderOS({ user, onBack }) {
+export default function FounderOS({ user, onBack, initialTab = "overview" }) {
   const [loading, setLoading] = useState(true);
   const [entitlement, setEntitlement] = useState(null);
   const [businesses, setBusinesses] = useState([]);
@@ -147,7 +147,7 @@ export default function FounderOS({ user, onBack }) {
   const [financials, setFinancials] = useState(EMPTY_FINANCIALS);
   const [executionItems, setExecutionItems] = useState([]);
   const [latestSwot, setLatestSwot] = useState(null);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(initialTab);
   const [saving, setSaving] = useState("");
   const [message, setMessage] = useState("");
   const [taskDraft, setTaskDraft] = useState({ title: "", category: "Launch", due_date: daysFromNow(30) });

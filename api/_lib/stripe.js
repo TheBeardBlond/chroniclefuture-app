@@ -2,8 +2,8 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 export const APP_URL = process.env.APP_URL || "https://chroniclefuture.com";
 
 export const OFFERS = {
-  monthly: { mode: "subscription", amount: 3900, name: "Chronicle Future Monthly", briefs: 4 },
-  one_time: { mode: "payment", amount: 1900, name: "Chronicle Future One-Time Brief", briefs: 1 }
+  monthly: { mode: "subscription", amount: 3900, name: "Chronicle Future Monthly", briefs: 4, priceId: process.env.STRIPE_MONTHLY_PRICE_ID },
+  one_time: { mode: "payment", amount: 1900, name: "Chronicle Future One-Time Brief", briefs: 1, priceId: process.env.STRIPE_ONE_TIME_PRICE_ID }
 };
 
 export function requireStripeKey() {
@@ -56,13 +56,19 @@ export async function createCheckoutSession({ user, customerId, offerKey }) {
   parameters.set("success_url", `${APP_URL}/?checkout=success`);
   parameters.set("cancel_url", `${APP_URL}/?checkout=cancelled`);
   parameters.set("line_items[0][quantity]", "1");
-  parameters.set("line_items[0][price_data][currency]", "usd");
-  parameters.set("line_items[0][price_data][unit_amount]", String(offer.amount));
-  parameters.set("line_items[0][price_data][product_data][name]", offer.name);
+  if (offer.priceId) {
+    parameters.set("line_items[0][price]", offer.priceId);
+  } else {
+    parameters.set("line_items[0][price_data][currency]", "usd");
+    parameters.set("line_items[0][price_data][unit_amount]", String(offer.amount));
+    parameters.set("line_items[0][price_data][product_data][name]", offer.name);
+  }
   parameters.set("metadata[user_id]", user.id);
   parameters.set("metadata[plan]", offerKey);
-  if (offer.mode === "subscription") {
+  if (offer.mode === "subscription" && !offer.priceId) {
     parameters.set("line_items[0][price_data][recurring][interval]", "month");
+  }
+  if (offer.mode === "subscription") {
     parameters.set("subscription_data[metadata][user_id]", user.id);
     parameters.set("subscription_data[metadata][plan]", offerKey);
   }

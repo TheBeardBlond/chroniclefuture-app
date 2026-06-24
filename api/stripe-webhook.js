@@ -12,13 +12,17 @@ async function readRawBody(request) {
 function verifyStripeSignature(payload, header) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret || !header) return false;
-  const values = Object.fromEntries(header.split(",").map((part) => part.split("=")));
-  if (!values.t || !values.v1) return false;
-  if (Math.abs(Date.now() / 1000 - Number(values.t)) > 300) return false;
-  const expected = crypto.createHmac("sha256", secret).update(`${values.t}.${payload.toString("utf8")}`).digest("hex");
+  const parts = header.split(",").map((part) => part.trim().split("="));
+  const timestamp = parts.find(([key]) => key === "t")?.[1];
+  const signatures = parts.filter(([key]) => key === "v1").map(([, value]) => value);
+  if (!timestamp || !signatures.length) return false;
+  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
+  const expected = crypto.createHmac("sha256", secret).update(`${timestamp}.${payload.toString("utf8")}`).digest("hex");
   const expectedBuffer = Buffer.from(expected);
-  const actualBuffer = Buffer.from(values.v1);
-  return expectedBuffer.length === actualBuffer.length && crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+  return signatures.some((signature) => {
+    const actualBuffer = Buffer.from(signature);
+    return expectedBuffer.length === actualBuffer.length && crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+  });
 }
 
 async function grantCheckout(admin, session) {
@@ -124,8 +128,11 @@ export default async function handler(request, response) {
   if (recordError) return response.status(500).json({ error: recordError.message });
 
   try {
-    if (event.type === "checkout.session.completed" && object.payment_status === "paid") await grantCheckout(admin, object);
-    if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") await updateSubscription(admin, object);
+    if (
+      (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded")
+      && ["paid", "no_payment_required"].includes(object.payment_status)
+    ) await grantCheckout(admin, object);
+    if (["customer.subscription.created", "customer.subscription.updated", "customer.subscription.deleted"].includes(event.type)) await updateSubscription(admin, object);
     if (event.type === "invoice.paid" || event.type === "invoice.payment_succeeded") await updateInvoiceStatus(admin, object, true);
     if (event.type === "invoice.payment_failed") await updateInvoiceStatus(admin, object, false);
     return response.status(200).json({ received: true });
