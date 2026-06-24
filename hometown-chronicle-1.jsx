@@ -2319,7 +2319,7 @@ export default function App() {
           : briefId ? <BriefPage briefId={briefId} onBack={workspace} />
           : articleSlug ? <NewsArticlePage slug={articleSlug} onBack={home} />
           : view === "founder" && user ? <Suspense fallback={<main className="loading-screen">Loading Founder OS...</main>}><FounderOS key={founderTab} user={user} initialTab={founderTab} onBack={() => navigate("main")} /></Suspense>
-          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={founder} />
+          : view === "workspace" && user ? <Dashboard user={user} onOpenBrief={openBrief} onOpenIssue={openIssue} onOpenFounder={() => founder("overview")} />
           : ["main", "tools", "forecast", "industry", "investors"].includes(view) && user ? <ProductWorkspace user={user} section={view} onNavigate={navigate} />
           : <PublicLanding user={user} onWorkspace={workspace} onOpenArticle={openArticle} />}
       </div>
