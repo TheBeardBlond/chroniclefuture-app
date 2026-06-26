@@ -638,7 +638,148 @@ const JOBS_ARTICLE = {
   ]
 };
 
-const NEWS_ARTICLES_LIST = [FEATURE_ARTICLE, METAL_ARTICLE, WAR_ARTICLE, NATO_ARTICLE, JOBS_ARTICLE];
+const VENEZUELA_QUAKE_ARTICLE = {
+  slug: "venezuela-earthquakes-2026",
+  status: "published",
+  category: "Breaking News",
+  kicker: "Breaking",
+  title: "Twin Earthquakes Devastate Venezuela",
+  dek: "A 7.2 and 7.5 magnitude double strike near Yaracuy State has killed at least 164 people and left Caracas in darkness. The death toll is expected to rise sharply.",
+  cardDek: "The most powerful seismic event to strike Venezuela in over 125 years killed at least 164 people, collapsed dozens of buildings in Caracas, and shut Simón Bolívar International Airport.",
+  standfirst: "Breaking news — Chronicle Future · June 25, 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 25, 2026",
+  readingTime: "4 min read",
+  lead: "Venezuela was rocked by two catastrophic earthquakes Wednesday evening in what seismologists are calling the most powerful seismic event to strike the country in over 125 years.",
+  sections: [
+    {
+      id: "intro",
+      paragraphs: [
+        `Venezuela was rocked by two catastrophic earthquakes Wednesday evening in what seismologists are calling the most powerful seismic event to strike the country in over 125 years. A 7.2-magnitude foreshock struck first, followed just 39 seconds later by a 7.5-magnitude mainshock near the town of Yumare in Yaracuy State, roughly 100 miles west of the capital. The double blow knocked out power across the country, triggered building collapses from Caracas to the coast, and sent thousands of terrified residents into the streets.`,
+        `At least 164 people have died and 971 have been injured, acting President Delcy Rodríguez confirmed Thursday morning — figures expected to rise sharply as rescuers continue to dig through debris. Rodríguez declared La Guaira, the coastal state north of Caracas, a "disaster zone," describing the situation as a "true tragedy."`,
+        `Dozens of buildings collapsed across Caracas, including a bank. Interior Minister Diosdado Cabello confirmed Los Palos Grandes and Altamira as the worst-hit districts. In one unspecified southeastern section of Caracas, almost all high-rise buildings were heavily damaged or destroyed. Simón Bolívar International Airport was damaged and all flights suspended. Buildings also collapsed in Trujillo, Carabobo, Aragua, Miranda, and La Guaira state.`
+      ]
+    },
+    {
+      id: "seismology",
+      heading: "One of the Most Damaging Classes of Earthquake Possible",
+      paragraphs: [
+        `Seismologist Lucy Jones of Caltech described it as one of the most damaging classes of earthquake possible. "This is one of the really great, very difficult, very damaging earthquakes, because you combined a very large event with residences of a lot of people," she said.`,
+        `The USGS PAGER service estimates a 39% probability of economic losses between $10 billion and $100 billion, with a 30% probability of losses exceeding $100 billion — upper estimates equivalent to roughly 20% of Venezuela's entire GDP. The USGS forecasts a 94% chance of at least one magnitude-5 aftershock within the next week. Twenty aftershocks had already been recorded by Thursday morning.`,
+        `A tsunami advisory was briefly issued for Puerto Rico and the US Virgin Islands following the quakes but has since been cancelled.`
+      ]
+    },
+    {
+      id: "response",
+      heading: "International Response Mobilises",
+      paragraphs: [
+        `The humanitarian response is mobilising fast. Secretary of State Marco Rubio said the US is deploying search-and-rescue teams from Fairfax County, Virginia, and Los Angeles, and that the damaged airport means the Department of Defense will need to deploy assets to access affected zones. Overhead imagery is also being provided for coastal areas.`,
+        `Rodríguez said she is coordinating with the IMF to establish an initial assistance fund of $200 million. Search operations continue around the clock. In Los Palos Grandes, families gathered outside collapsed buildings pleading for information about loved ones as rescuers cut through concrete.`,
+        `For millions of Venezuelan emigrants abroad, the wait for news has been agonizing — compounded by Venezuela's chronically unstable internet and power infrastructure.`
+      ]
+    }
+  ],
+  sourceNote: `Sources: CNN, ABC News, NBC News, Al Jazeera, USGS.`
+};
+
+const VENEZUELA_OIL_ARTICLE = {
+  slug: "venezuela-earthquake-oil-chessboard",
+  status: "published",
+  category: "Analysis",
+  kicker: "Energy analysis",
+  title: "Venezuela's Earthquake and the Global Oil Chessboard",
+  dek: "How a natural disaster hits at the worst possible moment — and what it reveals about the razor-thin margins of Trump's energy strategy.",
+  cardDek: "The twin earthquakes landed on an energy market already operating at the ragged edge of its nerves, threatening to unravel Washington's Plan B for the Middle East.",
+  standfirst: "Analysis — Chronicle Future · June 25, 2026",
+  byline: "Chronicle Future",
+  dateLabel: "June 25, 2026",
+  readingTime: "14 min read",
+  epigraph: {
+    quote: "It's really a question now of which country, the US or Iran, has a greater pain tolerance.",
+    source: "Max Boot, Council on Foreign Relations, April 2026"
+  },
+  lead: "The twin earthquakes that shattered Venezuela on Wednesday night landed on a global energy market already operating at the ragged edge of its nerves.",
+  sections: [
+    {
+      id: "intro",
+      paragraphs: [
+        `The twin earthquakes that shattered Venezuela on Wednesday night landed on a global energy market already operating at the ragged edge of its nerves. The timing could hardly be worse — or, from a certain strategic angle, more revealing. To understand why, you have to understand the extraordinary sequence of events that transformed Venezuela from a pariah state to a linchpin of US energy policy in a matter of months — and why the earthquake now threatens to unravel what the Trump administration has been quietly positioning as its Plan B for the Middle East.`
+      ]
+    },
+    {
+      id: "backstop",
+      heading: "Venezuela as Trump's Energy Backstop",
+      paragraphs: [
+        `Venezuela's once-booming economy had already been crippled by years of US-led sanctions, hyperinflation, government corruption, and mismanagement of the oil sector, despite sitting on the world's largest oil reserves. Its GDP had shrunk by roughly 80% since 2013. Then came the US capture of former President Nicolás Maduro in January, with acting President Delcy Rodríguez cautiously liberalising the economy and courting foreign oil companies.`,
+        `The timing of that intervention was not coincidental. From capturing Venezuela's president to attacking Europe's methane rules, Trump had created a slipstream for his oil-industry backers to expand production of fossil fuels and boost profits. Venezuela was always part of a larger energy architecture — not just regime change for its own sake, but the deliberate construction of an alternative supply source that Washington could control directly.`,
+        `The Trump administration has essentially taken control of Venezuela's oil exports since ousting Maduro. Revenues from Venezuela's oil sales are deposited in a Treasury Department account, and Venezuela's oil shipments are sent to the US Gulf Coast for refining. This is not partnership in any traditional sense. It is trusteeship — Washington deciding what Venezuela produces, where it goes, and who gets paid.`,
+        `The strategic logic became fully explicit when the Iran crisis ignited. The Treasury issued a broad authorisation allowing PDVSA to directly sell Venezuelan oil to US companies and on global markets — a massive shift after Washington had largely blocked such dealings for years. The White House also waived Jones Act requirements for sixty days. The explicit reason given: offsetting the catastrophic supply shock caused by Iran's closure of the Strait of Hormuz.`
+      ]
+    },
+    {
+      id: "iran-crisis",
+      heading: "The Iran Crisis: What Actually Happened",
+      paragraphs: [
+        `To understand the earthquake's implications, you need the full picture of what has been happening in the Persian Gulf since February.`,
+        `On February 28, 2026, the United States launched Operation Epic Fury, an air and maritime campaign targeting Iranian command and control centers, IRGC headquarters, ballistic missile sites, navy ships and submarines, anti-ship missile sites, air defense capabilities, and military airfields. Starting on March 4, Iranian forces declared the Strait "closed," threatening and carrying out attacks on ships attempting to transit it.`,
+        `The consequences were immediate and devastating for global energy markets. The 2026 Iran war caused immediate volatility in energy markets, with Brent crude oil prices surging 10–13% to around $80–82 per barrel by early March. The conflict caused the restriction of nearly all traffic through the Strait of Hormuz, leading to what the International Energy Agency characterised as the "largest supply disruption in the history of the global oil market."`,
+        `Gas prices rose $1.16 a gallon in the United States since the start of the war, with prices threatening to hit $5.00 a gallon if the Strait was not opened by mid-April. In California, gasoline prices surpassed $6 a gallon in seven counties as of late March. Jet fuel in North America spiked 95% since the war began.`
+      ]
+    },
+    {
+      id: "kharg",
+      heading: "Trump's Iran Endgame: The Kharg Island Gambit",
+      paragraphs: [
+        `Trump vowed to continue "hard" airstrikes against Iran, saying he planned to take control of its oil and gas markets in a plan resembling the playbook he ran in Venezuela. "At some point in the not too distant future, we will be taking Kharg Island, and other oil infrastructure points, and assume total control," Trump threatened publicly.`,
+        `Kharg Island is Iran's main oil export terminal, accounting for about 90% of its crude shipments before the war, with capacity to hold 30 million barrels of oil. Seizing it would effectively give the United States control over the on/off switch for Iranian oil — the same model it has already implemented in Venezuela.`,
+        `Trump drew the comparison himself explicitly. When asked about the Kharg Island manoeuvre on Fox News, he said: "I think they'd like to see us come home. But we did it with Venezuela, Venezuela's worked out great for everybody."`,
+        `Venezuela was meant to reduce that pain tolerance asymmetry — the more alternative supply Washington controlled, the longer it could sustain pressure on Tehran. The earthquake now complicates that calculus.`
+      ]
+    },
+    {
+      id: "markets-today",
+      heading: "Where Oil Markets Stand Today",
+      paragraphs: [
+        `The picture as of June 25 is a study in contradictions. On one hand, the Hormuz crisis appears to be easing. Crude oil dropped below $70 per barrel on Thursday, extending losses for a fourth consecutive session and nearly wiping out all the gains made since the outbreak of the Middle East conflict. Growing confidence in a lasting agreement has encouraged more tankers to transit the Strait of Hormuz with their tracking signals turned on. Saudi Arabian tankers are heading toward the Ras Tanura terminal to restart Persian Gulf exports for the first time since March.`,
+        `Brent crude futures gained 0.9% to close at $80.57 on Friday after US-Iran talks in Switzerland were abruptly called off. Analysts noted that the conditional reopening of the Strait, the lifting of force majeure declarations by Kuwait, and the end of the US naval blockade appeared to have convinced investors that the disruption "is well and truly over."`,
+        `On the other hand, the situation remains fragile. Venezuela had been ramping up oil production in recent months, and it is not yet clear whether the earthquakes will affect oil exports at a sensitive time — the world is just starting to recover from Iran's closure of the Strait and what the IEA has called the largest energy supply shock in history.`
+      ]
+    },
+    {
+      id: "oil-impact",
+      heading: "The Earthquake's Oil Impact: Limited but Loaded With Risk",
+      pullQuote: "The loss of electricity could interrupt operations at oil and gas production and related facilities.",
+      paragraphs: [
+        `The immediate news for oil markets is cautiously positive. Venezuela's important oil infrastructure appears to have largely escaped widespread damage, with initial reports suggesting most cities where serious damage occurred are not major oil production or refining centers. Chevron, which has the largest presence in Venezuela of any US oil company, said all its employees have been accounted for and that it remains operational despite power outages.`,
+        `But there is a significant caveat. Venezuela has the world's largest proven crude oil reserves at approximately 303 billion barrels — roughly 17% of global reserves. While oil production infrastructure itself does not appear to have been damaged, the loss of electricity could interrupt operations at oil and gas production and related facilities. Power in Venezuela was already chronically unreliable before a magnitude 7.5 earthquake tore through the country's decrepit grid. Getting it back online quickly is far from guaranteed.`
+      ]
+    },
+    {
+      id: "strategic-compounding",
+      heading: "The Strategic Compounding Problem",
+      paragraphs: [
+        `The deeper issue is what the earthquake does to Venezuela's investment trajectory and to Washington's broader energy strategy.`,
+        `A natural disaster on this scale will severely dampen fragile hopes of reviving the economy. The country's crucial oil industry needs billions of dollars of investment to get anywhere close to the production levels of the late 1990s. Following years of economic devastation and underinvestment in public services, the country's infrastructure — from hospitals to electricity and water — is ill-equipped to deal with a crisis like this.`,
+        `Major production increases in Venezuela need years and billions in investment. The country exports approximately 0.8 million barrels per day, with most going to China and the US share sharply reduced. The earthquake will redirect capital — both domestic and foreign — away from oil investment and toward disaster recovery. The $200 million IMF emergency fund is a start, but rebuilding Caracas will cost multiples of that. Foreign oil companies now face not just the normal risks of operating in a politically transitional petro-state, but the additional uncertainty of a country whose infrastructure has just been catastrophically damaged.`,
+        `Meanwhile, Trump's Iran endgame remains unresolved. Oil prices have dropped about 40% from their wartime peak as the Strait reopens, but US crude inventories plunged to their lowest since 1984, with Cushing stockpiles dipping below operational minimums. The ceasefire is holding — barely — but the strait is believed to contain an unknown number of Iranian naval mines, necessitating mine-sweeping operations that could take weeks.`
+      ]
+    },
+    {
+      id: "geopolitical-read",
+      heading: "The Geopolitical Read",
+      pullQuote: "What the earthquake reveals is how thin Trump's energy margins actually are.",
+      paragraphs: [
+        `What the earthquake reveals, more than anything, is how thin Trump's energy margins actually are. The Venezuela play was always a long-term bet dressed up as a short-term fix. Turning a broken petrostate with 80% GDP collapse, antiquated infrastructure, and zero institutional trust into a reliable supply cushion capable of offsetting the Strait of Hormuz was always going to take years, not months.`,
+        `TD Securities analysts noted earlier this year that Venezuela flow disruptions would have only a moderate impact on oil prices, and that the significant supply glut in the first half of 2026 and OPEC's current policy suggest any squeeze would not be sustainable. That glut provided a cushion. But the earthquake, landing precisely as the Hormuz crisis appears to be winding down and as oil prices fall back below $70, introduces a new variable at exactly the moment markets were beginning to stabilise.`,
+        `The test now is whether the Trump administration's bet on Venezuela — the intervention, the sanctions relief, the PDVSA revenue control — holds up when the country it is trying to run remotely has just been shaken to its foundations. The coming weeks will reveal whether Washington's grip on Venezuelan oil revenues translates into genuine recovery assistance, or whether the earthquake becomes another chapter in Venezuela's long history of crises compounded by institutional failure.`,
+        `For the moment, Caracas residents are sleeping in cars and streets, rescue workers are cutting through concrete by hand, and the family group chats of the Venezuelan diaspora are lighting up with desperate searches for the living. The oil markets can wait. The people cannot.`
+      ]
+    }
+  ],
+  sourceNote: `Analysis — Chronicle Future. Sources: CNN Business, PBS NewsHour, CNBC, Washington Times, Bloomberg, Congress.gov CRS, TD Securities, Trading Economics, Al Jazeera, Upstream Online.`
+};
+
+const NEWS_ARTICLES_LIST = [VENEZUELA_QUAKE_ARTICLE, VENEZUELA_OIL_ARTICLE, FEATURE_ARTICLE, METAL_ARTICLE, WAR_ARTICLE, NATO_ARTICLE, JOBS_ARTICLE];
 const NEWS_ARTICLES = Object.fromEntries(NEWS_ARTICLES_LIST.map((article) => [article.slug, article]));
 
 const SIGNAL_GROUPS = ["Local", "State", "National", "Global", "Technology", "Commodity"];
